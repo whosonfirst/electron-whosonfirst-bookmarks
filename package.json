@@ -1,0 +1,28 @@
+{
+  "name": "WOFBookmarks",
+  "version": "1.0.0",
+  "description": "Who's On First Bookmarks",
+  "main": "main.js",
+  "scripts": {
+    "postinstall": "install-app-deps",
+    "start": "electron ."
+  },
+  "repository": "https://github.com/whosonfirst/electron-whosonfirst-bookmarks",
+  "keywords": [
+    "mapzen",
+    "api"
+  ],
+  "author": "Mapzen",
+  "license": "BSD",
+  "devDependencies": {
+    "electron": "~1.6.2",
+    "electron-builder": "^18.3.5",
+    "electron-rebuild": "^1.5.7"
+  },
+  "dependencies": {
+    "electron-settings": "^3.0.14",
+    "jsonfile": "^3.0.0",
+    "shell": "^0.3.2",
+    "sqlite3": "^3.1.8"
+  }
+}

@@ -1,0 +1,29 @@
+#settings {
+    padding-left:2em;
+    padding-right:2em;    
+    
+}
+
+#settings-new {
+    display:none;
+}
+
+#settings-remove {
+    display:none;
+}
+
+#show-settings:after {
+    padding-left:.5em;
+    font-size:.8em !important;
+    font-weight: 200 !important;
+    content: attr(data-config-name);
+    color:darkslategrey;
+}
+
+.warning {
+    color: red !important;
+}
+
+.warning:after {
+    content: " ⚠️";
+}
