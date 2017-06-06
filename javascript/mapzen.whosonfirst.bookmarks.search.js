@@ -76,7 +76,28 @@
 			var args = { "names": q };
 
 			var on_success = function(rsp){
-				console.log(rsp);
+
+				var places = rsp["places"];
+				var count = places.length;
+
+				var list = document.createElement("li");
+				list.setAttribute("class", "list");
+
+				for (var i=0; i < count; i++){
+
+					var pl = places[i];
+					var name = pl["wof:name"];
+
+					var item = document.createElement("li");
+					item.appendChild(document.createTextNode(name));
+
+					list.appendChild(item);
+				}
+
+				var results = document.getElementById("results");
+				results.innerHTML = "";
+				
+				results.appendChild(list);
 			};
 
 			var on_error = function(rsp){
