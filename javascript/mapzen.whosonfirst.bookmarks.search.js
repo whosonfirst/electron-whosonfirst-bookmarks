@@ -31,6 +31,7 @@
 }(function(){
 
 	var api = require("./javascript/mapzen.whosonfirst.api.js");
+	var place = require("./javascript/mapzen.whosonfirst.bookmarks.place.js");	
 	
 	var self = {
 		
@@ -73,7 +74,10 @@
                         });
 
 			var method = "whosonfirst.places.search";
-			var args = { "names": q };
+			var args = {
+				"names": q,
+				"extras": "addr:",
+			};
 
 			var on_success = function(rsp){
 
@@ -89,8 +93,19 @@
 					var name = pl["wof:name"];
 
 					var item = document.createElement("li");
+					item.setAttribute("data-place", JSON.stringify(pl));
+					
 					item.appendChild(document.createTextNode(name));
 
+					item.onclick = function(e){
+						var el = e.target;
+						var pl = el.getAttribute("data-place");
+
+						// pl = JSON.parse(pl);
+
+						place.draw_place(pl);
+					};
+					
 					list.appendChild(item);
 				}
 
