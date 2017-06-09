@@ -5,13 +5,14 @@
     <title>Who's On First Bookmarks</title>
     <link rel="stylesheet" type="text/css" href="css/mapzen.styleguide.css" />
     <link rel="stylesheet" type="text/css" href="css/mapzen.api.settings.css" />
-
-    <script type="text/javascript" src="javascript/mapzen.whosonfirst.bookmarks.search.js"></script>
-    <script type="text/javascript" src="javascript/mapzen.whosonfirst.bookmarks.place.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/mapzen.whosonfirst.bookmarks.css" />    
     
     <script type="text/javascript">
       window.addEventListener("load", function load(event){
-      	mapzen.whosonfirst.bookmarks.search.init();
+
+        var s = require("./javascript/mapzen.whosonfirst.bookmarks.search.js");
+        s.init();
+
       });
     </script>
     
@@ -20,21 +21,17 @@
 
     <div class="row" id="header">
       
-      <div class="col-md-12">
+      <div class="col-md-6">
 	<div id="network-status" class="online"></div>
 
 	<ul class="list-inline">
 	    <li><button id="show-settings" class="btn btn-default btn-sm">settings</button></li>	  
 	</ul>
       </div>
-      
-   </div>
 
-   <div class="row" id="main">
+      <div class="col-md-6">
 
-     <div class="col-md-1"></div>
-     <div class="col-md-10">
-
+	 <div id="search-wrapper">
 	 <form class="form-inline" id="search">
 
 	   <div class="form-group">
@@ -42,6 +39,7 @@
 	     <input type="text" name="q" id="q" value="" placeholder="Search for a place in Who's On First" class="form-control" />
 	   </div>
 
+	   <!--
 	   <div class="form-group">
 	     <label for="by">By</label>	     
 	     <select name="by" id="by" class="form-control">
@@ -50,19 +48,24 @@
 	       <option value="names">All the names</option>	       
 	     </select>
 	   </div>
+	   -->
 	   
 	   <div class="form-group">	   
 	     <button type="submit" class="btn btn-primary" id="search-submit">Search</button>
 	   </div>
 	   
 	 </form>
-       
-     </div>
+	 </div>
+	
+      </div>
+      
+   </div>
 
-     <div id="results"></div>
-     
-  </div>
+   <div class="row" id="main">
 
+     <div class="col-md-12" id="canvas"></div>
+   </div>
+   
   </body>
 
   <script>

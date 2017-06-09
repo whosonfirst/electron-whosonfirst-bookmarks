@@ -1,0 +1,25 @@
+body {
+    background-color: #ccc;
+    margin-top:0px;
+}
+
+#header {
+    border: solid thin;
+    background-color: #fff;
+    padding-top:2em;
+    padding-bottom:1em;
+}
+
+#main {
+    border: 1px solid red;
+    background-color: #fff;    
+}
+
+#canvas {
+    padding:1em;
+}
+
+#search-wrapper {
+    float:right !important:
+    border:1px solid green;
+}

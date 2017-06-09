@@ -25,20 +25,16 @@
 
 }(function(){
 
-	// var api = require("./mapzen.whosonfirst.api.js");
-
-	var canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
+	// var api = require("./javascript/mapzen.whosonfirst.api.js");
 	
 	var self = {
 		
-		'init': function(){
+		'draw': function(el){
 
-		},
+			var canvas = document.getElementById("canvas");
+			canvas.innerHTML = "";
 
-		'draw_place': function(pl){
-
-			var el = document.createTextNode(pl);
-			canvas.draw(el);
+			canvas.appendChild(el);
 		}
 	}
 

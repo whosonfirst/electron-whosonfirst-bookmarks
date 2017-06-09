@@ -20,18 +20,14 @@
 		} else {
 			g=this;
 		}
-
-		g.mapzen = g.mapzen || {};
-		g.mapzen.whosonfirst = g.mapzen.whosonfirst || {};
-		g.mapzen.whosonfirst.bookmarks = g.mapzen.whosonfirst.bookmarks = {};
-		g.mapzen.whosonfirst.bookmarks.search = g.mapzen.whosonfirst.bookmarks.search = f();		
 		
         }
 
 }(function(){
 
-	var api = require("./javascript/mapzen.whosonfirst.api.js");
-	var place = require("./javascript/mapzen.whosonfirst.bookmarks.place.js");	
+	var api = require("./mapzen.whosonfirst.api.js");
+	var place = require("./mapzen.whosonfirst.bookmarks.place.js");
+	var canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");		
 	
 	var self = {
 		
@@ -48,7 +44,7 @@
 				catch(e){
 					console.log(e);
 				}
-
+				
 				return false;
 			}
 			
@@ -59,8 +55,8 @@
 			var q = document.getElementById("q");
 			q = q.value;
 
-			var by = document.getElementById("by");
-			by = by.value;
+			// var by = document.getElementById("by");
+			// by = by.value;
 
 			var api_key = document.body.getAttribute("data-api-key");
 			var api_endpoint = document.body.getAttribute("data-api-endpoint");
@@ -74,9 +70,10 @@
                         });
 
 			var method = "whosonfirst.places.search";
+			
 			var args = {
 				"names": q,
-				"extras": "addr:",
+				"extras": "addr:,geom:,wof:hierarchy,wof:tags",
 			};
 
 			var on_success = function(rsp){
@@ -84,7 +81,7 @@
 				var places = rsp["places"];
 				var count = places.length;
 
-				var list = document.createElement("li");
+				var list = document.createElement("ul");
 				list.setAttribute("class", "list");
 
 				for (var i=0; i < count; i++){
@@ -109,10 +106,7 @@
 					list.appendChild(item);
 				}
 
-				var results = document.getElementById("results");
-				results.innerHTML = "";
-				
-				results.appendChild(list);
+				canvas.draw(list);
 			};
 
 			var on_error = function(rsp){
