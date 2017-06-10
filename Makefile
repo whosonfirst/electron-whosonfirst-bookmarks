@@ -2,6 +2,14 @@ styleguide:
 	curl -s -o css/mapzen.styleguide.css https://mapzen.com/common/styleguide/styles/styleguide.css
 	curl -s -o javascript/mapzen.styleguide.min.js https://mapzen.com/common/styleguide/scripts/mapzen-styleguide.min.js
 
+tangram:
+	curl -s -o javascript/tangram.js https://mapzen.com/tangram/tangram.debug.js
+	curl -s -o javascript/tangram.min.js https://mapzen.com/tangram/tangram.min.js
+
+mapzenjs:
+	curl -s -o css/mapzen.js.css https://mapzen.com/js/mapzen.css
+	curl -s -o javascript/mapzen.js https://mapzen.com/js/mapzen.min.js
+
 localforage:
 	curl -s -o javascript/localforage.js https://raw.githubusercontent.com/localForage/localForage/master/dist/localforage.js
 	curl -s -o javascript/localforage.min.js https://raw.githubusercontent.com/localForage/localForage/master/dist/localforage.min.js

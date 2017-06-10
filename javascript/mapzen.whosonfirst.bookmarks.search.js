@@ -94,6 +94,14 @@
 					
 					item.appendChild(document.createTextNode(name));
 
+					if (pl["addr:full"]){
+
+						var addr = document.createElement("small");
+						addr.appendChild(document.createTextNode(pl["addr:full"]));
+						
+						item.appendChild(addr);
+					}
+					
 					item.onclick = function(e){
 						var el = e.target;
 						var pl = el.getAttribute("data-place");

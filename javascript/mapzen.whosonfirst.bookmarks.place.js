@@ -37,8 +37,50 @@
 
 		'draw_place': function(pl){
 
-			var el = document.createTextNode(pl);
-			canvas.draw(el);
+			pl = JSON.parse(pl);
+			console.log(pl);
+
+			var h2 = document.createElement("h2");
+			h2.appendChild(document.createTextNode(pl["wof:name"]));
+
+			if (pl["addr:full"]){
+				
+				var addr = document.createElement("small");
+				addr.appendChild(document.createTextNode(pl["addr:full"]));
+
+				h2.appendChild(addr);
+			}
+			
+			var map = document.createElement("div");
+			map.setAttribute("id", "map");
+			map.setAttribute("data-geom-latitude", pl["geom:latitude"]);
+			map.setAttribute("data-geom-longitude", pl["geom:longitude"]);
+			map.setAttribute("data-wofid", pl["wof:id"]);
+
+			var button = document.createElement("button");
+			button.setAttribute("class", "btn btn-primary");
+			button.appendChild(document.createTextNode("Save"));
+			
+			var wrapper = document.createElement("div");
+			wrapper.appendChild(h2);
+			wrapper.appendChild(map);
+			wrapper.appendChild(button);
+			
+			canvas.draw(wrapper);
+
+			var api_key = document.body.getAttribute("data-api-key");			
+			L.Mapzen.apiKey = api_key;
+
+			var map = L.Mapzen.map('map', {
+    				tangramOptions: {
+    					scene: L.Mapzen.BasemapStyles.Refill
+    				}
+			});
+
+			var lat = pl["geom:latitude"];
+			var lon = pl["geom:longitude"];			
+			
+			map.setView([lat, lon], 16);
 		}
 	}
 
