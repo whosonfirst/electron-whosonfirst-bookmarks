@@ -3,26 +3,41 @@ body {
     margin-top:0px;
 }
 
+h2 {
+    margin:0px;
+    padding: .5em;
+    color: #fff;
+    background-color: #000;
+}
+
+h2 small:before {
+    content: " ";
+}
+
+#controls {
+    margin: 1em;
+    text-align: center;
+}
+
 #header {
-    border: solid thin;
     background-color: #fff;
     padding-top:2em;
     padding-bottom:1em;
 }
 
 #main {
-    border: 1px solid red;
     background-color: #fff;    
 }
 
 #map {
     height: 400px;
     width: 100%;
-    position: absolute;
+    border: 5px solid #000;
 }
 
 #canvas {
-    padding:1em;
+    min-height:500px;
+    overflow: scroll;
 }
 
 #search-wrapper {

@@ -109,6 +109,8 @@
 			var lon = pl["geom:longitude"];			
 			
 			map.setView([lat, lon], 16);
+
+			L.marker([lat, lon]).addTo(map);
 		}
 	}
 
