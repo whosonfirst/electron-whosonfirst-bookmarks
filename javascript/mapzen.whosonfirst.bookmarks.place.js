@@ -28,6 +28,7 @@
 	// var api = require("./mapzen.whosonfirst.api.js");
 
 	var canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
+	var db = require("./mapzen.whosonfirst.bookmarks.database.js");	
 	
 	var self = {
 		
