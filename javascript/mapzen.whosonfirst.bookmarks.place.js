@@ -25,8 +25,6 @@
 
 }(function(){
 
-	// var api = require("./mapzen.whosonfirst.api.js");
-
 	var canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 	var db = require("./mapzen.whosonfirst.bookmarks.database.js");	
 	
@@ -36,9 +34,9 @@
 
 		},
 
-		'draw_place': function(pl){
+		'draw_place': function(str_pl){
 
-			pl = JSON.parse(pl);
+			var pl = JSON.parse(str_pl);
 			console.log(pl);
 
 			var h2 = document.createElement("h2");
@@ -54,21 +52,20 @@
 			
 			var map = document.createElement("div");
 			map.setAttribute("id", "map");
-			map.setAttribute("data-geom-latitude", pl["geom:latitude"]);
-			map.setAttribute("data-geom-longitude", pl["geom:longitude"]);
-			map.setAttribute("data-wofid", pl["wof:id"]);
-
+			map.setAttribute("data-place", str_pl);
+			
 			var select = document.createElement("select");
-			select.setAttribute("id", "desire");
+			select.setAttribute("id", "status");
 
 			var desires = {
-				0: "i was there",
-				1: "i want to go there",
-				2: "again again",
-				3: "again",
-				4: "again maybe",
-				5: "again never",
-				6: "meh"
+				0: "i've been there",
+				1: "i was there",
+				2: "i want to go there",
+				3: "again again",
+				4: "again",
+				5: "again maybe",
+				6: "again never",
+				7: "meh"
 			};
 
 			for (var id in desires){
@@ -85,6 +82,8 @@
 			button.setAttribute("class", "btn btn-primary");
 			button.appendChild(document.createTextNode("Save"));
 
+			button.onclick = self.add_place;
+			
 			var controls = document.createElement("div");
 			controls.setAttribute("id", "controls");
 			controls.appendChild(select);
@@ -112,7 +111,22 @@
 			map.setView([lat, lon], 16);
 
 			L.marker([lat, lon]).addTo(map);
+		},
+
+		'add_place': function(e){
+
+			var map = document.getElementById("map");
+
+			var str_pl = map.getAttribute("data-place");
+			var pl = JSON.parse(str_pl);			
+						
+			var status = document.getElementById("status");
+			status = status.value;
+			
+			db.add_place(pl, status);
+			return false;
 		}
+		
 	}
 
 	return self;
