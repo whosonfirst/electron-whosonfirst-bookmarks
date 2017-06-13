@@ -27,6 +27,8 @@
 
 	var canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 	var db = require("./mapzen.whosonfirst.bookmarks.database.js");	
+
+	var d = require("./mapzen.whosonfirst.bookmarks.desires.js");
 	
 	var self = {
 		
@@ -88,11 +90,15 @@
 			controls.setAttribute("id", "controls");
 			controls.appendChild(select);
 			controls.appendChild(button);
+
+			var visits = document.createElement("div");
+			visits.setAttribute("id", "visits");
 			
 			var wrapper = document.createElement("div");
 			wrapper.appendChild(h2);
 			wrapper.appendChild(map);
 			wrapper.appendChild(controls);
+			wrapper.appendChild(visits);
 			
 			canvas.draw(wrapper);
 
@@ -111,6 +117,38 @@
 			map.setView([lat, lon], 16);
 
 			L.marker([lat, lon]).addTo(map);
+
+			db.get_visits_for_place(pl['wof:id'], function(err, rows){
+
+				if (err){
+					console.log(err);
+					return;
+				}
+
+				var count = rows.length;
+				var list = document.createElement("ul");
+
+				for (var i=0; i < count; i++){
+
+					var row = rows[i];
+					var status_id = row['status_id'];
+					var desire = d.id_to_label(status_id);
+					
+					var q = document.createElement("q");
+					q.appendChild(document.createTextNode(desire));
+					
+					var v = document.createElement("li");
+					v.appendChild(document.createTextNode("You said "));
+					v.appendChild(q);
+					v.appendChild(document.createTextNode(" on or around "));
+					v.appendChild(document.createTextNode(row['date']));
+
+					list.appendChild(v);
+				}
+
+				var visits = document.getElementById("visits");
+				visits.appendChild(list);
+			});
 		},
 
 		'add_place': function(e){
@@ -123,7 +161,7 @@
 			var status = document.getElementById("status");
 			status = status.value;
 			
-			db.add_place(pl, status);
+			db.add_visit(pl, status);
 			return false;
 		}
 		

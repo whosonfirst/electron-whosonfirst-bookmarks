@@ -44,8 +44,8 @@
 	
 	if (! exists){
 
-		var sql = `CREATE TABLE places (
-			id INTEGER AUTO INCREMENT,
+		var visits_sql = `CREATE TABLE visits (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			latitude NUMERIC,
 			longitude NUMERIC,
 			wof_id INTEGER,
@@ -57,18 +57,33 @@
 			date TEXT
 		)`;
 
-		db.exec(sql, function(e){
+		var places_sql = `CREATE TABLE places (
+			wof_id INTEGER,
+			body TEXT,
+			created TEXT
+		)`;
+
+		db.exec(visits_sql, function(e){
 
 			if (e){
-				console.log("OH NO");
+				console.log("OH NO VISITS");
 				console.log(e);				
 			}			
 		});
+
+		db.exec(places_sql, function(e){
+
+			if (e){
+				console.log("OH NO PLACES");
+				console.log(e);				
+			}			
+		});
+				
 	}
 
 	var self = {
 
-		'add_place': function(pl, status_id){
+		'add_visit': function(pl, status_id){
 
 			var wof_id = pl['wof:id'];
 			var lat = pl['geom:latitude'];
@@ -85,7 +100,7 @@
 			var dt = new Date;
 			dt = dt.toISOString();
 
-			var sql = "INSERT INTO places (wof_id, latitude, longitude, neighbourhood_id, locality_id, region_id, country_id, status_id, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			var sql = "INSERT INTO visits (wof_id, latitude, longitude, neighbourhood_id, locality_id, region_id, country_id, status_id, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
 			var params = [wof_id, lat, lon, neighbourhood_id, locality_id, region_id, country_id, status_id, dt];
 
@@ -94,7 +109,15 @@
 				console.log("CB");
 				console.log(e);
 			});
-		}
+		},
+
+		'get_visits_for_place': function(wof_id, cb){
+
+			var sql = "SELECT * FROM visits WHERE wof_id = ?";
+			var params = [ wof_id ];
+
+			db.all(sql, params, cb);
+		},
 	}
 
 	return self;
