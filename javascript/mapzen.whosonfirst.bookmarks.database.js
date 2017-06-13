@@ -83,7 +83,7 @@
 
 	var self = {
 
-		'add_visit': function(pl, status_id){
+		'add_visit': function(pl, status_id, cb){
 
 			var wof_id = pl['wof:id'];
 			var lat = pl['geom:latitude'];
@@ -104,11 +104,7 @@
 			
 			var params = [wof_id, lat, lon, neighbourhood_id, locality_id, region_id, country_id, status_id, dt];
 
-			db.run(sql, params, function(e){
-
-				console.log("CB");
-				console.log(e);
-			});
+			db.run(sql, params, cb);
 		},
 
 		'get_visits_for_place': function(wof_id, cb){

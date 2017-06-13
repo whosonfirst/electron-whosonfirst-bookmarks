@@ -118,6 +118,11 @@
 
 			L.marker([lat, lon]).addTo(map);
 
+			self.draw_visits(pl);
+		},
+
+		'draw_visits': function(pl){
+
 			db.get_visits_for_place(pl['wof:id'], function(err, rows){
 
 				if (err){
@@ -149,8 +154,9 @@
 				var visits = document.getElementById("visits");
 				visits.appendChild(list);
 			});
-		},
 
+		},
+		
 		'add_place': function(e){
 
 			var map = document.getElementById("map");
@@ -161,7 +167,18 @@
 			var status = document.getElementById("status");
 			status = status.value;
 			
-			db.add_visit(pl, status);
+			db.add_visit(pl, status, function(err){
+
+				if (err){
+					console.log(err);
+					return false;
+				}
+
+				var visit_id = this.lastID;
+
+				self.draw_visits(pl);
+			});
+			
 			return false;
 		}
 		
