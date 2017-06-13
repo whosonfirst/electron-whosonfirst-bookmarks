@@ -107,6 +107,14 @@
 			db.run(sql, params, cb);
 		},
 
+		'remove_visit': function(visit_id, cb){
+
+			var sql = "DELETE FROM visits WHERE id = ?";
+			var params = [ visit_id ];
+
+			db.run(sql, params, cb);
+		},
+		
 		'get_visits_for_place': function(wof_id, cb){
 
 			var sql = "SELECT * FROM visits WHERE wof_id = ?";

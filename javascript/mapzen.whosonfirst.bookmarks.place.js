@@ -148,6 +148,30 @@
 					v.appendChild(document.createTextNode(" on or around "));
 					v.appendChild(document.createTextNode(row['date']));
 
+					var remove = document.createElement("button");
+					remove.setAttribute("class", "btn btn-sm");
+					remove.setAttribute("data-visit-id", row['id']);
+					
+					remove.appendChild(document.createTextNode("x"));
+
+					remove.onclick = function(e){
+
+						var el = e.target;
+						var id = el.getAttribute("data-visit-id");
+
+						if (! confirm("Are you sure you want to delete this visit?")){
+							return false;
+						}
+
+						db.remove_visit(id, function(){
+							self.draw_visits(pl);
+						});
+
+						return false;
+					};
+					
+					v.appendChild(remove);
+					
 					list.appendChild(v);
 				}
 
