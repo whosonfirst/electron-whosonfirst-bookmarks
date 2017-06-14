@@ -25,9 +25,12 @@
 
 }(function(){
 
-	var api = require("./mapzen.whosonfirst.api.js");
-	var place = require("./mapzen.whosonfirst.bookmarks.place.js");
-	var canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");		
+	const api = require("./mapzen.whosonfirst.api.js");
+	const db = require("./mapzen.whosonfirst.bookmarks.database.js");	
+	const place = require("./mapzen.whosonfirst.bookmarks.place.js");
+	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
+	const parrot = require("./mapzen.whosonfirst.partyparrot.js");
+	const utils = require("./mapzen.whosonfirst.utils.js");	
 	
 	var self = {
 		
@@ -74,14 +77,18 @@
 			var args = {
 				"names": q,
 				"extras": "addr:,geom:,wof:hierarchy,wof:tags",
+				"per_page": 15,
 			};
 
 			var on_success = function(rsp){
 
+				parrot.stop();
+				
 				var places = rsp["places"];
 				var count = places.length;
 
 				var list = document.createElement("ul");
+				list.setAttribute("id", "search-results");				
 				list.setAttribute("class", "list");
 
 				for (var i=0; i < count; i++){
@@ -90,6 +97,7 @@
 					var name = pl["wof:name"];
 
 					var item = document.createElement("li");
+					item.setAttribute("id", "wof-" + pl["wof:id"]);					
 					item.setAttribute("data-place", JSON.stringify(pl));
 					
 					item.appendChild(document.createTextNode(name));
@@ -112,6 +120,26 @@
 					};
 					
 					list.appendChild(item);
+
+					db.get_visit_count_for_place(pl["wof:id"], function(err, row){
+						
+						if (err){
+							console.log(err);
+							return;
+						}
+
+						var wof_id = row["wof_id"];
+						var count = row["count_visits"];
+
+						if (! count){
+							return;
+						}
+						
+						var el = document.getElementById("wof-" + wof_id);
+						el.setAttribute("data-visit-count", count);
+						utils.append_class(el, "visited");
+					});
+					
 				}
 
 				canvas.draw(list);
@@ -123,6 +151,7 @@
 			};
 
 			api.execute_method(method, args, on_success, on_error);
+			parrot.start("searching!");
 		}
 	}
 

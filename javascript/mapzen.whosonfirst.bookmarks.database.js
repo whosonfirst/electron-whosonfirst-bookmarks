@@ -114,6 +114,14 @@
 
 			db.run(sql, params, cb);
 		},
+
+		'get_visits': function(cb){
+
+			var sql = "SELECT * FROM visits ORDER BY date DESC";
+			var params = [];
+
+			db.all(sql, params, cb);			
+		},
 		
 		'get_visits_for_place': function(wof_id, cb){
 
@@ -122,6 +130,21 @@
 
 			db.all(sql, params, cb);
 		},
+
+		'get_visit_count_for_place': function(wof_id ,cb){
+
+			var sql = "SELECT COUNT(id) AS count_visits FROM visits WHERE wof_id = ?";
+			var params = [ wof_id ];
+
+			db.get(sql, params, function(err, row){
+
+				if (! err){
+					row["wof_id"] = wof_id;
+				}
+				
+				cb(err, row);
+			});
+		}
 	}
 
 	return self;

@@ -18,6 +18,11 @@ q {
     font-weight:700;
 }
 
+#canvas {
+    min-height:500px;
+    overflow: scroll;
+}
+
 #controls {
     margin: 1em;
     text-align: center;
@@ -39,12 +44,23 @@ q {
     border: 5px solid #000;
 }
 
-#canvas {
-    min-height:500px;
-    overflow: scroll;
+#search-results li {
+    font-weight: 700;
+}
+
+#search-results small {
+    font-weight: 200;
+}
+
+#search-results small:before {
+    content: " ";
 }
 
 #search-wrapper {
     float:right !important:
     border:1px solid green;
+}
+
+.visited {
+    color: green !important;
 }
