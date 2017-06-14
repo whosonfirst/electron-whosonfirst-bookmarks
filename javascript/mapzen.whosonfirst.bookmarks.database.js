@@ -117,7 +117,7 @@
 		
 		'get_visits_for_place': function(wof_id, cb){
 
-			var sql = "SELECT * FROM visits WHERE wof_id = ?";
+			var sql = "SELECT * FROM visits WHERE wof_id = ? ORDER BY date DESC";
 			var params = [ wof_id ];
 
 			db.all(sql, params, cb);

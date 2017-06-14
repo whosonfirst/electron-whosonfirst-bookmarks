@@ -28,7 +28,7 @@
 	var canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 	var db = require("./mapzen.whosonfirst.bookmarks.database.js");	
 
-	var d = require("./mapzen.whosonfirst.bookmarks.desires.js");
+	var desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
 	
 	var self = {
 		
@@ -59,24 +59,14 @@
 			var select = document.createElement("select");
 			select.setAttribute("id", "status");
 
-			var desires = {
-				0: "i've been there",
-				1: "i was there",
-				2: "i want to go there",
-				3: "again again",
-				4: "again",
-				5: "again maybe",
-				6: "again never",
-				7: "meh"
-			};
+			var all_desires = desires.get_list();
 
-			for (var id in desires){
+			for (var id in all_desires){
 
 				var option = document.createElement("option");
 				option.setAttribute("value", id);
-				option.appendChild(document.createTextNode(desires[id]));
-
-				console.log(option);
+				option.appendChild(document.createTextNode(all_desires[id]));
+				
 				select.appendChild(option);
 			}
 			
@@ -118,10 +108,10 @@
 
 			L.marker([lat, lon]).addTo(map);
 
-			self.draw_visits(pl);
+			self.draw_visits_list(pl);
 		},
 
-		'draw_visits': function(pl){
+		'draw_visits_list': function(pl){
 
 			db.get_visits_for_place(pl['wof:id'], function(err, rows){
 
@@ -137,7 +127,7 @@
 
 					var row = rows[i];
 					var status_id = row['status_id'];
-					var desire = d.id_to_label(status_id);
+					var desire = desires.id_to_label(status_id);
 					
 					var q = document.createElement("q");
 					q.appendChild(document.createTextNode(desire));
@@ -164,7 +154,7 @@
 						}
 
 						db.remove_visit(id, function(){
-							self.draw_visits(pl);
+							self.draw_visits_list(pl);
 						});
 
 						return false;
@@ -176,6 +166,8 @@
 				}
 
 				var visits = document.getElementById("visits");
+				visits.innerHTML = "";
+				
 				visits.appendChild(list);
 			});
 
@@ -199,8 +191,7 @@
 				}
 
 				var visit_id = this.lastID;
-
-				self.draw_visits(pl);
+				self.draw_visits_list(pl);
 			});
 			
 			return false;

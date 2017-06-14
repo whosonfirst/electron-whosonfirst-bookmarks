@@ -38,6 +38,10 @@
 	
 	var self = {
 
+		'get_list': function(){
+			return desires;
+		},
+		
 		'id_to_label': function(id){
 			return desires[id];
 		}
