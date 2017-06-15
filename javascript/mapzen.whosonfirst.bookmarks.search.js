@@ -53,11 +53,62 @@
 			
 		},
 
+		'parse_query': function(q, cb){
+
+			var params = { "names": q };
+
+			var re = /(locality|loc|city|neighbourhood|neighborhood|hood)\:\s*(?:(\d+)|"([^"]+)")\s+(.*)/;
+
+			// str = 'city: "san francisco" donuts and burgers'
+			// str.match(re)
+			// Array [ "hood: "san francisco" donuts and bu…", "hood", undefined, "san francisco", "donuts and burgers" ]
+
+			// str = "hood:12345 carrots"
+			// str.match(re)
+			// Array [ "city:12345 carrots", "city", "12345", undefined, "carrots" ]
+
+			var m = q.match(re);
+
+			if (m) {
+
+				var focus = m[1];
+				var wofid = m[2];
+				var place = m[3];
+				var query = m[4];
+
+				if (wofid){
+
+					if ((focus == "locality") || (focus == "loc") || (focus == "city")){
+
+						params["locality_id"] = wofid;
+						params["names"] = query;
+					}
+
+					else {
+						params["neighbourhood_id"] = wofid;
+						params["names"] = query;
+					}
+				}
+
+				else {
+
+					// lookup 'place' of placetype 'focus' here...
+				}
+			}
+			
+			cb(params);
+		},
+		
 		'search': function(){
 
 			var q = document.getElementById("q");
 			q = q.value;
 
+			self.parse_query(q, function(params){
+				console.log("params");
+				console.log(params);
+			});
+			
 			// var by = document.getElementById("by");
 			// by = by.value;
 
