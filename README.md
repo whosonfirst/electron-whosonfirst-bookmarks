@@ -26,6 +26,45 @@ npm install
 npm start
 ```
 
+## Database schema
+
+_This will change. Be prepared..._
+
+```
+CREATE TABLE visits (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			latitude NUMERIC,
+			longitude NUMERIC,
+			wof_id INTEGER,
+			neighbourhood_id INTEGER,
+			locality_id INTEGER,
+			region_id INTEGER,
+			country_id INTEGER,
+			status_id INTEGER,
+			date TEXT,
+			name TEXT);
+
+CREATE TABLE places (
+			wof_id INTEGER,
+			body TEXT,
+			created TEXT
+		);
+
+CREATE TABLE tags (id INTEGER PRIMARY KEY AUTOINCREMENT, tag TEXT);
+
+CREATE TABLE places_tags (wof_id INTEGER, tag_id INTEGER);
+
+CREATE TABLE trips (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, start_date TEXT, end_date TEXT, locality_id INTEGER, status_id INTEGER, notes TEXT);
+
+CREATE INDEX `by_date` ON visits (`date`);
+CREATE INDEX `by_locality` ON visits (`locality_id`, `neighbourhood_id`);
+CREATE INDEX `by_neighbourhood` ON visits (`neighbourhood_id`);
+CREATE UNIQUE INDEX `by_tag` ON tags (`tag`);
+CREATE UNIQUE INDEX `by_tagid` ON places_tags (`wof_id`, `tag_id`);
+CREATE INDEX `by_date_trips` ON trips (`start_date`, `end_date`);
+CREATE INDEX `by_locality_trips` ON trips (`locality_id`);
+```
+
 ## See also
 
 * https://electron.atom.io/

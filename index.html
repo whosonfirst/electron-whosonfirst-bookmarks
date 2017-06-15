@@ -27,22 +27,26 @@
 
     <div class="row" id="header">
       
-      <div class="col-md-6">
+      <div class="col-md-8">
 	<div id="network-status" class="online"></div>
 
 	<ul class="list-inline">
-	    <li><button id="show-settings" class="btn btn-default btn-sm">settings</button></li>	  
+	  <!-- <li><button id="show-settings" class="btn btn-default btn-sm">settings</button></li> -->
+	    <li><button id="show-trips" class="btn btn-default btn-sm">trips</button></li>	    	    	    	  
+	    <li><button id="show-cities" class="btn btn-default btn-sm">cities</button></li>
+	    <li><button id="show-neighbourhoods" class="btn btn-default btn-sm">neighbourhoods</button></li>
 	    <li><button id="show-visits" class="btn btn-default btn-sm">visits</button></li>
+	    <li><button id="show-nearby" class="btn btn-default btn-sm">nearby</button></li>	  
 	</ul>
       </div>
 
-      <div class="col-md-6">
+      <div class="col-md-4">
 
 	 <div id="search-wrapper">
 	 <form class="form-inline" id="search">
 
 	   <div class="form-group">
-	     <label for="q">Search</label>
+	     <label for="q" class="sr-only">Search</label>
 	     <input type="text" name="q" id="q" value="" placeholder="Search for a place in Who's On First" class="form-control" />
 	   </div>
 

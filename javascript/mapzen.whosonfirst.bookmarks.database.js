@@ -39,6 +39,8 @@
 
 	const bookmarks = path.join(udata, "bookmarks.db");
 	const exists = fs.existsSync(bookmarks);
+
+	console.log(bookmarks);
 	
 	const db = new sqlite3.Database(bookmarks);
 	
@@ -83,9 +85,26 @@
 
 	var self = {
 
+		'add_place': function(pl){
+
+			var wof_id = pl['wof:id'];
+			var body = JSON.stringify(pl);
+
+			var sql = "INSERT INTO places (wof_id, body, created) VALUES (?, ?, ?)";
+			var params = [ wof_id, body, dt ];
+
+			var dt = new Date;
+			dt = dt.toISOString();
+
+			db.run(sql, params, function(err){
+				console.log(err);
+			});
+		},
+		
 		'add_visit': function(pl, status_id, cb){
 
 			var wof_id = pl['wof:id'];
+			var name = pl['wof:name'];			
 			var lat = pl['geom:latitude'];
 			var lon = pl['geom:longitude'];			
 
@@ -100,11 +119,18 @@
 			var dt = new Date;
 			dt = dt.toISOString();
 
-			var sql = "INSERT INTO visits (wof_id, latitude, longitude, neighbourhood_id, locality_id, region_id, country_id, status_id, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			var sql = "INSERT INTO visits (wof_id, name, latitude, longitude, neighbourhood_id, locality_id, region_id, country_id, status_id, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
-			var params = [wof_id, lat, lon, neighbourhood_id, locality_id, region_id, country_id, status_id, dt];
+			var params = [wof_id, name, lat, lon, neighbourhood_id, locality_id, region_id, country_id, status_id, dt];
 
-			db.run(sql, params, cb);
+			db.run(sql, params, function(err){
+
+				if (! err){
+					self.add_place(pl);
+				}
+
+				cb(err);
+			});
 		},
 
 		'remove_visit': function(visit_id, cb){

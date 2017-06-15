@@ -61,6 +61,14 @@ q {
     border:1px solid green;
 }
 
+.place-name {
+    font-weight: 700;
+}
+
+.place-name:after {
+    content: " ";
+}
+
 .visited {
     color: green !important;
 }
