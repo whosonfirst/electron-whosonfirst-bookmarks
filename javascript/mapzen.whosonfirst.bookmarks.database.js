@@ -90,7 +90,7 @@
 			var wof_id = pl['wof:id'];
 			var body = JSON.stringify(pl);
 
-			var sql = "INSERT INTO places (wof_id, body, created) VALUES (?, ?, ?)";
+			var sql = "REPLACE INTO places (wof_id, body, created) VALUES (?, ?, ?)";
 			var params = [ wof_id, body, dt ];
 
 			var dt = new Date;
