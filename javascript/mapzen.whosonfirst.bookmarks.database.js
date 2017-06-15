@@ -85,6 +85,10 @@
 
 	var self = {
 
+		'conn': function(){
+			return db;
+		},
+		
 		'add_place': function(pl){
 
 			var wof_id = pl['wof:id'];
@@ -170,6 +174,14 @@
 				
 				cb(err, row);
 			});
+		},
+
+		'get_cities_list': function(cb){
+
+			var sql = "SELECT locality_id, COUNT(id) AS count_visits FROM visits GROUP BY locality_id ORDER BY count_visits DESC";
+			var params = [];
+
+			db.all(sql, params, cb);
 		}
 	}
 

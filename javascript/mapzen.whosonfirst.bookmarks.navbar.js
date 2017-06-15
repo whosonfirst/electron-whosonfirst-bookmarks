@@ -25,12 +25,16 @@
 
 }(function(){
 
+	const cities = require("./mapzen.whosonfirst.bookmarks.cities.js");	
 	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
 	
 	var self = {
 		
 		'init': function(){
 
+			var show_c = document.getElementById("show-cities");
+			show_c.onclick = function(){ cities.show_cities(); };
+			
 			var show_v = document.getElementById("show-visits");
 			show_v.onclick = function(){ visits.show_visits(); };
 			
