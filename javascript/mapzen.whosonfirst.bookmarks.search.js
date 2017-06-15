@@ -68,7 +68,9 @@
 			// Array [ "city:12345 carrots", "city", "12345", undefined, "carrots" ]
 
 			var m = q.match(re);
-
+			// console.log(q);
+			// console.log(m);
+			
 			if (m) {
 
 				var focus = m[1];
@@ -92,11 +94,107 @@
 
 				else {
 
-					// lookup 'place' of placetype 'focus' here...
+					params["names"] = query;
+
+					var place_name;
+					var place_type;
+					var place_country;
+
+					var re_country = /^(.*)\s*,\s*(\w{2})$/;
+
+					var m = place.match(re_country);
+
+					if (m){
+						place_name = m[1];
+						place_country = m[2];
+					}
+
+					else {
+						place_name = place;
+					}
+					
+					if ((focus == "locality") || (focus == "loc") || (focus == "city")){
+						place_type = "locality";
+					}
+
+					else {
+						place_type = "neighbourhood";
+					}
+
+					var on_lookup = function(rsp){
+
+						var wofid;
+						
+						var places = rsp["places"];
+						var count = places.length;
+
+						for (var i =0; i < count; i++){
+
+							var row = places[i];
+							var name = row['wof:name'];
+
+							if (name.toUpperCase() == place_name.toUpperCase()){
+								wofid = row['wof:id'];
+								break;
+							}
+						}
+						
+						if (! wofid){
+							console.log("Missing WOF ID");
+							console.log(places);
+							return;
+						}
+						
+						if (place_type == "locality"){
+							params["locality_id"] = wofid;
+						}
+
+						else {
+							params["neighbourhood_id"] = wofid;
+						}
+
+						cb(params);
+					};
+
+					var args = {
+						"name": place_name,
+						"placetype": place_type,
+					};
+
+					if (place_country){
+						args["iso"] = place_country;
+					}
+
+					self.lookup_place(args, on_lookup);
+					return;
 				}
 			}
 			
 			cb(params);
+		},
+
+		'lookup_place': function(args, cb){
+
+			var method = "whosonfirst.places.search";
+			
+			args["per_page"] = 15;
+
+			var api_key = document.body.getAttribute("data-api-key");
+			var api_endpoint = document.body.getAttribute("data-api-endpoint");
+
+			api.set_handler('authentication', function(){
+                                return api_key;
+                        });
+			
+                        api.set_handler('endpoint', function(){
+                                return api_endpoint;
+                        });
+
+			var on_success = function(rsp){
+				cb(rsp);
+			};
+
+			api.execute_method(method, args, on_success);
 		},
 		
 		'search': function(){
@@ -104,10 +202,10 @@
 			var q = document.getElementById("q");
 			q = q.value;
 
-			self.parse_query(q, function(params){
-				console.log("params");
-				console.log(params);
-			});
+			self.parse_query(q, self.search2);
+		},
+
+		'search2': function(args){
 			
 			// var by = document.getElementById("by");
 			// by = by.value;
@@ -124,12 +222,9 @@
                         });
 
 			var method = "whosonfirst.places.search";
-			
-			var args = {
-				"names": q,
-				"extras": "addr:,geom:,wof:hierarchy,wof:tags",
-				"per_page": 15,
-			};
+
+			args["extras"] = "addr:,geom:,wof:hierarchy,wof:tags";
+			args["per_page"] = 15;
 
 			var on_success = function(rsp){
 
