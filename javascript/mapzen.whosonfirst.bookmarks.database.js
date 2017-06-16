@@ -91,60 +91,8 @@
 		
 		'add_place': function(pl){
 
-			var wof_id = pl['wof:id'];
-			var body = JSON.stringify(pl);
-
-			var sql = "REPLACE INTO places (wof_id, body, created) VALUES (?, ?, ?)";
-			var params = [ wof_id, body, dt ];
-
-			var dt = new Date;
-			dt = dt.toISOString();
-
-			db.run(sql, params, function(err){
-				console.log(err);
-			});
 		},
 		
-		'add_visit': function(pl, status_id, cb){
-
-			var wof_id = pl['wof:id'];
-			var name = pl['wof:name'];			
-			var lat = pl['geom:latitude'];
-			var lon = pl['geom:longitude'];			
-
-			var hier = pl['wof:hierarchy'];
-			hier = hier[0];				// PLEASE FIX ME
-
-			var neighbourhood_id = hier['neighbourhood_id'];
-			var locality_id = hier['locality_id'];
-			var region_id = hier['region_id'];
-			var country_id = hier['country_id'];			
-
-			var dt = new Date;
-			dt = dt.toISOString();
-
-			var sql = "INSERT INTO visits (wof_id, name, latitude, longitude, neighbourhood_id, locality_id, region_id, country_id, status_id, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-			
-			var params = [wof_id, name, lat, lon, neighbourhood_id, locality_id, region_id, country_id, status_id, dt];
-
-			db.run(sql, params, function(err){
-
-				if (! err){
-					self.add_place(pl);
-				}
-
-				cb(err);
-			});
-		},
-
-		'remove_visit': function(visit_id, cb){
-
-			var sql = "DELETE FROM visits WHERE id = ?";
-			var params = [ visit_id ];
-
-			db.run(sql, params, cb);
-		},
-
 		'get_visits': function(cb){
 
 			var sql = "SELECT * FROM visits ORDER BY date DESC";

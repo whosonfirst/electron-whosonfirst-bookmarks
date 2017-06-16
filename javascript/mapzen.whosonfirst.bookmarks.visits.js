@@ -25,9 +25,15 @@
 
 }(function(){
 
-	var db = require("./mapzen.whosonfirst.bookmarks.database.js");	
+	console.log("VISITS");
+	
+	var db = require("./mapzen.whosonfirst.bookmarks.database.js");
+	var conn = db.conn();
+	
 	var canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 	var desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
+
+	var places = require("./mapzen.whosonfirst.bookmarks.places.js");
 	
 	var self = {
 		
@@ -66,8 +72,16 @@
 
 				var span = document.createElement("span");
 				span.setAttribute("class", "place-name");
+				span.setAttribute("data-wof-id", row['wof_id']);	
 				span.appendChild(document.createTextNode(row['name']));
 
+				span.onclick = function(e){
+					var el = e.target;
+					var wof_id = el.getAttribute("data-wof-id");
+
+					places.show_place(wof_id);
+				};
+				
 				v.appendChild(span);
 				v.appendChild(document.createTextNode("You said "));
 				v.appendChild(q);
@@ -89,7 +103,7 @@
 						return false;
 					}
 					
-					db.remove_visit(id, function(){
+					self.remove_visit(id, function(){
 						self.show_visits();
 					});
 					
@@ -106,7 +120,54 @@
 			visits.appendChild(list);
 
 			canvas.draw(visits);
-		}
+		},
+
+		'add_visit': function(pl, status_id, cb){
+
+			var on_save = function(err){
+
+				places.save_place(pl);
+				places.save_hierarchy(pl);
+
+				cb(err);
+			};
+
+			self.save_visit(pl, status_id, on_save);
+		},
+		
+		'save_visit': function(pl, status_id, cb){
+
+			var wof_id = pl['wof:id'];
+			var name = pl['wof:name'];			
+			var lat = pl['geom:latitude'];
+			var lon = pl['geom:longitude'];			
+
+			var hier = pl['wof:hierarchy'];
+			hier = hier[0];				// PLEASE FIX ME
+
+			var neighbourhood_id = hier['neighbourhood_id'];
+			var locality_id = hier['locality_id'];
+			var region_id = hier['region_id'];
+			var country_id = hier['country_id'];			
+
+			var dt = new Date;
+			dt = dt.toISOString();
+
+			var sql = "INSERT INTO visits (wof_id, name, latitude, longitude, neighbourhood_id, locality_id, region_id, country_id, status_id, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			
+			var params = [wof_id, name, lat, lon, neighbourhood_id, locality_id, region_id, country_id, status_id, dt];
+
+			conn.run(sql, params, cb);
+		},
+
+		'remove_visit': function(visit_id, cb){
+
+			var sql = "DELETE FROM visits WHERE id = ?";
+			var params = [ visit_id ];
+
+			conn.run(sql, params, cb);
+		},
+		
 		
 	}
 

@@ -26,8 +26,13 @@
 }(function(){
 
 	const api = require("./mapzen.whosonfirst.api.js");
+
 	const db = require("./mapzen.whosonfirst.bookmarks.database.js");	
-	const place = require("./mapzen.whosonfirst.bookmarks.place.js");
+	const conn = db.conn();
+	
+	const places = require("./mapzen.whosonfirst.bookmarks.places.js");
+	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 	const parrot = require("./mapzen.whosonfirst.partyparrot.js");
 	const utils = require("./mapzen.whosonfirst.utils.js");	
@@ -55,9 +60,19 @@
 
 		'parse_query': function(q, cb){
 
-			var params = { "names": q };
+			var re_wofid = /(?:wof)?id\:(\d+)/;
+			var m_wofid = q.match(re_wofid);
+			
+			if (m_wofid){
 
-			var re = /(locality|loc|city|neighbourhood|neighborhood|hood)\:\s*(?:(\d+)|"([^"]+)")\s+(.*)/;
+				var wofid = m_wofid[1];
+				places.show_place(wofid);
+				return;
+			}
+
+			var params = { "names": q };
+			
+			var re_place = /(locality|loc|city|neighbourhood|neighborhood|hood)\:\s*(?:(\d+)|"([^"]+)")\s+(.*)/;
 
 			// str = 'city: "san francisco" donuts and burgers'
 			// str.match(re)
@@ -67,16 +82,17 @@
 			// str.match(re)
 			// Array [ "city:12345 carrots", "city", "12345", undefined, "carrots" ]
 
-			var m = q.match(re);
+			var m_place = q.match(re_place);
+			
 			// console.log(q);
 			// console.log(m);
 			
-			if (m) {
+			if (m_place) {
 
-				var focus = m[1];
-				var wofid = m[2];
-				var place = m[3];
-				var query = m[4];
+				var focus = m_place[1];
+				var wofid = m_place[2];
+				var place = m_place[3];
+				var query = m_place[4];
 
 				if (wofid){
 
@@ -101,12 +117,11 @@
 					var place_country;
 
 					var re_country = /^(.*)\s*,\s*(\w{2})$/;
+					var m_country = place.match(re_country);
 
-					var m = place.match(re_country);
-
-					if (m){
-						place_name = m[1];
-						place_country = m[2];
+					if (m_country){
+						place_name = m_country[1];
+						place_country = m_country[2];
 					}
 
 					else {
@@ -125,12 +140,12 @@
 
 						var wofid;
 						
-						var places = rsp["places"];
-						var count = places.length;
+						var _places = rsp["places"];
+						var count = _places.length;
 
 						for (var i =0; i < count; i++){
 
-							var row = places[i];
+							var row = _places[i];
 							var name = row['wof:name'];
 
 							if (name.toUpperCase() == place_name.toUpperCase()){
@@ -141,7 +156,7 @@
 						
 						if (! wofid){
 							console.log("Missing WOF ID");
-							console.log(places);
+							console.log(_places);
 							return;
 						}
 						
@@ -230,8 +245,8 @@
 
 				parrot.stop();
 				
-				var places = rsp["places"];
-				var count = places.length;
+				var possible = rsp["places"];
+				var count = possible.length;
 
 				var list = document.createElement("ul");
 				list.setAttribute("id", "search-results");				
@@ -239,7 +254,7 @@
 
 				for (var i=0; i < count; i++){
 
-					var pl = places[i];
+					var pl = possible[i];
 					var name = pl["wof:name"];
 
 					var item = document.createElement("li");
@@ -260,9 +275,7 @@
 						var el = e.target;
 						var pl = el.getAttribute("data-place");
 
-						// pl = JSON.parse(pl);
-
-						place.draw_place(pl);
+						places.draw_place(pl);
 					};
 					
 					list.appendChild(item);

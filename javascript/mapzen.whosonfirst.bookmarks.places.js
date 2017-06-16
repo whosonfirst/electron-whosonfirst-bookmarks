@@ -25,10 +25,15 @@
 
 }(function(){
 
-	var canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
-	var db = require("./mapzen.whosonfirst.bookmarks.database.js");	
+	console.log("PLACES");
+	
+	const db = require("./mapzen.whosonfirst.bookmarks.database.js");
+	const conn = db.conn();
+	
+	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
+	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
 
-	var desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
+	const api = require("./mapzen.whosonfirst.api.js");
 	
 	var self = {
 		
@@ -36,11 +41,73 @@
 
 		},
 
-		'draw_place': function(str_pl){
+		'fetch_place': function(id, cb){
 
-			var pl = JSON.parse(str_pl);
-			console.log(pl);
+			var method = "whosonfirst.places.getInfo";
+			
+			var args = {
+				"id": id,
+				"extras": "addr:,edtf:,geom:,lbl:,wof:hierarchy,wof:tags"
+			};
 
+			var api_key = document.body.getAttribute("data-api-key");
+			var api_endpoint = document.body.getAttribute("data-api-endpoint");
+
+			api.set_handler('authentication', function(){
+                                return api_key;
+                        });
+			
+                        api.set_handler('endpoint', function(){
+                                return api_endpoint;
+                        });
+
+			var on_success = function(rsp){
+				
+				var pl = rsp["place"];
+
+				if (cb){
+					cb(pl);
+				}
+			};
+
+			var on_error = function(rsp){
+				console.log("SAD FACE");
+				console.log(rsp);
+			};
+
+			api.execute_method(method, args, on_success, on_error);
+		},
+		
+		'show_place': function(id){
+
+			var sql = "SELECT * FROM places WHERE wof_id = ?";
+			var params = [ id ];
+
+			var cb = function(err, row){
+
+				if (err){
+					console.log(err);
+					return false;
+				}
+
+				if (! row){
+					self.fetch_place(id, self.draw_place);
+					return;
+				}
+				
+				var pl = row["body"];
+				self.draw_place(pl);
+			};
+
+			conn.get(sql, params, cb);
+		},
+		
+		'draw_place': function(pl){
+
+			if (typeof(pl) == "string"){
+				pl = JSON.parse(pl);
+			}
+			
 			var h2 = document.createElement("h2");
 			h2.appendChild(document.createTextNode(pl["wof:name"]));
 
@@ -54,7 +121,7 @@
 			
 			var map = document.createElement("div");
 			map.setAttribute("id", "map");
-			map.setAttribute("data-place", str_pl);
+			map.setAttribute("data-place", JSON.stringify(pl));
 			
 			var select = document.createElement("select");
 			select.setAttribute("id", "status");
@@ -81,14 +148,14 @@
 			controls.appendChild(select);
 			controls.appendChild(button);
 
-			var visits = document.createElement("div");
-			visits.setAttribute("id", "visits");
+			var visits_wrapper = document.createElement("div");
+			visits_wrapper.setAttribute("id", "visits");
 			
 			var wrapper = document.createElement("div");
 			wrapper.appendChild(h2);
 			wrapper.appendChild(map);
 			wrapper.appendChild(controls);
-			wrapper.appendChild(visits);
+			wrapper.appendChild(visits_wrapper);
 			
 			canvas.draw(wrapper);
 
@@ -101,8 +168,16 @@
     				}
 			});
 
+			// console.log(pl);
+			
 			var lat = pl["geom:latitude"];
 			var lon = pl["geom:longitude"];			
+
+			if ((pl["lbl:latitude"]) && (pl["lbl:longitude"])){
+
+				lat = pl["lbl:latitude"];
+				lon = pl["lbl:longitude"];				
+			}
 			
 			map.setView([lat, lon], 16);
 
@@ -153,7 +228,9 @@
 							return false;
 						}
 
-						db.remove_visit(id, function(){
+						var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+						
+						visits.remove_visit(id, function(){
 							self.draw_visits_list(pl);
 						});
 
@@ -165,10 +242,10 @@
 					list.appendChild(v);
 				}
 
-				var visits = document.getElementById("visits");
-				visits.innerHTML = "";
+				var visits_wrapper = document.getElementById("visits");
+				visits_wrapper.innerHTML = "";
 				
-				visits.appendChild(list);
+				visits_wrapper.appendChild(list);
 			});
 
 		},
@@ -182,8 +259,10 @@
 						
 			var status = document.getElementById("status");
 			status = status.value;
-			
-			db.add_visit(pl, status, function(err){
+
+			var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+
+			visits.add_visit(pl, status, function(err){
 
 				if (err){
 					console.log(err);
@@ -195,8 +274,60 @@
 			});
 			
 			return false;
-		}
-		
+		},
+
+		'save_place': function(pl, cb){
+
+			var wof_id = pl['wof:id'];
+			var name = pl['wof:name'];
+
+			console.log("save " + name + " (" + wof_id + ")");
+			
+			var body = JSON.stringify(pl);
+
+			var sql = "REPLACE INTO places (wof_id, body, created) VALUES (?, ?, ?)";
+			var params = [ wof_id, body, dt ];
+
+			var dt = new Date;
+			dt = dt.toISOString();
+
+			conn.run(sql, params, cb);
+		},
+
+		'save_hierarchy': function(pl, cb){
+
+			var wof_id = pl['wof:id'];
+			var hierarchies = pl['wof:hierarchy'];
+			var count = hierarchies.length;
+
+			console.log("SAVE HIER " + count);
+
+			var possible = ['neighbourhood_id', 'locality_id', 'region_id', 'country_id' ];
+			
+			for (var i=0; i < count; i++){
+
+				var hier = hierarchies[i];
+
+				for (var p in possible){
+
+					var k = possible[p];
+					
+					console.log("MAYBE " + k);
+					
+					if (! hier[k]){
+						continue;
+					}
+
+					if (hier[k] == wof_id){
+						continue;
+					}
+
+					console.log("FETCH " + hier[k]);
+					
+					self.fetch_place(hier[k], self.save_pl);
+				}
+			}
+		},
 	}
 
 	return self;
