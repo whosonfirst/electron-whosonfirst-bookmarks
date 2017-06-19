@@ -161,6 +161,9 @@
 
 			status_button.onclick = self.add_place;
 
+			// note: we're not actually doing anything with routing yet because
+			// of geolocation hoohah - see below for details...
+			
 			var routing_select = document.createElement("select");
 			routing_select.setAttribute("id", "routing");
 
@@ -217,6 +220,7 @@
 			// "Google Maps Geolocation API (requires enabling billing but is free to use; you can skip
 			// this one, in which case geolocation features of Chrome will not work)"
 			// https://developers.google.com/maps/documentation/geolocation/intro
+			// 
 			// controls.appendChild(routing_select);
 			// controls.appendChild(routing_button);
 			
