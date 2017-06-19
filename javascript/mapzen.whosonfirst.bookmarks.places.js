@@ -123,8 +123,8 @@
 			map.setAttribute("id", "map");
 			map.setAttribute("data-place", JSON.stringify(pl));
 			
-			var select = document.createElement("select");
-			select.setAttribute("id", "status");
+			var status_select = document.createElement("select");
+			status_select.setAttribute("id", "status");
 
 			var all_desires = desires.get_list();
 
@@ -134,20 +134,51 @@
 				option.setAttribute("value", id);
 				option.appendChild(document.createTextNode(all_desires[id]));
 				
-				select.appendChild(option);
+				status_select.appendChild(option);
 			}
 			
-			var button = document.createElement("button");
-			button.setAttribute("class", "btn btn-primary");
-			button.appendChild(document.createTextNode("Save"));
+			var status_button = document.createElement("button");
+			status_button.setAttribute("class", "btn btn-primary");
+			status_button.appendChild(document.createTextNode("Save"));
 
-			button.onclick = self.add_place;
+			status_button.onclick = self.add_place;
+
+			var routing_select = document.createElement("select");
+			routing_select.setAttribute("id", "routing");
+
+			var modes = {
+				"pedestrian": "by foot",
+				"bicylcle": "on bike",
+				"auto": "by car",
+				"bus": "by transit"
+			};
+			
+			for (var mode in modes){
+
+				var option = document.createElement("option");
+				option.setAttribute("value", mode);
+				option.appendChild(document.createTextNode(modes[mode]));
+				
+				routing_select.appendChild(option);
+			}
+
+			var routing_button = document.createElement("button");
+			routing_button.setAttribute("class", "btn");
+			routing_button.appendChild(document.createTextNode("Take me there"));
+
+			routing_button.onclick = function(e){
+				var el = e.target;
+				alert("take me there");
+			};
 			
 			var controls = document.createElement("div");
 			controls.setAttribute("id", "controls");
-			controls.appendChild(select);
-			controls.appendChild(button);
+			controls.appendChild(status_select);
+			controls.appendChild(status_button);
+			controls.appendChild(routing_select);
+			controls.appendChild(routing_button);
 
+			
 			var visits_wrapper = document.createElement("div");
 			visits_wrapper.setAttribute("id", "visits");
 			
