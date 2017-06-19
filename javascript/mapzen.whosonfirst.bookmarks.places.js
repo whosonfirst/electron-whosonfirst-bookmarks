@@ -77,11 +77,18 @@
 
 			api.execute_method(method, args, on_success, on_error);
 		},
-		
-		'show_place': function(id){
+
+		'get_place': function(id, cb){
 
 			var sql = "SELECT * FROM places WHERE wof_id = ?";
 			var params = [ id ];
+
+			console.log(sql, params);
+			
+			conn.get(sql, params, cb);			
+		},
+		
+		'show_place': function(id){
 
 			var cb = function(err, row){
 
@@ -99,7 +106,7 @@
 				self.draw_place(pl);
 			};
 
-			conn.get(sql, params, cb);
+			self.get_place(id, cb);
 		},
 		
 		'draw_place': function(pl){
@@ -108,6 +115,17 @@
 				pl = JSON.parse(pl);
 			}
 			
+			// console.log(pl);
+			
+			var lat = pl["geom:latitude"];
+			var lon = pl["geom:longitude"];			
+
+			if ((pl["lbl:latitude"]) && (pl["lbl:longitude"])){
+
+				lat = pl["lbl:latitude"];
+				lon = pl["lbl:longitude"];				
+			}
+
 			var h2 = document.createElement("h2");
 			h2.appendChild(document.createTextNode(pl["wof:name"]));
 
@@ -168,16 +186,39 @@
 
 			routing_button.onclick = function(e){
 				var el = e.target;
-				alert("take me there");
+
+				console.log("place " + lat + ", " + lon);
+				
+				var on_locate = function(pos){
+					
+					var current_lat = pos.coords.latitude;
+					var current_lon = pos.coords.longitude;
+
+					console.log("current " + current_lat + "," + current_lon);
+				};
+
+				var on_error = function(err){
+					console.log(err);
+					return false;
+				};
+				
+				navigator.geolocation.getCurrentPosition(on_locate, on_error);
 			};
 			
 			var controls = document.createElement("div");
 			controls.setAttribute("id", "controls");
 			controls.appendChild(status_select);
 			controls.appendChild(status_button);
-			controls.appendChild(routing_select);
-			controls.appendChild(routing_button);
 
+			// I hate everything... 20170619/thisisaaronland)
+			// https://github.com/electron/electron/issues/7306			
+			// https://electron.atom.io/docs/api/environment-variables/#googleapikey
+			// https://www.chromium.org/developers/how-tos/api-keys which says:
+			// "Google Maps Geolocation API (requires enabling billing but is free to use; you can skip
+			// this one, in which case geolocation features of Chrome will not work)"
+			// https://developers.google.com/maps/documentation/geolocation/intro
+			// controls.appendChild(routing_select);
+			// controls.appendChild(routing_button);
 			
 			var visits_wrapper = document.createElement("div");
 			visits_wrapper.setAttribute("id", "visits");
@@ -198,22 +239,10 @@
     					scene: L.Mapzen.BasemapStyles.Refill
     				}
 			});
-
-			// console.log(pl);
-			
-			var lat = pl["geom:latitude"];
-			var lon = pl["geom:longitude"];			
-
-			if ((pl["lbl:latitude"]) && (pl["lbl:longitude"])){
-
-				lat = pl["lbl:latitude"];
-				lon = pl["lbl:longitude"];				
-			}
 			
 			map.setView([lat, lon], 16);
 
 			L.marker([lat, lon]).addTo(map);
-
 			self.draw_visits_list(pl);
 		},
 
@@ -245,10 +274,10 @@
 					v.appendChild(document.createTextNode(row['date']));
 
 					var remove = document.createElement("button");
-					remove.setAttribute("class", "btn btn-sm");
+					remove.setAttribute("class", "btn btn-sm remove");
 					remove.setAttribute("data-visit-id", row['id']);
 					
-					remove.appendChild(document.createTextNode("x"));
+					remove.appendChild(document.createTextNode("⃠"));
 
 					remove.onclick = function(e){
 
@@ -319,6 +348,8 @@
 			var sql = "REPLACE INTO places (wof_id, body, created) VALUES (?, ?, ?)";
 			var params = [ wof_id, body, dt ];
 
+			console.log(sql, params);
+			
 			var dt = new Date;
 			dt = dt.toISOString();
 

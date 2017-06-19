@@ -69,6 +69,14 @@ q {
     content: " ";
 }
 
+.remove {
+    background-color: transparent;
+    padding:0px;
+    padding-left:1em;
+    color: red;
+    font-weight: 700;
+}
+
 .visited {
     color: green !important;
 }

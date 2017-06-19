@@ -89,10 +89,10 @@
 				v.appendChild(document.createTextNode(row['date']));
 				
 				var remove = document.createElement("button");
-				remove.setAttribute("class", "btn btn-sm");
+				remove.setAttribute("class", "btn btn-sm remove");
 				remove.setAttribute("data-visit-id", row['id']);
 				
-				remove.appendChild(document.createTextNode("x"));
+				remove.appendChild(document.createTextNode("⃠"));
 				
 				remove.onclick = function(e){
 					
