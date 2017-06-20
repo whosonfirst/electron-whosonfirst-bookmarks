@@ -159,6 +159,8 @@
 			var swlon;
 			var nelat;
 			var nelon;
+
+			var features = [];
 			
 			var items = visits.getElementsByClassName("visits-list-item");
 			var count = items.length;			
@@ -188,8 +190,25 @@
 				if ((! nelon) || (lon > nelon)){
 					nelon = lon;
 				}
+
+				var coords = [ lon, lat ];
+				
+				var geom = {
+					"type": "Point",
+					"coordinates": coords
+				};
+				
+				var props = {};
+
+				var feature = {
+					"type": "Feature",
+					"geometry": geom,
+					"properties": props
+				};
+
+				features.push(feature);
 			}
-			
+
 			var left_panel = document.createElement("div");
 			left_panel.setAttribute("class", "col-md-6 panel");
 			
@@ -222,8 +241,13 @@
 			var opts = { "padding": [50, 50] };
 			
 			map.fitBounds(bounds, opts);
-			
-			// L.marker([lat, lon]).addTo(map);
+
+			var feature_collection = {
+				"type": "FeatureCollection",
+				"features": features,
+			};
+
+			L.geoJSON(feature_collection).addTo(map);
 		},
 
 		'add_visit': function(pl, status_id, cb){

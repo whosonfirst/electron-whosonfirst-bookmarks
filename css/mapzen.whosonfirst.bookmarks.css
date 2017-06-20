@@ -28,6 +28,11 @@ q {
     text-align: center;
 }
 
+#feedback {
+    background-color: #fff;
+    margin:.5em;
+}
+
 #header {
     background-color: #fff;
     padding-top:2em;
@@ -64,6 +69,15 @@ q {
 
 .datetime {
     font-weight: 700;
+}
+
+.feedback {
+
+}
+
+.feedback:before {
+    content: "💬  ";
+    padding-right: 1em;
 }
 
 .panel {

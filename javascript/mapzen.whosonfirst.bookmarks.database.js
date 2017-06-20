@@ -25,6 +25,8 @@
 
 }(function(){
 
+	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");	
+
 	const electron = require('electron');
 	const path = require('path');
 	const fs = require('fs');
@@ -40,7 +42,7 @@
 	const bookmarks = path.join(udata, "bookmarks.db");
 	const exists = fs.existsSync(bookmarks);
 
-	console.log(bookmarks);
+	fb.debug(bookmarks);
 	
 	const db = new sqlite3.Database(bookmarks);
 	

@@ -34,6 +34,8 @@
 	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
 
 	const api = require("./mapzen.whosonfirst.api.js");
+
+	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
 	
 	var self = {
 		
@@ -114,8 +116,6 @@
 			if (typeof(pl) == "string"){
 				pl = JSON.parse(pl);
 			}
-			
-			// console.log(pl);
 			
 			var lat = pl["geom:latitude"];
 			var lon = pl["geom:longitude"];			
@@ -278,7 +278,6 @@
 				item.appendChild(v_span);				
 				
 				details.appendChild(item);
-				
 			}
 			
 			return details;
@@ -289,7 +288,7 @@
 			db.get_visits_for_place(pl['wof:id'], function(err, rows){
 
 				if (err){
-					console.log(err);
+					fb.error(err);
 					return;
 				}
 
