@@ -125,17 +125,6 @@
 				lat = pl["lbl:latitude"];
 				lon = pl["lbl:longitude"];				
 			}
-
-			var h2 = document.createElement("h2");
-			h2.appendChild(document.createTextNode(pl["wof:name"]));
-
-			if (pl["addr:full"]){
-				
-				var addr = document.createElement("small");
-				addr.appendChild(document.createTextNode(pl["addr:full"]));
-
-				h2.appendChild(addr);
-			}
 			
 			var map = document.createElement("div");
 			map.setAttribute("id", "map");
@@ -226,14 +215,28 @@
 			
 			var visits_wrapper = document.createElement("div");
 			visits_wrapper.setAttribute("id", "visits");
+
+			var h2 = document.createElement("h2");
+			h2.appendChild(document.createTextNode(pl["wof:name"]));
+
+			var details = self.render_place_details(pl);
 			
-			var wrapper = document.createElement("div");
-			wrapper.appendChild(h2);
-			wrapper.appendChild(map);
-			wrapper.appendChild(controls);
-			wrapper.appendChild(visits_wrapper);
+			var left_panel = document.createElement("div");
+			left_panel.setAttribute("class", "col-md-6 panel");
+
+			var right_panel = document.createElement("div");
+			right_panel.setAttribute("class", "col-md-6 panel");
 			
-			canvas.draw(wrapper);
+			left_panel.appendChild(map);
+			left_panel.appendChild(controls);
+			
+			right_panel.appendChild(h2);
+			right_panel.appendChild(details);
+			right_panel.appendChild(visits_wrapper);
+			
+			canvas.reset();
+			canvas.append(left_panel);
+			canvas.append(right_panel);			
 
 			var api_key = document.body.getAttribute("data-api-key");			
 			L.Mapzen.apiKey = api_key;
@@ -250,6 +253,37 @@
 			self.draw_visits_list(pl);
 		},
 
+		'render_place_details': function(pl){
+
+			var details = document.createElement("ul");
+			details.setAttribute("class", "list");
+			details.setAttribute("id", "place-details-" + pl["wof:id"]);
+
+			for (var k in pl){
+				
+				var v = pl[k];
+
+				var k_span = document.createElement("span");
+				k_span.setAttribute("class", "place-details-key");
+				k_span.appendChild(document.createTextNode(k));
+				
+				var v_span = document.createElement("span");
+				v_span.setAttribute("class", "place-details-value");
+				v_span.appendChild(document.createTextNode(v));
+
+				var item = document.createElement("li");
+				item.setAttribute("class", "place-details-item");
+				
+				item.appendChild(k_span);
+				item.appendChild(v_span);				
+				
+				details.appendChild(item);
+				
+			}
+			
+			return details;
+		},
+		
 		'draw_visits_list': function(pl){
 
 			db.get_visits_for_place(pl['wof:id'], function(err, rows){

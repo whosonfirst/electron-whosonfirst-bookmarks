@@ -31,10 +31,18 @@
 		
 		'draw': function(el){
 
+			self.reset();
+			self.append(el);
+		},
+
+		'append': function(el){
+			var canvas = document.getElementById("canvas");
+			canvas.appendChild(el);
+		},
+		
+		'reset': function(){
 			var canvas = document.getElementById("canvas");
 			canvas.innerHTML = "";
-
-			canvas.appendChild(el);
 		}
 	}
 
