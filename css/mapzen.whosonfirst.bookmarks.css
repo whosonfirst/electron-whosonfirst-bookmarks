@@ -62,6 +62,10 @@ q {
     border:1px solid green;
 }
 
+.datetime {
+    font-weight: 700;
+}
+
 .panel {
     border: 1px dotted red;
 }
@@ -104,3 +108,24 @@ q {
 .visited {
     color: green !important;
 }
+
+.visits-list {
+    max-height: 500px;
+    overflow: scroll;
+    margin:0px;
+    padding: 0px;
+}
+
+.visits-list-item {
+    list-style-type: none;
+    margin:0px;
+    padding: 0px;    
+    margin-bottom: 1em;
+}
+
+.visits-list-item small {
+    display: block;
+    color: #666;
+    margin-top:.5em;
+}
+
