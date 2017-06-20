@@ -76,12 +76,24 @@ q {
 }
 
 .feedback:before {
-    content: "💬  ";
+    content: "🎈  ";
     padding-right: 1em;
 }
 
+.feedback-debug:before {
+    content: "⌨" !important;
+}
+
+.feedback-error:before {
+    content: "🔥" !important;
+}
+
+.feedback-warning:before {
+    content: "⚠" !important;
+}
+
 .panel {
-    border: 1px dotted red;
+    border-bottom: 1px dotted red;
 }
 
 .place-details {

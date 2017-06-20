@@ -34,6 +34,7 @@
 	var desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
 
 	var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+	var namify = require("./mapzen.whosonfirst.bookmarks.namify.js");	
 	
 	var self = {
 		
@@ -92,8 +93,9 @@
 					span.appendChild(document.createTextNode(", in "));
 
 					var loc = document.createElement("span");
-					loc.setAttribute("class", "place-name-locality");
+					loc.setAttribute("class", "place-name-locality namify");
 					loc.setAttribute("id", "place-locality-" + locality_id);
+					loc.setAttribute("data-wof-id", locality_id);					
 					loc.appendChild(document.createTextNode(locality_id));
 
 					span.appendChild(loc);
@@ -248,6 +250,8 @@
 			};
 
 			L.geoJSON(feature_collection).addTo(map);
+
+			namify.translate();
 		},
 
 		'add_visit': function(pl, status_id, cb){

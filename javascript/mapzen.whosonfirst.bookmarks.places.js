@@ -29,6 +29,8 @@
 	
 	const db = require("./mapzen.whosonfirst.bookmarks.database.js");
 	const conn = db.conn();
+
+	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
@@ -299,6 +301,8 @@
 				visits_wrapper.innerHTML = "";
 				
 				visits_wrapper.appendChild(list);
+
+				namify.translate();				
 			});
 
 		},
