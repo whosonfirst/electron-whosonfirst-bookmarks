@@ -111,7 +111,7 @@
 
 				var sm = document.createElement("small");
 				sm.setAttribute("id", "placetype-mentions-" + wof_id);				
-				sm.appendChild(document.createTextNode("you've mentioned this place"));
+				sm.appendChild(document.createTextNode("you've mentioned stuff here"));
 				
 				var visits = document.createElement("span");
 				visits.setAttribute("class", "placetype-count");
@@ -327,11 +327,15 @@
 				return false;
 			}
 
+			// TO DO: group desires by count in a single list item
+			// as in "<q>again</a> and <q>meh</q> twice" rather than
+			// "<q>again</a> twice and <q>meh</q> twice"
+			
 			var wof_id;
 			
 			var desires_list = document.createElement("ul");
 			desires_list.setAttribute("class", "list-inline placetype-desires");
-			
+
 			var count_rows = rows.length;
 
 			for (var i=0; i < count_rows; i++){
@@ -357,7 +361,10 @@
 				item.append(q);				
 				
 				if (count_visits == 1){
-					item.appendChild(document.createTextNode(" once"));
+
+					if (count_rows > 1){
+						item.appendChild(document.createTextNode(" once"));
+					}
 				}
 
 				else if (count_visits == 2){

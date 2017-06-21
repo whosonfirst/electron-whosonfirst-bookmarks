@@ -144,7 +144,7 @@ q {
 }
 
 .placetype-desires:before {
-    content: "you've said ";
+    content: "you said ";
     font-style:italic;    
 }
 
