@@ -36,6 +36,7 @@
 	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
 
 	const api = require("./mapzen.whosonfirst.api.js");
+	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");	
 
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
 	
@@ -248,10 +249,9 @@
     					scene: L.Mapzen.BasemapStyles.Refill
     				}
 			});
-			
-			map.setView([lat, lon], 16);
 
-			L.marker([lat, lon]).addTo(map);
+			geojson.add_latlon_to_map(map, lat, lon);
+
 			self.draw_visits_list(pl);
 		},
 

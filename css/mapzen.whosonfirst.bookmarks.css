@@ -3,6 +3,11 @@ body {
     margin-top:0px;
 }
 
+button[disabled=disabled] {
+    background-color:#fff !important;
+    color: #ccc !important;
+}
+
 h2 {
     margin:0px;
     padding:0px;

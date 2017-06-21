@@ -30,7 +30,8 @@
 
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 
-	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");	
+	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
+	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
 
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");	
 	
@@ -171,11 +172,6 @@
 						return false;
 					}
 
-					var swlat;
-					var swlon;
-					var nelat;
-					var nelon;
-
 					var features = [];
 
 					var count_rows = rows.length;
@@ -193,22 +189,6 @@
 							
 							lat = props['lbl:latitude'];
 							lon = props['lbl:longitude'];
-						}
-
-						if ((! swlat) || (lat < swlat)){
-							swlat = lat;
-						}
-
-						if ((! swlon) || (lat < swlon)){
-							swlon = lon;
-						}
-
-						if ((! nelat) || (lat > nelat)){
-							nelat = lat;
-						}
-
-						if ((! nelon) || (lat > nelon)){
-							nelon = lon;
 						}
 
 						var coords = [ lon, lat ];
@@ -229,23 +209,13 @@
 						features.push(feature);
 					}
 
-					var sw = L.latLng(swlat, swlon);
-					var ne = L.latLng(nelat, nelon);
-					
-					var bounds = L.latLngBounds(sw, ne);
-					var opts = { "padding": [50, 50] };
-					
-					map.fitBounds(bounds, opts);
-					
 					var feature_collection = {
 						"type": "FeatureCollection",
 						"features": features,
 					};
-					
-					L.geoJSON(feature_collection).addTo(map);			
-				};
 
-				console.log(sql, params);
+					geojson.add_featurecollection_to_map(map, feature_collection);
+				};
 
 				conn.all(sql, params, cb);
 			}
