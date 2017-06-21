@@ -30,6 +30,7 @@
 
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 
+	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
 
@@ -65,6 +66,7 @@
 			var count = rows.length;
 
 			var ids = [];
+			var counts = {};
 			
 			var places = document.createElement("ul");
 			places.setAttribute("class", "list placetype-list");
@@ -76,6 +78,7 @@
 				var count_visits = row['count_visits'];				
 
 				var item = document.createElement("li");
+				item.setAttribute("id", "placetype-list-item-" + wof_id);
 				item.setAttribute("class", "list placetype-list-item");
 				
 				var place = document.createElement("span");
@@ -107,6 +110,7 @@
 				item.appendChild(place);
 
 				var sm = document.createElement("small");
+				sm.setAttribute("id", "placetype-mentions-" + wof_id);				
 				sm.appendChild(document.createTextNode("you've mentioned this place"));
 				
 				var visits = document.createElement("span");
@@ -128,6 +132,11 @@
 				item.appendChild(sm);
 				
 				places.appendChild(item);
+
+				// we need this below to determine whether to count neighbourhoods
+				// for a locality (20170620/thisisaaronland)
+				
+				counts[wof_id] = count_visits;
 			}
 
 			var left_panel = document.createElement("div");
@@ -218,9 +227,152 @@
 				};
 
 				conn.all(sql, params, cb);
+
+				for (var i=0; i < count_ids; i++){
+
+					self.get_desires_for_placetype(pt, ids[i], self.draw_desires_for_placetype);
+					
+					if ((pt == "locality") && (counts[ids[i]] > 1)){
+						self.get_neighbourhood_count_for_locality(ids[i], self.draw_neighbourhood_count_for_locality);
+					}
+
+					if (pt == "neighbourhood"){
+						// self.get_locality_for_neighbourhood(ids[i]);
+					}
+				}
+				
 			}
 			
 			namify.translate();			
+		},
+
+		'get_neighbourhood_count_for_locality': function(wof_id, cb){
+
+			var sql = "SELECT COUNT(DISTINCT(neighbourhood_id)) AS count_neighbourhoods FROM visits WHERE locality_id = ?";
+			var params = [ wof_id ];
+
+			conn.get(sql, params, function(err, row){
+
+				if (! err){
+					row["wof_id"] = wof_id;
+				}
+
+				cb(err, row);
+			});
+		},
+
+		'draw_neighbourhood_count_for_locality': function(err, row){
+
+			if (err){
+				fb.error(err);
+				return false;
+			}
+
+			var wof_id = row["wof_id"];
+			var count_hoods = row["count_neighbourhoods"];
+
+			var mentions = document.getElementById("placetype-mentions-" + wof_id);
+
+			if (count_hoods == 1){
+
+				var span = document.createElement("span");
+				span.setAttribute("class", "hey-look");
+				span.appendChild(document.createTextNode("one neighbourhood"));
+				
+				mentions.appendChild(document.createTextNode(" in "));
+				mentions.appendChild(span);
+			}
+
+			else {
+
+				var span = document.createElement("span");
+				span.setAttribute("class", "hey-look");
+				span.appendChild(document.createTextNode(count_hoods + " neighbourhoods"));
+				
+				mentions.appendChild(document.createTextNode(" spanning "));
+				mentions.appendChild(span);				
+			}
+		},
+		
+		// maybe put this in a different package... (20170620/thisisaaronland)
+		
+		'get_desires_for_placetype': function(pt, wof_id, cb){
+
+			var col = pt + "_id";
+			
+			var sql = "SELECT status_id, COUNT(id) AS count_visits FROM visits WHERE " + col + " = ? GROUP BY status_id ORDER BY count_visits DESC";
+			var params = [ wof_id ];
+
+			console.log(sql, params);
+			
+			conn.all(sql, params, function(err, rows){
+
+				if (! err){
+
+					var count_rows = rows.length;
+					
+					for (var i=0; i < count_rows; i++){
+						rows[i]['wof_id'] = wof_id;
+					}
+				}
+
+				cb(err, rows);
+			});
+		},
+		
+		'draw_desires_for_placetype': function(err, rows){
+
+			if (err){
+				fb.error(err);
+				return false;
+			}
+
+			var wof_id;
+			
+			var desires_list = document.createElement("ul");
+			desires_list.setAttribute("class", "list-inline placetype-desires");
+			
+			var count_rows = rows.length;
+
+			for (var i=0; i < count_rows; i++){
+
+				var row = rows[i];
+				wof_id = row["wof_id"];
+
+				var status_id = row["status_id"];
+				var count_visits = row["count_visits"];
+
+				var desire = desires.id_to_label(status_id);
+
+				var item = document.createElement("li");
+				item.setAttribute("class", "placetype-desires-item");
+
+				var q = document.createElement("q");
+				q.appendChild(document.createTextNode(desire));
+
+				q.onclick = function(){
+
+				};
+				
+				item.append(q);				
+				
+				if (count_visits == 1){
+					item.appendChild(document.createTextNode(" once"));
+				}
+
+				else if (count_visits == 2){
+					item.appendChild(document.createTextNode(" twice"));
+				}
+				
+				else {
+					item.appendChild(document.createTextNode(" " + count_visits + " times"));
+				}
+
+				desires_list.appendChild(item);
+			}
+
+			var place = document.getElementById("placetype-list-item-" + wof_id);
+			place.appendChild(desires_list);
 		}
 		
 	}

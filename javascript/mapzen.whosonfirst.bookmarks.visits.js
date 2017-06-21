@@ -315,7 +315,7 @@
 			var params = [ wof_id ];
 
 			conn.all(sql, params, cb);
-		}
+		}		
 		
 	}
 

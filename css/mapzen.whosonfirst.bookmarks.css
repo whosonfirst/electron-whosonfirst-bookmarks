@@ -97,6 +97,10 @@ q {
     content: "⚠" !important;
 }
 
+.hey-look {
+    font-weight: 700;
+}
+
 .panel {
     border-bottom: 1px dotted red;
 }
@@ -130,6 +134,31 @@ q {
 
 .placetype-count {
     font-weight: 700;
+}
+
+.placetype-desires {
+    font-size: small;
+    color: #666;
+    margin-top:.5em;
+    margin-left:.1em;
+}
+
+.placetype-desires:before {
+    content: "you've said ";
+    font-style:italic;    
+}
+
+.placetype-desires li:after {
+    content: " and ";
+    font-style:italic;
+}
+
+.placetype-desires li:last-child:after {
+    content: "";
+}
+
+.placetype-desires q {
+    color: #000;
 }
 
 .placetype-list {
