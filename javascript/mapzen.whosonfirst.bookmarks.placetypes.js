@@ -28,7 +28,6 @@
 	const db = require("./mapzen.whosonfirst.bookmarks.database.js");
 	const conn = db.conn();
 
-	const places = require("./mapzen.whosonfirst.bookmarks.places.js");	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");	
@@ -64,6 +63,8 @@
 
 			var count = rows.length;
 
+			var ids = [];
+			
 			var places = document.createElement("ul");
 			places.setAttribute("class", "list placetype-list");
 			
@@ -79,6 +80,9 @@
 				var place = document.createElement("span");
 
 				if (wof_id){
+
+					ids.push(wof_id);
+					
 					place.setAttribute("class", "place-name namify");
 					place.setAttribute("data-wof-id", wof_id);				
 					place.appendChild(document.createTextNode(wof_id));
@@ -91,7 +95,12 @@
 				}
 				
 				place.onclick = function(e){
+					var el = e.target;
+					var wof_id = el.getAttribute("data-wof-id");
 
+					var places = require("./mapzen.whosonfirst.bookmarks.places.js");						
+					places.show_place(wof_id);
+					return;
 				};
 				
 				item.appendChild(place);
@@ -145,24 +154,103 @@
     				}
 			});
 
-			/*
-			var sw = L.latLng(swlat, swlon);
-			var ne = L.latLng(nelat, nelon);
 
-			var bounds = L.latLngBounds(sw, ne);
-			var opts = { "padding": [50, 50] };
+			var count_ids = ids.length;
+
+			if (count_ids){
+
+				var str_ids = ids.join(",");
+				
+				var sql = "SELECT * FROM places WHERE wof_id IN (" + str_ids + ")";
+				var params = [];
+
+				var cb = function(err, rows){
+
+					if (err){
+						fb.error(err);
+						return false;
+					}
+
+					var swlat;
+					var swlon;
+					var nelat;
+					var nelon;
+
+					var features = [];
+
+					var count_rows = rows.length;
+
+					for (var i=0; i < count_rows; i++){
+
+						var row = rows[i];
+						var body = row['body'];
+						var props = JSON.parse(body);
+
+						var lat = props['geom:latitude'];
+						var lon = props['geom:longitude'];
+
+						if ((props['lbl:latitude']) && (props['lbl:longitude'])){
+							
+							lat = props['lbl:latitude'];
+							lon = props['lbl:longitude'];
+						}
+
+						if ((! swlat) || (lat < swlat)){
+							swlat = lat;
+						}
+
+						if ((! swlon) || (lat < swlon)){
+							swlon = lon;
+						}
+
+						if ((! nelat) || (lat > nelat)){
+							nelat = lat;
+						}
+
+						if ((! nelon) || (lat > nelon)){
+							nelon = lon;
+						}
+
+						var coords = [ lon, lat ];
+						
+						var geom = {
+							"type": "Point",
+							"coordinates": coords
+						};
+						
+						var props = {};
+
+						var feature = {
+							"type": "Feature",
+							"geometry": geom,
+							"properties": props,
+						};
+
+						features.push(feature);
+					}
+
+					var sw = L.latLng(swlat, swlon);
+					var ne = L.latLng(nelat, nelon);
+					
+					var bounds = L.latLngBounds(sw, ne);
+					var opts = { "padding": [50, 50] };
+					
+					map.fitBounds(bounds, opts);
+					
+					var feature_collection = {
+						"type": "FeatureCollection",
+						"features": features,
+					};
+					
+					L.geoJSON(feature_collection).addTo(map);			
+				};
+
+				console.log(sql, params);
+
+				conn.all(sql, params, cb);
+			}
 			
-			map.fitBounds(bounds, opts);
-
-			var feature_collection = {
-				"type": "FeatureCollection",
-				"features": features,
-			};
-
-			L.geoJSON(feature_collection).addTo(map);
-			*/
-			
-			namify.translate();
+			namify.translate();			
 		}
 		
 	}
