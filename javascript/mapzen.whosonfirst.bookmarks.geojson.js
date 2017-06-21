@@ -107,6 +107,96 @@
 			
 			var layer = L.geoJSON(fc).addTo(map);
 			return layer;
+		},
+
+		'add_visits_to_map': function(map, visits){
+
+			var feature_collection = self.visits_to_featurecollection(visits);
+			return self.add_featurecollection_to_map(map, feature_collection);			
+		},
+
+		'add_place_to_map': function(map, pl){
+
+			var pt = pl["wof:placetype"];
+
+			var geom;
+			
+			switch (pt) {
+
+			case "venue":
+
+				var lat = pl["geom:latitude"];
+				var lon = pl["geom:longitude"];			
+
+				if ((pl["lbl:latitude"]) && (pl["lbl:longitude"])){
+					lat = pl["lbl:latitude"];
+					lon = pl["lbl:longitude"];				
+				}
+
+				var coords = [ lon, lat ];
+				
+				geom = {
+					"type": "Point",
+					"coordinates": coords
+				};
+				
+			default:
+
+				var bbox = pl["geom:bbox"];
+				bbox = bbox.split(",");
+
+				var swlon = bbox[0];
+				var swlat = bbox[1];
+				var nelon = bbox[2];
+				var nelat = bbox[3];
+				
+			};
+
+			if (! geom){
+				fb.warning("Unable to generate geometry for placetype");
+				return false;
+			}
+
+			
+		},
+		
+		'visits_to_featurecollection': function(visits){
+
+			var features = [];
+			
+			var count_visits = visits.length;
+
+			for (var i=0; i < count_visits; i++){
+
+				var visit = visits[i];
+				
+				var lat = visit['latitude'];
+				var lon = visit['longitude'];
+
+				var coords = [ lon, lat ];
+				
+				var geom = {
+					"type": "Point",
+					"coordinates": coords,
+				};
+
+				var props = {};
+
+				var feature = {
+					"type": "Feature",
+					"geometry": geom,
+					"properties": props,
+				};
+
+				features.push(feature);
+			}
+
+			var feature_collection = {
+				"type": "FeatureCollection",
+				"features": features,
+			};
+
+			return feature_collection;
 		}
 	}
 

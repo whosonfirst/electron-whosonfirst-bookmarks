@@ -301,6 +301,21 @@
 			conn.run(sql, params, cb);
 		},
 		
+		'get_visits_for_locality': function(wof_id, cb){
+
+			var sql = "SELECT * FROM visits WHERE locality_id = ?";
+			var params = [ wof_id ];
+
+			conn.all(sql, params, cb);
+		},
+
+		'get_visits_for_neighbourhood': function(wof_id, cb){
+
+			var sql = "SELECT * FROM visits WHERE neighbourhood_id = ?";
+			var params = [ wof_id ];
+
+			conn.all(sql, params, cb);
+		}
 		
 	}
 

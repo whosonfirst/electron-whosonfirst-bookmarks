@@ -52,7 +52,7 @@
 			
 			var args = {
 				"id": id,
-				"extras": "addr:,edtf:,geom:,lbl:,wof:hierarchy,wof:tags"
+				"extras": "addr:,edtf:,geom:,lbl:,mz:,wof:hierarchy,wof:tags"
 			};
 
 			var api_key = document.body.getAttribute("data-api-key");
@@ -252,7 +252,7 @@
 
 			geojson.add_latlon_to_map(map, lat, lon);
 
-			self.draw_visits_list(pl);
+			self.draw_visits_list(pl, map);
 		},
 
 		'render_place_details': function(pl){
@@ -285,26 +285,54 @@
 			return details;
 		},
 		
-		'draw_visits_list': function(pl){
+		'draw_visits_list': function(pl, map){
 
-			db.get_visits_for_place(pl['wof:id'], function(err, rows){
+			var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+
+			var wof_id = pl['wof:id'];
+			var pt = pl["wof:placetype"];
+
+			var cb = function(err, rows){
 
 				if (err){
 					fb.error(err);
 					return;
 				}
-
-				var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");				
+				
+				var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
 				var list = visits.render_visits(rows);
 				
 				var visits_wrapper = document.getElementById("visits");
 				visits_wrapper.innerHTML = "";
 				
 				visits_wrapper.appendChild(list);
+				
+				namify.translate();
 
-				namify.translate();				
-			});
+				geojson.add_visits_to_map(map, rows);
+			};
+			
+			switch (pt) {
 
+			case "venue":
+			
+				db.get_visits_for_place(wof_id, cb);
+				break;
+				
+			case "locality":
+
+				visits.get_visits_for_locality(wof_id, cb);
+				break;
+				
+			case "neighbourhood":
+
+				visits.get_visits_for_neighbourhood(wof_id, cb);
+				break;
+				
+			default:
+				fb.warning("unsupported placetype " + pt);
+			}
+			
 		},
 		
 		'add_place': function(e){
