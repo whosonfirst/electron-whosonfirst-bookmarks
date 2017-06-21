@@ -123,6 +123,30 @@ q {
     content: " ";
 }
 
+.placetype-count {
+    font-weight: 700;
+}
+
+.placetype-list {
+    max-height: 500px;
+    overflow: scroll;
+    margin:0px;
+    padding: 0px;
+}
+
+.placetype-list-item {
+    list-style-type: none;
+    margin:0px;
+    padding: 0px;    
+    margin-bottom: 1em;
+}
+
+.placetype-list-item small {
+    display: block;
+    color: #666;
+    margin-top:.5em;
+}
+
 .remove {
     background-color: transparent;
     padding:0px;

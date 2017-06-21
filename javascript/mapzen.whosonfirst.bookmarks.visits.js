@@ -277,11 +277,18 @@
 			var hier = pl['wof:hierarchy'];
 			hier = hier[0];				// PLEASE FIX ME
 
-			var neighbourhood_id = hier['neighbourhood_id'];
-			var locality_id = hier['locality_id'];
-			var region_id = hier['region_id'];
-			var country_id = hier['country_id'];			
+			var neighbourhood_id = 0
+			var locality_id = 0
+			var region_id = 0
+			var country_id = 0
 
+			if (hier){
+				neighbourhood_id = hier['neighbourhood_id'];
+				locality_id = hier['locality_id'];
+				region_id = hier['region_id'];
+				country_id = hier['country_id'];			
+			}
+			
 			var dt = new Date;
 			dt = dt.toISOString();
 

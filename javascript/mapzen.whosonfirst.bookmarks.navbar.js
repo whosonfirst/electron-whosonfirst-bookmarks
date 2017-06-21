@@ -25,8 +25,7 @@
 
 }(function(){
 
-	const cities = require("./mapzen.whosonfirst.bookmarks.cities.js");
-	const neighbourhoods = require("./mapzen.whosonfirst.bookmarks.neighbourhoods.js");		
+	const pt = require("./mapzen.whosonfirst.bookmarks.placetypes.js");
 	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
 	
 	var self = {
@@ -34,10 +33,10 @@
 		'init': function(){
 
 			var show_c = document.getElementById("show-cities");
-			show_c.onclick = function(){ cities.show_cities(); };
+			show_c.onclick = function(){ pt.show_placetype("locality"); };
 
 			var show_n = document.getElementById("show-neighbourhoods");
-			show_n.onclick = function(){ neighbourhoods.show_neighbourhoods(); };
+			show_n.onclick = function(){ pt.show_placetype("neighbourhood"); };
 			
 			var show_v = document.getElementById("show-visits");
 			show_v.onclick = function(){ visits.show_visits(); };
