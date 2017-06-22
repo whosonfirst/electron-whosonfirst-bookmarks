@@ -27,17 +27,19 @@
 
 	console.log("VISITS");
 	
-	var db = require("./mapzen.whosonfirst.bookmarks.database.js");
-	var conn = db.conn();
+	const db = require("./mapzen.whosonfirst.bookmarks.database.js");
+	const conn = db.conn();
 	
-	var canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
-	var desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
+	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
+	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
 
-	var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+	const places = require("./mapzen.whosonfirst.bookmarks.places.js");
 	
-	var namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
-	var geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
-	var fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");	
+	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
+	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
+	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");	
+
+	const utils = require("./mapzen.whosonfirst.utils.js");
 	
 	var self = {
 		
@@ -54,12 +56,107 @@
 					return false;
 				}
 
-				
+				self.draw_visit(row);
 			};
 
 			self.get_visit(id, cb);
 		},
 
+		'draw_visit': function(row){
+
+			var lat = row['latitude'];
+			var lon = row['longitude'];
+			
+			var visit = self.render_visit(row);
+			
+			var left_panel = document.createElement("div");
+			left_panel.setAttribute("class", "col-md-6 panel");
+
+			var right_panel = document.createElement("div");
+			right_panel.setAttribute("class", "col-md-6 panel");
+
+			var map_el = document.createElement("div");
+			map_el.setAttribute("id", "map");
+			
+			left_panel.appendChild(map_el);
+			right_panel.appendChild(visit);
+
+			canvas.reset();			
+			canvas.append(left_panel);
+			canvas.append(right_panel);			
+
+			var api_key = document.body.getAttribute("data-api-key");			
+			L.Mapzen.apiKey = api_key;
+
+			var map = L.Mapzen.map('map', {
+    				tangramOptions: {
+    					scene: L.Mapzen.BasemapStyles.Refill
+    				}
+			});
+			
+			geojson.add_latlon_to_map(map, lat, lon);
+			
+			namify.translate();			
+		},
+
+		'render_visit': function(row){
+
+			var id = row["id"];
+			
+			var visit = document.createElement("ul");
+			visit.setAttribute("class", "list visit-details");
+			visit.setAttribute("id", "visit-details-" + id);			
+
+			for (var k in row){
+
+				var v = row[k];
+
+				var item = document.createElement("li");
+				item.setAttribute("class", "visit-details-item");
+
+				var k_span = document.createElement("span");
+				k_span.setAttribute("class", "visit-details-item-key");
+				k_span.appendChild(document.createTextNode(k));
+
+				var v_span = document.createElement("span");
+				v_span.setAttribute("class", "visit-details-item-value");
+				v_span.appendChild(document.createTextNode(v));
+
+				switch (k){
+
+				case "wof_id":
+					utils.append_class(v_span, "namify");
+					v_span.setAttribute("data-wof-id", v);
+					break
+				case "neighbourhood_id":
+					utils.append_class(v_span, "namify");
+					v_span.setAttribute("data-wof-id", v);
+					break
+				case "locality_id":
+					utils.append_class(v_span, "namify");
+					v_span.setAttribute("data-wof-id", v);
+					break
+				case "region_id":
+					utils.append_class(v_span, "namify");
+					v_span.setAttribute("data-wof-id", v);
+					break
+				case "country_id":
+					utils.append_class(v_span, "namify");
+					v_span.setAttribute("data-wof-id", v);
+					break					
+				default:
+					// pass
+				}
+				
+				item.appendChild(k_span);
+				item.appendChild(v_span);
+
+				visit.appendChild(item);
+			}
+
+			return visit;
+		},
+		
 		'get_visit': function(id, cb){
 
 			var sql = "SELECT * FROM visits WHERE id = ?";
@@ -160,8 +257,18 @@
 
 				var date = document.createElement("span");
 				date.setAttribute("class", "datetime");
+				date.setAttribute("data-visit-id", row["id"]);
 				date.appendChild(document.createTextNode(row['date']));
 
+				date.onclick = function(e){
+
+					var el = e.target;
+					var id = el.getAttribute("data-visit-id");
+
+					self.show_visit(id);
+					return;
+				};
+				
 				sm.appendChild(date);
 								
 				var item = document.createElement("li");
@@ -262,13 +369,13 @@
 			
 			var api_key = document.body.getAttribute("data-api-key");			
 			L.Mapzen.apiKey = api_key;
-			
+
 			var map = L.Mapzen.map('map', {
     				tangramOptions: {
     					scene: L.Mapzen.BasemapStyles.Refill
     				}
 			});
-
+			
 			geojson.add_featurecollection_to_map(map, feature_collection);
 
 			namify.translate();
