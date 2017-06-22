@@ -76,8 +76,8 @@
 			};
 
 			var on_error = function(rsp){
-				console.log("SAD FACE");
-				console.log(rsp);
+				fb.error(rsp);
+				return false;
 			};
 
 			api.execute_method(method, args, on_success, on_error);
@@ -222,6 +222,34 @@
 			var h2 = document.createElement("h2");
 			h2.appendChild(document.createTextNode(pl["wof:name"]));
 
+			var reload = document.createElement("small");
+			reload.setAttribute("class", "reload");
+			reload.setAttribute("data-wof-id", pl["wof:id"]);
+			reload.appendChild(document.createTextNode("↻"));
+
+			reload.onclick = function(e){
+
+				var el = e.target;
+				var wof_id = el.getAttribute("data-wof-id");
+
+				self.fetch_place(wof_id, function(pl){
+
+					self.save_place(pl, function(err){
+
+						if (err){
+							fb.error(err);
+							return false;
+						}
+
+						self.draw_place(pl);
+					});
+
+					// TO DO: if place is a venue rebuild hierarchy for visits
+				});
+			};
+
+			h2.appendChild(reload);
+			
 			var details = self.render_place_details(pl);
 			
 			var left_panel = document.createElement("div");

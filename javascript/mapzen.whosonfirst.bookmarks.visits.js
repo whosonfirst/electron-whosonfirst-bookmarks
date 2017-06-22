@@ -37,6 +37,7 @@
 	
 	var namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 	var geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
+	var fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");	
 	
 	var self = {
 		
@@ -44,6 +45,31 @@
 			
 		},
 
+		'show_visit': function(id){
+
+			var cb = function(err, row){
+
+				if (err){
+					fb.error(err);
+					return false;
+				}
+
+				
+			};
+
+			self.get_visit(id, cb);
+		},
+
+		'get_visit': function(id, cb){
+
+			var sql = "SELECT * FROM visits WHERE id = ?";
+			var params = [ id ];
+
+			console.log(sql, params);
+
+			conn.get(sql, params, cb);
+		},
+		
 		'show_visits': function(){
 
 			db.get_visits(function(err, rows){
