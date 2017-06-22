@@ -36,6 +36,7 @@ q {
 #feedback {
     background-color: #fff;
     margin:.5em;
+    font-size:small;
 }
 
 #header {
@@ -72,6 +73,17 @@ q {
     border:1px solid green;
 }
 
+.control {
+    color:#666;
+    display: inline !important;
+    margin-left:.5em;
+    padding-top:.3em;
+}
+
+.control:hover {
+    color: blue;
+}
+
 .datetime {
     font-weight: 700;
 }
@@ -99,6 +111,27 @@ q {
 
 .hey-look {
     font-weight: 700;
+}
+
+.object-list {
+    margin: 0px;
+    padding: 0px;
+}
+
+.object-list-item {
+    list-style-type: none;
+}
+
+.object-table {
+    
+}
+
+.object-table-cell {
+    overflow: scroll;
+    overflow-wrap: break-word;    
+}
+
+.object-value {
 }
 
 .panel {
@@ -179,16 +212,6 @@ q {
     display: block;
     color: #666;
     margin-top:.5em;
-}
-
-.reload {
-    color:#666;
-    display: inline !important;
-    margin-left:1em;
-}
-
-.reload:hover {
-    color: blue;
 }
 
 .remove {

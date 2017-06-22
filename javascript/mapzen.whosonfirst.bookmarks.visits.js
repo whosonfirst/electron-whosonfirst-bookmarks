@@ -100,15 +100,16 @@
 		},
 
 		'render_visit': function(row){
-
+			
 			var id = row["id"];
-
+			var wof_id = row["wof_id"];
+			
 			var wrapper = document.createElement("div");
 
 			var place = document.createElement("span");
 			place.setAttribute("class", "namify");
-			place.setAttribute("data-wof-id", row["wof_id"]);			
-			place.appendChild(document.createTextNode(row["wof_id"]));
+			place.setAttribute("data-wof-id", wof_id);			
+			place.appendChild(document.createTextNode(wof_id));
 
 			place.onclick = function(e){
 				
@@ -117,66 +118,34 @@
 
 				var places = require("./mapzen.whosonfirst.bookmarks.places.js");
 				places.show_place(wof_id);
-				return;
 			};
 			
 			var h2 = document.createElement("h2");
 			h2.appendChild(place);
 
-			wrapper.appendChild(h2);
+			var dt = document.createElement("div");
+			dt.setAttribute("class", "datetime");
+			dt.appendChild(document.createTextNode(row["date"]));
+
+			var status_id = row["status_id"];
+			var desire = desires.id_to_label(status_id);
+
+			var q = document.createElement("q");
+			q.appendChild(document.createTextNode(desire));
+
+			var p = document.createElement("p");
+			p.appendChild(document.createTextNode("You said "))
+			p.appendChild(q);
 			
-			var details = document.createElement("ul");
-			details.setAttribute("class", "list visit-details");
-			details.setAttribute("id", "visit-details-" + id);			
+			wrapper.appendChild(h2);
+			wrapper.appendChild(dt);
+			wrapper.appendChild(p);			
 
-			for (var k in row){
+			var details = utils.render_object(row);
+			var details_wrapper = utils.render_expandable(details);
+			
+			wrapper.appendChild(details_wrapper);
 
-				var v = row[k];
-
-				var item = document.createElement("li");
-				item.setAttribute("class", "visit-details-item");
-
-				var k_span = document.createElement("span");
-				k_span.setAttribute("class", "visit-details-item-key");
-				k_span.appendChild(document.createTextNode(k));
-
-				var v_span = document.createElement("span");
-				v_span.setAttribute("class", "visit-details-item-value");
-				v_span.appendChild(document.createTextNode(v));
-
-				switch (k){
-
-				case "wof_id":
-					utils.append_class(v_span, "namify");
-					v_span.setAttribute("data-wof-id", v);
-					break
-				case "neighbourhood_id":
-					utils.append_class(v_span, "namify");
-					v_span.setAttribute("data-wof-id", v);
-					break
-				case "locality_id":
-					utils.append_class(v_span, "namify");
-					v_span.setAttribute("data-wof-id", v);
-					break
-				case "region_id":
-					utils.append_class(v_span, "namify");
-					v_span.setAttribute("data-wof-id", v);
-					break
-				case "country_id":
-					utils.append_class(v_span, "namify");
-					v_span.setAttribute("data-wof-id", v);
-					break					
-				default:
-					// pass
-				}
-				
-				item.appendChild(k_span);
-				item.appendChild(v_span);
-
-				details.appendChild(item);
-			}
-
-			wrapper.appendChild(details);
 			return wrapper;
 		},
 		

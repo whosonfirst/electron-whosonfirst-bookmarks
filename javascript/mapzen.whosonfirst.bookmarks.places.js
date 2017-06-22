@@ -25,8 +25,6 @@
 
 }(function(){
 
-	console.log("PLACES");
-	
 	const db = require("./mapzen.whosonfirst.bookmarks.database.js");
 	const conn = db.conn();
 
@@ -38,6 +36,7 @@
 	const api = require("./mapzen.whosonfirst.api.js");
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");	
 
+	const utils = require("./mapzen.whosonfirst.utils.js");	
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
 	
 	var self = {
@@ -223,7 +222,7 @@
 			h2.appendChild(document.createTextNode(pl["wof:name"]));
 
 			var reload = document.createElement("small");
-			reload.setAttribute("class", "reload");
+			reload.setAttribute("class", "control");
 			reload.setAttribute("data-wof-id", pl["wof:id"]);
 			reload.appendChild(document.createTextNode("⟳"));
 
@@ -262,8 +261,8 @@
 			left_panel.appendChild(controls);
 			
 			right_panel.appendChild(h2);
+			right_panel.appendChild(visits_wrapper);			
 			right_panel.appendChild(details);
-			right_panel.appendChild(visits_wrapper);
 			
 			canvas.reset();
 			canvas.append(left_panel);
@@ -285,6 +284,9 @@
 
 		'render_place_details': function(pl){
 
+			var details = utils.render_object(pl);
+			return utils.render_expandable(details);
+			
 			var details = document.createElement("ul");
 			details.setAttribute("class", "list place-details");
 			details.setAttribute("id", "place-details-" + pl["wof:id"]);
@@ -329,11 +331,13 @@
 				
 				var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
 				var list = visits.render_visits(rows);
+
+				var expandable = utils.render_expandable(list, { "label": "visits", "open": true });
 				
 				var visits_wrapper = document.getElementById("visits");
 				visits_wrapper.innerHTML = "";
 				
-				visits_wrapper.appendChild(list);
+				visits_wrapper.appendChild(expandable);
 				
 				namify.translate();
 

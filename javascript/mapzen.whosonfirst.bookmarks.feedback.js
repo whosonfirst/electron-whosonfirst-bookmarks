@@ -25,8 +25,9 @@
 
 }(function(){
 
-	var canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
-
+	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
+	const utils = require("./mapzen.whosonfirst.utils.js");
+	
 	var log = [];
 	
 	var self = {
@@ -74,16 +75,32 @@
 			if (! msg_class){
 				msg_class = "message";
 			}
+
+			// msg = utils.render_object(msg);
+			
+			msg = JSON.stringify(msg);
+			msg = document.createTextNode(msg);
 			
 			var el = document.createElement("div");
 			el.setAttribute("class", "feedback feedback-" + msg_class);
 
-			el.appendChild(document.createTextNode(msg));
+			el.appendChild(msg);
 			
 			feedback.innerHTML = "";
 			feedback.appendChild(el);
 		},
-				
+
+		'reset': function(){
+
+			var feedback = document.getElementById("feedback");
+
+			if (! feedback){
+				return
+			}
+
+			feedback.innerHTML = "";
+		}
+		
 	}
 
 	return self;
