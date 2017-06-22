@@ -225,7 +225,7 @@
 			var reload = document.createElement("small");
 			reload.setAttribute("class", "reload");
 			reload.setAttribute("data-wof-id", pl["wof:id"]);
-			reload.appendChild(document.createTextNode("↻"));
+			reload.appendChild(document.createTextNode("⟳"));
 
 			reload.onclick = function(e){
 
