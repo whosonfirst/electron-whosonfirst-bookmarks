@@ -102,10 +102,32 @@
 		'render_visit': function(row){
 
 			var id = row["id"];
+
+			var wrapper = document.createElement("div");
+
+			var place = document.createElement("span");
+			place.setAttribute("class", "namify");
+			place.setAttribute("data-wof-id", row["wof_id"]);			
+			place.appendChild(document.createTextNode(row["wof_id"]));
+
+			place.onclick = function(e){
+				
+				var el = e.target;
+				var wof_id = el.getAttribute("data-wof-id");
+
+				var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+				places.show_place(wof_id);
+				return;
+			};
 			
-			var visit = document.createElement("ul");
-			visit.setAttribute("class", "list visit-details");
-			visit.setAttribute("id", "visit-details-" + id);			
+			var h2 = document.createElement("h2");
+			h2.appendChild(place);
+
+			wrapper.appendChild(h2);
+			
+			var details = document.createElement("ul");
+			details.setAttribute("class", "list visit-details");
+			details.setAttribute("id", "visit-details-" + id);			
 
 			for (var k in row){
 
@@ -151,10 +173,11 @@
 				item.appendChild(k_span);
 				item.appendChild(v_span);
 
-				visit.appendChild(item);
+				details.appendChild(item);
 			}
 
-			return visit;
+			wrapper.appendChild(details);
+			return wrapper;
 		},
 		
 		'get_visit': function(id, cb){
