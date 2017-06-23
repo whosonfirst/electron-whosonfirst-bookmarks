@@ -341,6 +341,8 @@
 			var wof_id = pl['wof:id'];
 			var pt = pl["wof:placetype"];
 
+			var skip_header = (pt == "venue") ? true : false;
+			
 			var cb = function(err, rows){
 
 				if (err){
@@ -349,7 +351,7 @@
 				}
 				
 				var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
-				var list = visits.render_visits(rows, {"skip_header": true});
+				var list = visits.render_visits(rows, {"skip_header": skip_header});
 
 				var expandable = utils.render_expandable(list, { "label": "visits", "open": true });
 				
