@@ -327,6 +327,23 @@
 				return false;
 			}
 
+			var count_rows = rows.length;
+
+			if (! count_rows){
+				return;
+			}
+
+			var first = rows[0];
+			var wof_id = first["wof_id"];
+			
+			var desires_list = self.render_desires_for_placetype(rows);
+
+			var place = document.getElementById("placetype-list-item-" + wof_id);
+			place.appendChild(desires_list);
+		},
+
+		'render_desires_for_placetype': function(rows){
+
 			// TO DO: group desires by count in a single list item
 			// as in "<q>again</a> and <q>meh</q> twice" rather than
 			// "<q>again</a> twice and <q>meh</q> twice"
@@ -378,8 +395,7 @@
 				desires_list.appendChild(item);
 			}
 
-			var place = document.getElementById("placetype-list-item-" + wof_id);
-			place.appendChild(desires_list);
+			return desires_list;
 		}
 		
 	}

@@ -248,7 +248,10 @@
 			};
 
 			h2.appendChild(reload);
-			
+
+			var desires_wrapper = document.createElement("div");
+			desires_wrapper.setAttribute("id", "desires");
+		
 			var details = self.render_place_details(pl);
 			
 			var left_panel = document.createElement("div");
@@ -261,7 +264,8 @@
 			left_panel.appendChild(controls);
 			
 			right_panel.appendChild(h2);
-			right_panel.appendChild(visits_wrapper);			
+			right_panel.appendChild(desires_wrapper);			
+			right_panel.appendChild(visits_wrapper);
 			right_panel.appendChild(details);
 			
 			canvas.reset();
@@ -280,6 +284,21 @@
 			geojson.add_latlon_to_map(map, lat, lon);
 
 			self.draw_visits_list(pl, map);
+
+			var placetypes = require("./mapzen.whosonfirst.bookmarks.placetypes.js");
+			
+			placetypes.get_desires_for_placetype(pl["wof:placetype"], pl["wof:id"], function(err, rows){
+
+				if (err){
+					fb.error(err);
+					return;
+				}
+
+				var desires_list = placetypes.render_desires_for_placetype(rows);
+				var desires_wrapper = document.getElementById("desires");
+				desires_wrapper.appendChild(desires_list);
+			});
+			
 		},
 
 		'render_place_details': function(pl){
