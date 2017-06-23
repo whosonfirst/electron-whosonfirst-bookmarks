@@ -251,8 +251,10 @@
 
 			var desires_wrapper = document.createElement("div");
 			desires_wrapper.setAttribute("id", "desires");
-		
-			var details = self.render_place_details(pl);
+
+			var dates = self.render_dates(pl);			
+			var address = self.render_address(pl);
+			var details = self.render_details(pl);
 			
 			var left_panel = document.createElement("div");
 			left_panel.setAttribute("class", "col-md-6 panel");
@@ -264,6 +266,8 @@
 			left_panel.appendChild(controls);
 			
 			right_panel.appendChild(h2);
+			right_panel.appendChild(address);
+			right_panel.appendChild(dates);			
 			right_panel.appendChild(desires_wrapper);			
 			right_panel.appendChild(visits_wrapper);
 			right_panel.appendChild(details);
@@ -301,39 +305,6 @@
 			
 		},
 
-		'render_place_details': function(pl){
-
-			var details = utils.render_object(pl);
-			return utils.render_expandable(details);
-			
-			var details = document.createElement("ul");
-			details.setAttribute("class", "list place-details");
-			details.setAttribute("id", "place-details-" + pl["wof:id"]);
-
-			for (var k in pl){
-				
-				var v = pl[k];
-
-				var k_span = document.createElement("span");
-				k_span.setAttribute("class", "place-details-key");
-				k_span.appendChild(document.createTextNode(k));
-				
-				var v_span = document.createElement("span");
-				v_span.setAttribute("class", "place-details-value");
-				v_span.appendChild(document.createTextNode(v));
-
-				var item = document.createElement("li");
-				item.setAttribute("class", "place-details-item");
-				
-				item.appendChild(k_span);
-				item.appendChild(v_span);				
-				
-				details.appendChild(item);
-			}
-			
-			return details;
-		},
-		
 		'draw_visits_list': function(pl, map){
 
 			var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
@@ -452,8 +423,6 @@
 
 					var k = possible[p];
 					
-					console.log("MAYBE " + k);
-					
 					if (! hier[k]){
 						continue;
 					}
@@ -462,11 +431,198 @@
 						continue;
 					}
 
-					console.log("FETCH " + hier[k]);
-					
 					self.fetch_place(hier[k], self.save_pl);
 				}
 			}
+		},
+
+		'render_details': function(pl){
+
+			var details = utils.render_object(pl);
+			return utils.render_expandable(details);
+			
+			var details = document.createElement("ul");
+			details.setAttribute("class", "list place-details");
+			details.setAttribute("id", "place-details-" + pl["wof:id"]);
+
+			for (var k in pl){
+				
+				var v = pl[k];
+
+				var k_span = document.createElement("span");
+				k_span.setAttribute("class", "place-details-key");
+				k_span.appendChild(document.createTextNode(k));
+				
+				var v_span = document.createElement("span");
+				v_span.setAttribute("class", "place-details-value");
+				v_span.appendChild(document.createTextNode(v));
+
+				var item = document.createElement("li");
+				item.setAttribute("class", "place-details-item");
+				
+				item.appendChild(k_span);
+				item.appendChild(v_span);				
+				
+				details.appendChild(item);
+			}
+			
+			return details;
+		},
+		
+		'render_address': function(pl){
+
+			var wof_id = pl["wof:id"];
+			
+			var addr = {
+				'street': null,
+				'full': null,
+				'neighbourhood': null,
+				'locality': null,
+				'region': null,
+				'country': null
+			};
+			
+			var house_num = pl["addr:housenumber"];
+			var street = pl["addr:street"];
+			
+			if ((house_num) && (street)){
+
+				var txt = house_num + " " + street;
+				addr['street'] = txt;
+			}
+
+			else if (street){
+
+				addr['street'] = street;
+			}
+
+			else if (pl["addr:full"]){
+				addr["full"] = pl["addr:full"];
+			}
+			
+			else {}
+			
+			var hier = pl["wof:hierarchy"]
+
+			if (hier.length){
+
+				var hier = hier[0];	// please fix me...
+
+				for (var k in addr){
+
+					if (k == 'street'){
+						continue;
+					}
+
+					var k_id = k + "_id";
+
+					if ((hier[k_id]) && (hier[k_id] != wof_id)){
+						addr[k] = hier[k_id];
+					}
+				}
+			}
+			
+			var address = document.createElement("ul");
+			address.setAttribute("class", "list-inline address");			
+			address.setAttribute("id", "address-" + wof_id);
+			
+			for (var k in addr){
+
+				var v = addr[k];
+
+				if (! v){
+					continue;
+				}
+				
+				var item = document.createElement("li");
+				item.setAttribute("id", "address-" + k + "-" + wof_id);
+				item.setAttribute("class", "address-item address-" + k);
+				item.appendChild(document.createTextNode(v));
+
+				if ((k != "street") && (k != "full")){
+
+					if (v < 0){
+						continue;
+					}
+					
+					utils.append_class(item, "namify");
+					utils.append_class(item, "click-me");					
+					item.setAttribute("data-wof-id", v);
+					
+					item.onclick = function(e){
+						var el = e.target;
+						var wof_id = el.getAttribute("data-wof-id");
+						self.show_place(wof_id);
+					};
+				}
+
+				address.appendChild(item);
+			}
+
+			return address;
+		},
+
+		'render_status': function(pl){
+			
+			var deprecated = null;
+			var superseded_by = null;				
+			var is_current = null;
+			
+		},
+		
+		'render_dates': function(pl){
+			
+			var inception = null;
+			var cessation = null;
+			var is_current = null;
+			
+			if (pl["edtf:inception"]){
+				inception = pl["edtf:inception"];
+			}
+			
+			if (pl["edtf:cessation"]){
+				cessation = pl["edtf:cessation"];
+			}
+			
+			if (pl["mz:is_current"]){
+				is_current = pl["mz:is_current"];
+			}
+			
+			if ((! inception) || (inception == "uuuu")){
+				inception = "the sometime-past";
+			}
+			
+			if ((! cessation) || (cessation == "uuuu")){
+				
+				cessation = "the future-maybe";
+				
+				if (is_current){
+					cessation = "the present";
+				}
+			}
+			
+			var wof_id = pl["wof:id"];
+			
+			var dates = document.createElement("ul");
+			dates.setAttribute("class", "list-inline dates");
+			dates.setAttribute("id", "dates-" + wof_id);
+
+			if ((is_current == 0) || ((cessation != "the future-maybe") && (cessation != "the present"))){
+				utils.append_class(dates, "is-not-current");
+			}
+			
+			var item_inception = document.createElement("li");
+			item_inception.setAttribute("class", "dates-item dates-item-inception");
+			item_inception.appendChild(document.createTextNode(inception));
+			
+			var item_cessation = document.createElement("li");
+			item_cessation.setAttribute("class", "dates-item dates-item-cessation");
+			item_cessation.appendChild(document.createTextNode(cessation));
+			
+			dates.appendChild(item_inception);
+			dates.appendChild(item_cessation);
+			
+			return dates;
 		},
 	}
 
