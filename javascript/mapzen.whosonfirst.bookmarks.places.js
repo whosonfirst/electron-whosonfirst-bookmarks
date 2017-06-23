@@ -118,10 +118,14 @@
 			if (typeof(pl) == "string"){
 				pl = JSON.parse(pl);
 			}
+
+			var pt = pl["wof:placetype"];
 			
 			var lat = pl["geom:latitude"];
-			var lon = pl["geom:longitude"];			
-
+			var lon = pl["geom:longitude"];
+			var bbox = pl["geom:bbox"];						
+			bbox = bbox.split(",");
+			
 			if ((pl["lbl:latitude"]) && (pl["lbl:longitude"])){
 
 				lat = pl["lbl:latitude"];
@@ -285,8 +289,14 @@
     				}
 			});
 
-			geojson.add_latlon_to_map(map, lat, lon);
+			if (pt == "venue"){
+				geojson.add_latlon_to_map(map, lat, lon);
+			}
 
+			else {				
+				geojson.add_bbox_to_map(map, bbox[1], bbox[0], bbox[3], bbox[2]);
+			}
+			
 			self.draw_visits_list(pl, map);
 
 			var placetypes = require("./mapzen.whosonfirst.bookmarks.placetypes.js");

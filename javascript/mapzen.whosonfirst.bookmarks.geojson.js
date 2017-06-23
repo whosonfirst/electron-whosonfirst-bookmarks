@@ -31,6 +31,41 @@
 			
 		},
 
+		'add_bbox_to_map': function(map, min_lat, min_lon, max_lat, max_lon){
+
+			var poly = [
+				[ min_lon, min_lat ],
+				[ min_lon, max_lat ],
+				[ max_lon, max_lat ],
+				[ max_lon, min_lat ],
+				[ min_lon, min_lat ]
+			];
+
+			var geom = {
+				"type": "polygon",
+				"coordinates": poly
+			};
+
+			var props = {};
+
+			var feature = {
+				"type": "Feature",
+				"geometry": geom,
+				"properties": props,
+			};
+
+			var sw = L.latLng(min_lat, min_lon);
+			var ne = L.latLng(max_lat, max_lon);
+
+			var bounds = L.latLngBounds(sw, ne);
+			var opts = { "padding": [50, 50] };
+			
+			map.fitBounds(bounds, opts);
+
+			var layer = L.geoJSON(feature).addTo(map);
+			return layer;			
+		},
+
 		'add_latlon_to_map': function(map, lat, lon, zoom){
 
 			if (! zoom){
@@ -57,14 +92,14 @@
 			return layer;				
 		},
 
-		'add_featurecollection_to_map': function(map, fc){
+		'add_featurecollection_to_map': function(map, featurecollection){
 
-			var swlat;
-			var swlon;
-			var nelat;
-			var nelon;
+			var min_lat;
+			var min_lon;
+			var max_lat;
+			var max_lon;
 
-			var features = fc["features"];
+			var features = featurecollection["features"];
 			var count_features = features.length;
 
 			for (var i=0; i < count_features; i++){
@@ -76,28 +111,26 @@
 				var lat = coords[1];
 				var lon = coords[0];
 
-				if ((! swlat) || (lat < swlat)){
-					swlat = lat;
+				if ((! min_lat) || (lat < min_lat)){
+					min_lat = lat;
 				}
 				
-				if ((! swlon) || (lat < swlon)){
-					swlon = lon;
+				if ((! min_lon) || (lat < min_lon)){
+					min_lon = lon;
 				}
 				
-				if ((! nelat) || (lat > nelat)){
-					nelat = lat;
+				if ((! max_lat) || (lat > max_lat)){
+					max_lat = lat;
 				}
 				
-				if ((! nelon) || (lat > nelon)){
-					nelon = lon;
+				if ((! max_lon) || (lat > max_lon)){
+					max_lon = lon;
 				}						
 			}
 			
-			var sw = L.latLng(swlat, swlon);
-			var ne = L.latLng(nelat, nelon);
+			var sw = L.latLng(min_lat, min_lon);
+			var ne = L.latLng(max_lat, max_lon);
 
-			console.log(sw, ne);
-			
 			var bounds = L.latLngBounds(sw, ne);
 			var opts = { "padding": [50, 50] };
 			
@@ -105,7 +138,7 @@
 
 			console.log(map.getBounds());
 			
-			var layer = L.geoJSON(fc).addTo(map);
+			var layer = L.geoJSON(featurecollection).addTo(map);
 			return layer;
 		},
 
@@ -145,10 +178,10 @@
 				var bbox = pl["geom:bbox"];
 				bbox = bbox.split(",");
 
-				var swlon = bbox[0];
-				var swlat = bbox[1];
-				var nelon = bbox[2];
-				var nelat = bbox[3];
+				var min_lon = bbox[0];
+				var min_lat = bbox[1];
+				var max_lon = bbox[2];
+				var max_lat = bbox[3];
 				
 			};
 
