@@ -349,7 +349,7 @@
 				}
 				
 				var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
-				var list = visits.render_visits(rows);
+				var list = visits.render_visits(rows, {"skip_header": true});
 
 				var expandable = utils.render_expandable(list, { "label": "visits", "open": true });
 				

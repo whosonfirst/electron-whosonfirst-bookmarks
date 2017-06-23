@@ -172,8 +172,14 @@
 			});
 		},
 
-		'render_visits': function(rows){
+		'render_visits': function(rows, more){
 
+			if (! more){
+				more = {};
+			}
+
+			var skip_header = (more["skip_header"]) ? true : false;
+			
 			var count = rows.length;
 			
 			var list = document.createElement("ul");
@@ -198,11 +204,11 @@
 				span.setAttribute("class", "place-name");
 				span.setAttribute("data-wof-id", row['wof_id']);	
 				span.appendChild(document.createTextNode(row['name']));
-
+				
 				span.onclick = function(e){
 					var el = e.target;
 					var wof_id = el.getAttribute("data-wof-id");
-
+					
 					places.show_place(wof_id);
 				};			
 
@@ -217,7 +223,28 @@
 
 					span.appendChild(loc);
 				}
+								
+				var sm = document.createElement("small");
+				sm.appendChild(document.createTextNode("You said "));
+				sm.appendChild(q);
+				sm.appendChild(document.createTextNode(" on or around "));
+
+				var date = document.createElement("span");
+				date.setAttribute("class", "datetime");
+				date.setAttribute("data-visit-id", row["id"]);
+				date.appendChild(document.createTextNode(row['date']));
+
+				date.onclick = function(e){
+
+					var el = e.target;
+					var id = el.getAttribute("data-visit-id");
+
+					self.show_visit(id);
+					return;
+				};
 				
+				sm.appendChild(date);
+
 				var remove = document.createElement("button");
 				remove.setAttribute("class", "btn btn-sm remove");
 				remove.setAttribute("data-visit-id", row['id']);
@@ -239,35 +266,18 @@
 					
 					return false;
 				};
-
-				span.appendChild(remove);
 				
-				var sm = document.createElement("small");
-				sm.appendChild(document.createTextNode("You said "));
-				sm.appendChild(q);
-				sm.appendChild(document.createTextNode(" on or around "));
-
-				var date = document.createElement("span");
-				date.setAttribute("class", "datetime");
-				date.setAttribute("data-visit-id", row["id"]);
-				date.appendChild(document.createTextNode(row['date']));
-
-				date.onclick = function(e){
-
-					var el = e.target;
-					var id = el.getAttribute("data-visit-id");
-
-					self.show_visit(id);
-					return;
-				};
+				sm.appendChild(remove);
 				
-				sm.appendChild(date);
-								
 				var item = document.createElement("li");
 				item.setAttribute("class", "visits-list-item");
 				item.setAttribute("data-latitude", lat);
-				item.setAttribute("data-longitude", lon);				
-				item.appendChild(span);
+				item.setAttribute("data-longitude", lon);
+
+				if (! skip_header){
+					item.appendChild(span);
+				}
+				
 				item.appendChild(sm);
 				
 				list.appendChild(item);
