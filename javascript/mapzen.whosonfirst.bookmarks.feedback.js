@@ -59,8 +59,7 @@
 
 			log.push(ev);
 			
-			var str_ev = ev.join(" ");
-			console.log(str_ev);
+			console.log("[" + ev[1] + "] " + ev[0] + "\n" + JSON.stringify(ev[2]));
 			
 			if (msg_class == "debug"){
 				return;

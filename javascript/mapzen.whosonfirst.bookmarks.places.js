@@ -84,6 +84,11 @@
 
 		'get_place': function(id, cb){
 
+			if (id == -1){
+				cb("Invalid WOF ID");
+				return;
+			}
+			
 			var sql = "SELECT * FROM places WHERE wof_id = ?";
 			var params = [ id ];
 
@@ -289,6 +294,9 @@
     				}
 			});
 
+			geojson.add_place_to_map(map, pl);
+
+			/*
 			if (pt == "venue"){
 				geojson.add_latlon_to_map(map, lat, lon);
 			}
@@ -296,6 +304,7 @@
 			else {				
 				geojson.add_bbox_to_map(map, bbox[1], bbox[0], bbox[3], bbox[2]);
 			}
+			*/
 			
 			self.draw_visits_list(pl, map);
 
@@ -334,7 +343,7 @@
 				var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
 				var list = visits.render_visits(rows, {"skip_header": skip_header});
 
-				var expandable = utils.render_expandable(list, { "label": "visits", "open": true });
+				var expandable = utils.render_expandable(list, { "label": "visits" });
 				
 				var visits_wrapper = document.getElementById("visits");
 				visits_wrapper.innerHTML = "";

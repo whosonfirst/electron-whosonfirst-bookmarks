@@ -64,16 +64,18 @@
 
 		'draw_visit': function(row){
 
-			var lat = row['latitude'];
-			var lon = row['longitude'];
+			var wof_id = row["wof_id"];
+			
+			var lat = row["latitude"];
+			var lon = row["longitude"];
 			
 			var visit = self.render_visit(row);
 			
 			var left_panel = document.createElement("div");
-			left_panel.setAttribute("class", "col-md-6 panel");
+			left_panel.setAttribute("class", "col-md-6 panel panel-left");
 
 			var right_panel = document.createElement("div");
-			right_panel.setAttribute("class", "col-md-6 panel");
+			right_panel.setAttribute("class", "col-md-6 panel panel-right");
 
 			var map_el = document.createElement("div");
 			map_el.setAttribute("id", "map");
@@ -96,7 +98,27 @@
 			
 			geojson.add_latlon_to_map(map, lat, lon);
 			
-			namify.translate();			
+			namify.translate();
+
+			var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+			
+			places.get_place(wof_id, function(err, row){
+
+				if (err){
+					fb.error(err);
+					return;
+				}
+
+				var pl = JSON.parse(row["body"]);
+				var address = places.render_address(pl);
+				var dates = places.render_dates(pl);				
+
+				var details = document.getElementById("place-details-" + wof_id);
+				details.appendChild(address);
+				details.appendChild(dates);				
+
+				namify.translate();				
+			});
 		},
 
 		'render_visit': function(row){
@@ -123,7 +145,7 @@
 			var h2 = document.createElement("h2");
 			h2.appendChild(place);
 
-			var dt = document.createElement("div");
+			var dt = document.createElement("span");
 			dt.setAttribute("class", "datetime");
 			dt.appendChild(document.createTextNode(row["date"]));
 
@@ -131,14 +153,20 @@
 			var desire = desires.id_to_label(status_id);
 
 			var q = document.createElement("q");
+			q.setAttribute("class", "click-me");
 			q.appendChild(document.createTextNode(desire));
 
 			var p = document.createElement("p");
-			p.appendChild(document.createTextNode("You said "))
+			p.appendChild(document.createTextNode("On or around "));
+			p.append(dt);
+			p.appendChild(document.createTextNode(" you said "));
 			p.appendChild(q);
+
+			var place_details = document.createElement("div");
+			place_details.setAttribute("id", "place-details-" + wof_id);
 			
 			wrapper.appendChild(h2);
-			wrapper.appendChild(dt);
+			wrapper.appendChild(place_details);
 			wrapper.appendChild(p);			
 
 			var details = utils.render_object(row);

@@ -25,25 +25,115 @@
 
 }(function(){
 
+	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
+	
 	var self = {
 		
 		'init': function(){
 			
 		},
 
+		'add_place_to_map': function(map, pl){
+
+			var pt = pl["wof:placetype"];
+
+			var lat = pl["geom:latitude"];
+			var lon = pl["geom:longitude"];
+			
+			if ((pl["lbl:latitude"]) && (pl["lbl:longitude"])){				
+				lat = pl["lbl:latitude"];
+				lon = pl["lbl:longitude"];				
+			}
+			
+			if (pt == "venue"){
+				self.add_latlon_to_map(map, lat, lon);
+				return;
+			}
+
+			var bbox = pl["geom:bbox"];
+			bbox = bbox.split(",");
+
+			var min_lat = bbox[1];
+			var min_lon = bbox[0];			
+			var max_lat = bbox[3];
+			var max_lon = bbox[2];
+
+			if ((min_lat == max_lat) && (min_lon == max_lon)){
+				self.add_latlon_to_map(map, lat, lon);
+				return;
+			}
+
+			var mz_uri = pl["mz:url"];
+
+			if (mz_uri){
+
+				var on_error = function(e){
+					self.add_bbox_to_map(map, min_lat, min_lon, max_lat, max_lon);
+					return;
+				};
+					
+				self.add_mzuri_to_map(map, mz_uri, on_success, on_error);
+				return;
+			}
+
+			self.add_bbox_to_map(map, min_lat, min_lon, max_lat, max_lon);			
+		},
+
+		'add_mzuri_to_map': function(map, mz_uri, on_error){
+
+			var req = new XMLHttpRequest();
+
+			req.onload = function(){
+
+				var feature;
+				
+				try {
+					feature = JSON.parse(this.responseText);
+				}
+
+				catch (e){
+					on_error(e);
+					return false;
+				}
+
+				var props = feature["properties"];
+				var bbox = props["geom:bbox"];
+
+				bbox = bbox.split(",");
+
+				var min_lat = bbox[1];
+				var min_lon = bbox[0];				
+				var max_lat = bbox[3];
+				var max_lon = bbox[2];				
+				
+				var sw = L.latLng(min_lat, min_lon);
+				var ne = L.latLng(max_lat, max_lon);
+
+				var bounds = L.latLngBounds(sw, ne);
+				var opts = { "padding": [100, 100] };
+				
+				map.fitBounds(bounds, opts);
+
+				self.add_geojson_to_map(map, feature);
+			};
+
+			req.open("get", url, true);
+			req.send();
+		},
+		
 		'add_bbox_to_map': function(map, min_lat, min_lon, max_lat, max_lon){
 
-			var poly = [
+			var coords = [[
 				[ min_lon, min_lat ],
 				[ min_lon, max_lat ],
 				[ max_lon, max_lat ],
 				[ max_lon, min_lat ],
 				[ min_lon, min_lat ]
-			];
+			]];
 
 			var geom = {
-				"type": "polygon",
-				"coordinates": poly
+				"type": "Polygon",
+				"coordinates": coords
 			};
 
 			var props = {};
@@ -58,12 +148,11 @@
 			var ne = L.latLng(max_lat, max_lon);
 
 			var bounds = L.latLngBounds(sw, ne);
-			var opts = { "padding": [50, 50] };
+			var opts = { "padding": [100, 100] };
 			
 			map.fitBounds(bounds, opts);
 
-			var layer = L.geoJSON(feature).addTo(map);
-			return layer;			
+			self.add_geojson_to_map(map, feature);
 		},
 
 		'add_latlon_to_map': function(map, lat, lon, zoom){
@@ -73,6 +162,7 @@
 			}
 			
 			var coords = [ lon, lat ];
+
 			var geom = {
 				"type": "Point",
 				"coordinates": coords
@@ -88,8 +178,7 @@
 
 			map.setView([lat, lon], 16);
 
-			var layer = L.geoJSON(feature).addTo(map);
-			return layer;				
+			self.add_geojson_to_map(map, feature);
 		},
 
 		'add_featurecollection_to_map': function(map, featurecollection){
@@ -132,65 +221,17 @@
 			var ne = L.latLng(max_lat, max_lon);
 
 			var bounds = L.latLngBounds(sw, ne);
-			var opts = { "padding": [50, 50] };
+			var opts = { "padding": [100, 100] };
 			
 			map.fitBounds(bounds, opts);
 
-			console.log(map.getBounds());
-			
-			var layer = L.geoJSON(featurecollection).addTo(map);
-			return layer;
+			self.add_geojson_to_map(map, featurecollection);
 		},
 
 		'add_visits_to_map': function(map, visits){
 
 			var feature_collection = self.visits_to_featurecollection(visits);
 			return self.add_featurecollection_to_map(map, feature_collection);			
-		},
-
-		'add_place_to_map': function(map, pl){
-
-			var pt = pl["wof:placetype"];
-
-			var geom;
-			
-			switch (pt) {
-
-			case "venue":
-
-				var lat = pl["geom:latitude"];
-				var lon = pl["geom:longitude"];			
-
-				if ((pl["lbl:latitude"]) && (pl["lbl:longitude"])){
-					lat = pl["lbl:latitude"];
-					lon = pl["lbl:longitude"];				
-				}
-
-				var coords = [ lon, lat ];
-				
-				geom = {
-					"type": "Point",
-					"coordinates": coords
-				};
-				
-			default:
-
-				var bbox = pl["geom:bbox"];
-				bbox = bbox.split(",");
-
-				var min_lon = bbox[0];
-				var min_lat = bbox[1];
-				var max_lon = bbox[2];
-				var max_lat = bbox[3];
-				
-			};
-
-			if (! geom){
-				fb.warning("Unable to generate geometry for placetype");
-				return false;
-			}
-
-			
 		},
 		
 		'visits_to_featurecollection': function(visits){
@@ -230,6 +271,12 @@
 			};
 
 			return feature_collection;
+		},
+
+		'add_geojson_to_map': function(map, geojson){
+
+			var layer = L.geoJSON(geojson).addTo(map);
+			return layer;			
 		}
 	}
 

@@ -1,4 +1,4 @@
-dbody {
+body {
     background-color: #ccc;
     margin-top:0px;
 }
@@ -22,7 +22,7 @@ q {
 }
 
 #canvas {
-    min-height:500px;
+    min-height:600px;
     overflow: scroll;
     background-color:#fff;
     padding: .5em;
@@ -189,7 +189,13 @@ q {
 }
 
 .panel {
-    border-bottom: 1px dotted red;
+    min-height:600px;
+    max-height:600px;
+    overflow: scroll;
+}
+
+.panel-right {
+    border-bottom: 1px solid #000;
 }
 
 .place-details {
