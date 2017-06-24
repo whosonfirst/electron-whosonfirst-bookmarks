@@ -369,6 +369,7 @@
 				item.setAttribute("class", "placetype-desires-item");
 
 				var q = document.createElement("q");
+				q.setAttribute("class", "click-me");
 				q.appendChild(document.createTextNode(desire));
 
 				q.onclick = function(){

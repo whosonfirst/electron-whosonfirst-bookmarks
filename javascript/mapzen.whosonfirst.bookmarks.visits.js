@@ -129,7 +129,7 @@
 			var wrapper = document.createElement("div");
 
 			var place = document.createElement("span");
-			place.setAttribute("class", "namify");
+			place.setAttribute("class", "namify click-me");
 			place.setAttribute("data-wof-id", wof_id);			
 			place.appendChild(document.createTextNode(wof_id));
 
@@ -156,11 +156,10 @@
 			q.setAttribute("class", "click-me");
 			q.appendChild(document.createTextNode(desire));
 
+			var desc = self.render_visit_description(row);
+			
 			var p = document.createElement("p");
-			p.appendChild(document.createTextNode("On or around "));
-			p.append(dt);
-			p.appendChild(document.createTextNode(" you said "));
-			p.appendChild(q);
+			p.appendChild(desc);
 
 			var place_details = document.createElement("div");
 			place_details.setAttribute("id", "place-details-" + wof_id);
@@ -175,6 +174,68 @@
 			wrapper.appendChild(details_wrapper);
 
 			return wrapper;
+		},
+
+		'render_visit_description': function(row){
+
+			var id = row["id"];
+
+			var status_id = row["status_id"];
+			var desire = desires.id_to_label(status_id);
+
+			var q = document.createElement("q");
+			q.setAttribute("class", "click-me");
+
+			q.appendChild(document.createTextNode(desire));
+			
+			var desc = document.createElement("span");
+			desc.setAttribute("id", "visit-description-" + id);
+			desc.setAttribute("class", "visit-description");			
+			
+			desc.appendChild(document.createTextNode("You said "));
+			desc.appendChild(q);
+			desc.appendChild(document.createTextNode(" on or around "));
+			
+			var date = document.createElement("span");
+			date.setAttribute("class", "datetime click-me");
+			date.setAttribute("data-visit-id", row["id"]);
+			date.appendChild(document.createTextNode(row['date']));
+			
+			date.onclick = function(e){
+				
+				var el = e.target;
+				var id = el.getAttribute("data-visit-id");
+				
+				self.show_visit(id);
+				return;
+			};
+			
+			desc.appendChild(date);
+			
+			var remove = document.createElement("button");
+			remove.setAttribute("class", "btn btn-sm remove");
+			remove.setAttribute("data-visit-id", row['id']);
+			
+			remove.appendChild(document.createTextNode("⃠"));
+			
+			remove.onclick = function(e){
+				
+				var el = e.target;
+				var id = el.getAttribute("data-visit-id");
+				
+				if (! confirm("Are you sure you want to delete this visit?")){
+					return false;
+				}
+				
+				self.remove_visit(id, function(){
+					self.show_visits();
+				});
+				
+				return false;
+			};
+
+			desc.appendChild(remove);
+			return desc;
 		},
 		
 		'get_visit': function(id, cb){
@@ -229,7 +290,7 @@
 				q.appendChild(document.createTextNode(desire));			
 
 				var span = document.createElement("span");
-				span.setAttribute("class", "place-name");
+				span.setAttribute("class", "place-name click-me");
 				span.setAttribute("data-wof-id", row['wof_id']);	
 				span.appendChild(document.createTextNode(row['name']));
 				
@@ -244,58 +305,18 @@
 					span.appendChild(document.createTextNode(", in "));
 
 					var loc = document.createElement("span");
-					loc.setAttribute("class", "place-name-locality namify");
+					loc.setAttribute("class", "place-name-locality namify click-me");
 					loc.setAttribute("id", "place-locality-" + locality_id);
 					loc.setAttribute("data-wof-id", locality_id);					
 					loc.appendChild(document.createTextNode(locality_id));
 
 					span.appendChild(loc);
 				}
-								
-				var sm = document.createElement("small");
-				sm.appendChild(document.createTextNode("You said "));
-				sm.appendChild(q);
-				sm.appendChild(document.createTextNode(" on or around "));
 
-				var date = document.createElement("span");
-				date.setAttribute("class", "datetime");
-				date.setAttribute("data-visit-id", row["id"]);
-				date.appendChild(document.createTextNode(row['date']));
+				var desc = self.render_visit_description(row);
 
-				date.onclick = function(e){
-
-					var el = e.target;
-					var id = el.getAttribute("data-visit-id");
-
-					self.show_visit(id);
-					return;
-				};
-				
-				sm.appendChild(date);
-
-				var remove = document.createElement("button");
-				remove.setAttribute("class", "btn btn-sm remove");
-				remove.setAttribute("data-visit-id", row['id']);
-				
-				remove.appendChild(document.createTextNode("⃠"));
-				
-				remove.onclick = function(e){
-					
-					var el = e.target;
-					var id = el.getAttribute("data-visit-id");
-					
-					if (! confirm("Are you sure you want to delete this visit?")){
-						return false;
-					}
-					
-					self.remove_visit(id, function(){
-						self.show_visits();
-					});
-					
-					return false;
-				};
-				
-				sm.appendChild(remove);
+				var sm = document.createElement("small");				
+				sm.appendChild(desc);
 				
 				var item = document.createElement("li");
 				item.setAttribute("class", "visits-list-item");
@@ -463,6 +484,14 @@
 
 			conn.run(sql, params, cb);
 		},
+
+		'get_visits_for_neighbourhood': function(wof_id, cb){
+
+			var sql = "SELECT * FROM visits WHERE neighbourhood_id = ?";
+			var params = [ wof_id ];
+
+			conn.all(sql, params, cb);
+		},
 		
 		'get_visits_for_locality': function(wof_id, cb){
 
@@ -472,13 +501,21 @@
 			conn.all(sql, params, cb);
 		},
 
-		'get_visits_for_neighbourhood': function(wof_id, cb){
+		'get_visits_for_region': function(wof_id, cb){
 
-			var sql = "SELECT * FROM visits WHERE neighbourhood_id = ?";
+			var sql = "SELECT * FROM visits WHERE region_id = ?";
 			var params = [ wof_id ];
 
 			conn.all(sql, params, cb);
-		}		
+		},
+
+		'get_visits_for_country': function(wof_id, cb){
+
+			var sql = "SELECT * FROM visits WHERE country_id = ?";
+			var params = [ wof_id ];
+
+			conn.all(sql, params, cb);
+		},
 		
 	}
 

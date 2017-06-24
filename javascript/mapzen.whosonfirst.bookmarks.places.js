@@ -361,15 +361,25 @@
 			
 				db.get_visits_for_place(wof_id, cb);
 				break;
+
+			case "neighbourhood":
+
+				visits.get_visits_for_neighbourhood(wof_id, cb);
+				break;
 				
 			case "locality":
 
 				visits.get_visits_for_locality(wof_id, cb);
 				break;
-				
-			case "neighbourhood":
 
-				visits.get_visits_for_neighbourhood(wof_id, cb);
+			case "region":
+
+				visits.get_visits_for_region(wof_id, cb);
+				break;
+
+			case "country":
+
+				visits.get_visits_for_country(wof_id, cb);
 				break;
 				
 			default:
