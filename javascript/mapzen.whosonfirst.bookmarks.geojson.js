@@ -33,6 +33,14 @@
 			
 		},
 
+		'add_visit_to_map': function(map, visit){
+
+			var lat = visit["latitude"];
+			var lon = visit["longitude"];
+
+			return self.add_latlon_to_map(map, lat, lon);
+		},
+		
 		'add_place_to_map': function(map, pl){
 
 			var pt = pl["wof:placetype"];

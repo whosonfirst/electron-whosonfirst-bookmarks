@@ -33,6 +33,7 @@
 	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
+	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");	
 
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
 	const utils = require("./mapzen.whosonfirst.utils.js");
@@ -224,16 +225,7 @@
 
 			}
 
-			// end of OH GOD PUT ME IN A FUNCTION OR SOMETHING...
-			
-			var api_key = document.body.getAttribute("data-api-key");			
-			L.Mapzen.apiKey = api_key;
-			
-			var map = L.Mapzen.map('map', {
-    				tangramOptions: {
-    					scene: L.Mapzen.BasemapStyles.Refill
-    				}
-			});
+			var map = maps.new_map(map_el);
 
 			var count_ids = ids.length;
 

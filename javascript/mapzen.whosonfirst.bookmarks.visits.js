@@ -36,6 +36,7 @@
 	const places = require("./mapzen.whosonfirst.bookmarks.places.js");
 	
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
+	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");	
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");	
 
@@ -66,9 +67,6 @@
 
 			var wof_id = row["wof_id"];
 			
-			var lat = row["latitude"];
-			var lon = row["longitude"];
-			
 			var visit = self.render_visit(row);
 			
 			var left_panel = document.createElement("div");
@@ -87,16 +85,8 @@
 			canvas.append(left_panel);
 			canvas.append(right_panel);			
 
-			var api_key = document.body.getAttribute("data-api-key");			
-			L.Mapzen.apiKey = api_key;
-
-			var map = L.Mapzen.map('map', {
-    				tangramOptions: {
-    					scene: L.Mapzen.BasemapStyles.Refill
-    				}
-			});
-			
-			geojson.add_latlon_to_map(map, lat, lon);
+			var map = maps.new_map(map_el);
+			geojson.add_visit_to_map(map, row);
 			
 			namify.translate();
 
@@ -424,16 +414,8 @@
 			canvas.reset();
 			canvas.append(left_panel);
 			canvas.append(right_panel);
-			
-			var api_key = document.body.getAttribute("data-api-key");			
-			L.Mapzen.apiKey = api_key;
 
-			var map = L.Mapzen.map('map', {
-    				tangramOptions: {
-    					scene: L.Mapzen.BasemapStyles.Refill
-    				}
-			});
-			
+			var map = maps.new_map(map_el);
 			geojson.add_featurecollection_to_map(map, feature_collection);
 
 			namify.translate();

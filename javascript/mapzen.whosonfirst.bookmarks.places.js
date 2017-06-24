@@ -34,7 +34,8 @@
 	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
 
 	const api = require("./mapzen.whosonfirst.api.js");
-	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");	
+	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
+	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js")	
 
 	const utils = require("./mapzen.whosonfirst.utils.js");	
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
@@ -137,9 +138,9 @@
 				lon = pl["lbl:longitude"];				
 			}
 			
-			var map = document.createElement("div");
-			map.setAttribute("id", "map");
-			map.setAttribute("data-place", JSON.stringify(pl));
+			var map_el = document.createElement("div");
+			map_el.setAttribute("id", "map");
+			map_el.setAttribute("data-place", JSON.stringify(pl));
 			
 			var status_select = document.createElement("select");
 			status_select.setAttribute("id", "status");
@@ -271,7 +272,7 @@
 			var right_panel = document.createElement("div");
 			right_panel.setAttribute("class", "col-md-6 panel");
 			
-			left_panel.appendChild(map);
+			left_panel.appendChild(map_el);
 			left_panel.appendChild(controls);
 			
 			right_panel.appendChild(h2);
@@ -285,15 +286,7 @@
 			canvas.append(left_panel);
 			canvas.append(right_panel);			
 
-			var api_key = document.body.getAttribute("data-api-key");			
-			L.Mapzen.apiKey = api_key;
-
-			var map = L.Mapzen.map('map', {
-    				tangramOptions: {
-    					scene: L.Mapzen.BasemapStyles.Refill
-    				}
-			});
-
+			var map = maps.new_map(map_el);
 			geojson.add_place_to_map(map, pl);
 
 			self.draw_visits_list(pl, map);
@@ -391,8 +384,6 @@
 		},
 		
 		'add_place': function(e){
-
-			var map = document.getElementById("map");
 
 			var str_pl = map.getAttribute("data-place");
 			var pl = JSON.parse(str_pl);			
