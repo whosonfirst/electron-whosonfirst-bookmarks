@@ -185,9 +185,16 @@
 
 			var q = document.createElement("q");
 			q.setAttribute("class", "click-me");
+			q.setAttribute("data-status-id", status_id);			
 
 			q.appendChild(document.createTextNode(desire));
-			
+
+			q.onclick = function(e){
+				var el = e.target;
+				var status_id = el.getAttribute("data-status-id");
+				desires.show_desire(status_id);
+			};
+		
 			var desc = document.createElement("span");
 			desc.setAttribute("id", "visit-description-" + id);
 			desc.setAttribute("class", "visit-description");			
@@ -525,14 +532,34 @@
 			conn.all(sql, params, cb);
 		},
 
-		'get_visits_for_desire_and_place': function(status_id, pt, pt_id, cb){
+		'get_visits_for_desire_and_place': function(status_id, wof_id, cb){
 
-			var col = pt + "_id";
+			var places = require("./mapzen.whosonfirst.bookmarks.places.js");
 			
-			var sql = "SELECT * FROM visits WHERE status_id = ? AND " + col + " = ?";
-			var params = [ status_id, pt_id ];
+			places.get_place(wof_id, function(err, row){
 
-			conn.all(sql, params, cb);
+				if (err){
+					cb(err);
+					return false;
+				}
+
+				var pl = JSON.parse(row["body"]);
+				var pt = pl["wof:placetype"];
+
+				// PLEASE PUT ME IN A FUNCTION OR SOMETHING...
+				
+				if ((pt != "venue") && (pt != "neighbourhood") && (pt != "locality") && (pt != "region") && (pt != "country")){
+					cb("Invalid placetype");
+					return;
+				}
+				
+				var col = pt + "_id";
+				
+				var sql = "SELECT * FROM visits WHERE status_id = ? AND " + col + " = ?";
+				var params = [ status_id, wof_id ];
+				
+				conn.all(sql, params, cb);
+			});
 		},
 
 		'get_count_for_desire': function(status_id, cb){
@@ -545,7 +572,7 @@
 		
 		'get_localities_for_desire': function(status_id, cb){
 
-			var sql = "SELECT locality_id, COUNT(id) AS count_visits FROM visits WHERE status_id = ? GROUP BY locality_id ORDER BY count_visits DESC";
+			var sql = "SELECT locality_id, status_id, COUNT(id) AS count_visits FROM visits WHERE status_id = ? GROUP BY locality_id ORDER BY count_visits DESC";
 			var params = [ status_id ];
 
 			conn.all(sql, params, cb);

@@ -419,7 +419,7 @@
 			// "<q>again</a> twice and <q>meh</q> twice"
 			
 			var wof_id;
-			
+
 			var desires_list = document.createElement("ul");
 			desires_list.setAttribute("class", "list-inline placetype-desires");
 
@@ -437,19 +437,21 @@
 
 				var item = document.createElement("li");
 				item.setAttribute("class", "placetype-desires-item");
-
+				
 				var q = document.createElement("q");
-				q.setAttribute("data-status-id", status_id);				
+				q.setAttribute("data-wof-id", wof_id);				
+				q.setAttribute("data-status-id", status_id);
 				q.setAttribute("class", "desire click-me");
 				q.appendChild(document.createTextNode(desire));
 
 				q.onclick = function(e){
 
 					var el = e.target;
+					var wof_id = el.getAttribute("data-wof-id");					
 					var status_id = el.getAttribute("data-status-id");
-
+					
 					var desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
-					desires.show_desire(status_id);
+					desires.show_desires_for_place(status_id, wof_id);
 				};
 				
 				item.append(q);				

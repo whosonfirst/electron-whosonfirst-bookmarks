@@ -114,7 +114,7 @@
 				namify.translate();	// PLEASE RUN ONCE WITH A WAITGROUP
 			});			
 		},
-		
+
 		'show_desire': function(status_id){
 			
 			var map = document.createElement("div");
@@ -145,10 +145,91 @@
     				}
 			});
 
-			self.show_localities_for_desire(status_id);			
-			self.draw_visits_list(status_id, map);	
-		},
+			self.show_localities_for_desire(status_id);
 
+			var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+			
+			visits.get_visits_for_desire(status_id, function(err, rows){
+
+				if (err){
+					return;
+				}
+
+				self.draw_visits_list(rows, map);
+			});
+		 },
+
+		'show_desires_for_place': function(status_id, wof_id){
+
+			var map = document.createElement("div");
+			map.setAttribute("id", "map");
+
+			var desire_wrapper = self.render_desire(status_id);
+			
+			var left_panel = document.createElement("div");
+			left_panel.setAttribute("class", "col-md-6 panel");
+
+			var right_panel = document.createElement("div");
+			right_panel.setAttribute("class", "col-md-6 panel");
+
+			left_panel.appendChild(map);
+			right_panel.appendChild(desire_wrapper);
+			
+			canvas.reset();
+			canvas.append(left_panel);
+			canvas.append(right_panel);			
+
+			var api_key = document.body.getAttribute("data-api-key");			
+			L.Mapzen.apiKey = api_key;
+
+			var map = L.Mapzen.map('map', {
+    				tangramOptions: {
+    					scene: L.Mapzen.BasemapStyles.Refill
+    				}
+			});
+
+
+			var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+
+			places.get_place(wof_id, function(err, row){
+
+				if (err){
+					return false;
+				}			
+
+				var pl = JSON.parse(row["body"]);
+				
+				var place = document.createElement("span");
+				place.setAttribute("class", "click-me hey-look");
+				place.setAttribute("data-wof-id", wof_id);
+				place.appendChild(document.createTextNode(pl["wof:name"]));
+
+				place.onclick = function(e){
+					var el = e.target;
+					var wof_id = el.getAttribute("data-wof-id");
+					places.show_place(wof_id);
+				};
+				
+				var sm = document.createElement("small");
+				sm.setAttribute("class", "desire-wrapper-header-location");
+				sm.appendChild(place);
+
+				var header = document.getElementById("desire-wrapper-header-" + status_id);				
+				header.appendChild(sm);
+			});
+
+			var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+
+			visits.get_visits_for_desire_and_place(status_id, wof_id, function(err, rows){
+
+				if (err){
+					return false;
+				}
+
+				self.draw_visits_list(rows, map);
+			});
+		},
+		
 		'render_desire': function(status_id){
 
 			var desire = self.id_to_label(status_id);
@@ -160,8 +241,22 @@
 			visits_wrapper.setAttribute("id", "visits-wrapper");
 
 			var h2 = document.createElement("h2");
-			h2.appendChild(document.createTextNode(desire));
+			h2.setAttribute("class", "desire-wrapper-header");			
+			h2.setAttribute("id", "desire-wrapper-header-" + status_id);
 
+			var span = document.createElement("span");
+			span.setAttribute("class", "click-me");			
+			span.setAttribute("data-status-id", status_id);
+			span.appendChild(document.createTextNode(desire));
+
+			span.onclick = function(e){
+				var el = e.target;
+				var status_id = el.getAttribute("data-status-id");
+				self.show_desire(status_id);
+			};
+			
+			h2.appendChild(span);
+			
 			var stats_wrapper = document.createElement("div");
 			stats_wrapper.setAttribute("id", "desire-stats-wrapper-" + status_id);
 			stats_wrapper.setAttribute("class", "desire-stats-wrapper");				
@@ -173,36 +268,30 @@
 			return desire_wrapper;
 		},
 		
-		'draw_visits_list': function(status_id, map){
+		'draw_visits_list': function(rows, map){
 
-			var geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");			
-			var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+			var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");			
+			var geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
+
+			var count_rows = rows.length;
+
+			if (! count_rows){
+				return true;
+			}
 			
-			visits.get_visits_for_desire(status_id, function(err, rows){
+			var list = visits.render_visits(rows);
 
-				if (err){
-					return false;
-				}
+			var open = true;
+			var expandable = utils.render_expandable(list, { "label": "desires", "open": open });
 
-				var count_rows = rows.length;
+			var wrapper = document.getElementById("visits-wrapper");
+			wrapper.appendChild(expandable);
 
-				if (! count_rows){
-					return true;
-				}
-				
-				var list = visits.render_visits(rows);
+			if (map){
+				geojson.add_visits_to_map(map, rows);
+			}
 
-				var expandable = utils.render_expandable(list, { "label": "desires" });
-				
-				var wrapper = document.getElementById("visits-wrapper");
-				wrapper.appendChild(expandable);
-
-				if (map){
-					geojson.add_visits_to_map(map, rows);
-				}
-
-				namify.translate();
-			});
+			namify.translate();
 		},
 
 		'render_stats': function(rows){
@@ -219,6 +308,8 @@
 				return stats;
 			}
 
+			var status_id = rows[0]["status_id"];	// WE MAY REGRET THIS ONE DAY...
+			
 			var by_count = {};
 			var counts = [];
 			
@@ -230,7 +321,6 @@
 				var count_visits = row["count_visits"];
 
 				if (! by_count[ count_visits ]){
-					
 					by_count[ count_visits ] = [ wof_id ];					
 					counts.push(count_visits);
 				}
@@ -261,19 +351,23 @@
 				
 					var place_item = document.createElement("li");
 					place_item.setAttribute("class", "desire-stats-places-item");
-					
+
 					var place = document.createElement("span");
 					place.setAttribute("class", "namify hey-look click-me");
 					place.setAttribute("data-wof-id", wof_id);
+					place.setAttribute("data-status-id", status_id);					
 					place.appendChild(document.createTextNode(wof_id));
 					
 					place.onclick = function(e){
 						
 						var el = e.target;
 						var wof_id = el.getAttribute("data-wof-id");
+						var status_id = el.getAttribute("data-status-id");						
+
+						self.show_desires_for_place(status_id, wof_id);
 						
-						var places = require("./mapzen.whosonfirst.bookmarks.places.js");
-						places.show_place(wof_id);
+						// var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+						// places.show_place(wof_id);
 					};
 					
 					place_item.appendChild(place);

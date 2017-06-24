@@ -200,6 +200,9 @@
 				var lat = coords[1];
 				var lon = coords[0];
 
+				console.log("WTF LAT " + lat);
+				console.log("WTF LON " + lon);				
+				
 				if ((! min_lat) || (lat < min_lat)){
 					min_lat = lat;
 				}
@@ -216,10 +219,14 @@
 					max_lon = lon;
 				}						
 			}
+
+			if ((min_lat == max_lat) && (min_lon == max_lon)){
+				return self.add_latlon_to_map(map, min_lat, min_lon);
+			}
 			
 			var sw = L.latLng(min_lat, min_lon);
 			var ne = L.latLng(max_lat, max_lon);
-
+			
 			var bounds = L.latLngBounds(sw, ne);
 			var opts = { "padding": [100, 100] };
 			
