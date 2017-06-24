@@ -516,6 +516,32 @@
 
 			conn.all(sql, params, cb);
 		},
+
+		'get_visits_for_desire': function(status_id, cb){
+
+			var sql = "SELECT * FROM visits WHERE status_id = ?";
+			var params = [ status_id ];
+
+			conn.all(sql, params, cb);
+		},
+
+		'get_visits_for_desire_and_place': function(status_id, pt, pt_id, cb){
+
+			var col = pt + "_id";
+			
+			var sql = "SELECT * FROM visits WHERE status_id = ? AND " + col + " = ?";
+			var params = [ status_id, pt_id ];
+
+			conn.all(sql, params, cb);
+		},
+		
+		'get_localities_for_desire': function(status_id, cb){
+
+			var sql = "SELECT DISTINCT(locality_id) AS locality_id FROM visits WHERE status_id = ?";
+			var params = [ status_id ];
+
+			conn.all(sql, params, cb);
+		},
 		
 	}
 

@@ -346,7 +346,7 @@
 			if (count_hoods == 1){
 
 				var span = document.createElement("span");
-				span.setAttribute("class", "hey-look");
+				span.setAttribute("class", "hey-look click-me");
 				span.appendChild(document.createTextNode("one neighbourhood"));
 				
 				mentions.appendChild(document.createTextNode(" in "));
@@ -356,7 +356,7 @@
 			else {
 
 				var span = document.createElement("span");
-				span.setAttribute("class", "hey-look");
+				span.setAttribute("class", "hey-look click-me");
 				span.appendChild(document.createTextNode(count_hoods + " neighbourhoods"));
 				
 				mentions.appendChild(document.createTextNode(" spanning "));
@@ -439,11 +439,17 @@
 				item.setAttribute("class", "placetype-desires-item");
 
 				var q = document.createElement("q");
-				q.setAttribute("class", "click-me");
+				q.setAttribute("data-status-id", status_id);				
+				q.setAttribute("class", "desire click-me");
 				q.appendChild(document.createTextNode(desire));
 
-				q.onclick = function(){
+				q.onclick = function(e){
 
+					var el = e.target;
+					var status_id = el.getAttribute("data-status-id");
+
+					var desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
+					desires.show_desire(status_id);
 				};
 				
 				item.append(q);				
