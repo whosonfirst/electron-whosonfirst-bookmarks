@@ -296,32 +296,28 @@
 
 			geojson.add_place_to_map(map, pl);
 
-			/*
-			if (pt == "venue"){
-				geojson.add_latlon_to_map(map, lat, lon);
-			}
-
-			else {				
-				geojson.add_bbox_to_map(map, bbox[1], bbox[0], bbox[3], bbox[2]);
-			}
-			*/
-			
 			self.draw_visits_list(pl, map);
 
-			var placetypes = require("./mapzen.whosonfirst.bookmarks.placetypes.js");
-			
-			placetypes.get_desires_for_placetype(pl["wof:placetype"], pl["wof:id"], function(err, rows){
+			var pt = pl["wof:placetype"];
 
-				if (err){
-					fb.error(err);
-					return;
-				}
-
-				var desires_list = placetypes.render_desires_for_placetype(rows);
-				var desires_wrapper = document.getElementById("desires");
-				desires_wrapper.appendChild(desires_list);
-			});
+			if ((pt == "neighbourhood") || (pt == "locality") || (pt == "region") || (pt == "country")){
+				
+				var placetypes = require("./mapzen.whosonfirst.bookmarks.placetypes.js");
 			
+				placetypes.get_desires_for_placetype(pl["wof:placetype"], pl["wof:id"], function(err, rows){
+					
+					if (err){
+						fb.error(err);
+						return;
+					}
+					
+					var desires_list = placetypes.render_desires_for_placetype(rows);
+					var desires_wrapper = document.getElementById("desires");
+					desires_wrapper.appendChild(desires_list);
+				});
+			}
+
+			namify.translate();
 		},
 
 		'draw_visits_list': function(pl, map){
@@ -339,6 +335,12 @@
 					fb.error(err);
 					return;
 				}
+
+				var count_visits = rows.length;
+
+				if (! count_visits){
+					return;
+				}
 				
 				var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
 				var list = visits.render_visits(rows, {"skip_header": skip_header});
@@ -348,11 +350,11 @@
 				var visits_wrapper = document.getElementById("visits");
 				visits_wrapper.innerHTML = "";
 				
-				visits_wrapper.appendChild(expandable);
-				
-				namify.translate();
+				visits_wrapper.appendChild(expandable);			
 
 				geojson.add_visits_to_map(map, rows);
+
+				namify.translate();				
 			};
 			
 			switch (pt) {

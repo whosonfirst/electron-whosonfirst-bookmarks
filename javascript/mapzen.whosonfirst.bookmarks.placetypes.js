@@ -34,7 +34,8 @@
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
 
-	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");	
+	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
+	const utils = require("./mapzen.whosonfirst.utils.js");
 	
 	var self = {
 		
@@ -82,12 +83,18 @@
 				item.setAttribute("class", "list placetype-list-item");
 				
 				var place = document.createElement("span");
-
+				
 				if (wof_id){
 
 					ids.push(wof_id);
 					
-					place.setAttribute("class", "place-name namify");
+					place.setAttribute("class", "place-name namify click-me");
+
+					if (pt == "neighbourhood"){
+						place.setAttribute("id", "neighbourhood-" + wof_id);
+						utils.append_class(place, "localityify");
+					}
+					
 					place.setAttribute("data-wof-id", wof_id);				
 					place.appendChild(document.createTextNode(wof_id));
 				}
@@ -154,6 +161,70 @@
 			canvas.reset();
 			canvas.append(left_panel);
 			canvas.append(right_panel);
+
+			// start of OH GOD PUT ME IN A FUNCTION OR SOMETHING...
+			
+			var els = document.getElementsByClassName("localityify");
+			var els_count = els.length;
+
+			var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+			
+			for (var i=0; i < els_count; i++){
+
+				var el = els[i];
+				var wof_id = el.getAttribute("data-wof-id");
+
+				if (wof_id == -1){
+					continue;
+				}
+
+				places.get_place(wof_id, function(err, row){
+
+					if (err){
+						return;
+					}
+
+					var pl = JSON.parse(row["body"]);
+
+					var neighbourhood_id = pl["wof:id"];
+					
+					var hier = pl["wof:hierarchy"];
+					hier = hier[0];		// please fix me...
+
+					if (! hier["locality_id"]){
+						return;
+					}
+
+					var loc_id = hier["locality_id"];
+					
+					places.get_place(loc_id, function(err, row){
+
+						var loc_pl = JSON.parse(row["body"]);
+
+						var loc_id = loc_pl["wof:id"];						
+						var loc_name = loc_pl["wof:name"];
+
+						var loc_span = document.createElement("span");
+						loc_span.setAttribute("class", "click-me");
+						loc_span.setAttribute("data-wof-id", loc_id);						
+						
+						loc_span.appendChild(document.createTextNode(loc_name));
+
+						loc_span.onclick = function(e){
+							var el = e.target;
+							var wof_id = el.getAttribute("data-wof-id");
+							places.show_place(wof_id);
+						};
+
+						var hood_span = document.getElementById("neighbourhood-" + neighbourhood_id);
+						hood_span.appendChild(document.createTextNode(", in "));
+						hood_span.appendChild(loc_span);
+					});
+				});
+
+			}
+
+			// end of OH GOD PUT ME IN A FUNCTION OR SOMETHING...
 			
 			var api_key = document.body.getAttribute("data-api-key");			
 			L.Mapzen.apiKey = api_key;
@@ -163,7 +234,6 @@
     					scene: L.Mapzen.BasemapStyles.Refill
     				}
 			});
-
 
 			var count_ids = ids.length;
 
