@@ -534,15 +534,23 @@
 
 			conn.all(sql, params, cb);
 		},
+
+		'get_count_for_desire': function(status_id, cb){
+
+			var sql = "SELECT COUNT(DISTINCT(locality_id)) AS count_desires FROM visits WHERE status_id = ?";
+			var params = [ status_id ];
+
+			conn.get(sql, params, cb);
+		},
 		
 		'get_localities_for_desire': function(status_id, cb){
 
-			var sql = "SELECT DISTINCT(locality_id) AS locality_id FROM visits WHERE status_id = ?";
+			var sql = "SELECT locality_id, COUNT(id) AS count_visits FROM visits WHERE status_id = ? GROUP BY locality_id ORDER BY count_visits DESC";
 			var params = [ status_id ];
 
 			conn.all(sql, params, cb);
 		},
-		
+
 	}
 
 	return self;

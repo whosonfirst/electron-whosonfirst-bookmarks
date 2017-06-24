@@ -26,6 +26,8 @@
 }(function(){
 
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
+	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
+	const utils = require("./mapzen.whosonfirst.utils.js");		
 	
 	const desires = {
 		0: "i've been there",
@@ -51,41 +53,66 @@
 		'show_desires': function(){
 
 			var left_panel = document.createElement("div");
-			left_panel.setAttribute("class", "col-md-6 panel");
+			left_panel.setAttribute("class", "col-md-12 panel");
 
-			var right_panel = document.createElement("div");
-			right_panel.setAttribute("class", "col-md-6 panel");
-
-			var list = document.createElement("li");
-
+			var list = document.createElement("ul");
+			list.setAttribute("class", "list desires-list");
+			
 			for (var status_id in desires){
 
 				var label = desires[status_id];
-
-				var item = document.createElement("li");
-				var span = document.createElement("span");
 				
-				span.setAttribute("class", "desire click-me");
-				span.setAttribute("data-status-id", status_id);
-				span.appendChild(document.createTextNode(label));
+				var item = document.createElement("li");
+				list.setAttribute("class", "desires-list-item");
+				list.setAttribute("id", "desires-list-item-" + status_id);
+				
+				var header = document.createElement("h4");
+				header.setAttribute("id", "desires-list-item-header-" + status_id);
+				
+				header.setAttribute("class", "desire desire-list-item-header click-me");
+				header.setAttribute("data-status-id", status_id);
+				header.appendChild(document.createTextNode(label));
 
-				span.onclick = function(e){
+				header.onclick = function(e){
 
 					var el = e.target;
 					var status_id = el.getAttribute("data-status-id");
 
 					self.show_desire(status_id);
 				};
+
+				var stats_wrapper = document.createElement("div");
+				stats_wrapper.setAttribute("id", "desire-stats-wrapper-" + status_id);
+				stats_wrapper.setAttribute("class", "desire-stats-wrapper");				
 				
-				item.appendChild(span);
+				item.appendChild(header);
+				item.appendChild(stats_wrapper);
+				
 				list.appendChild(item);
 			}
 
 			left_panel.appendChild(list);
 			
-			canvas.reset();
-			canvas.append(left_panel);
-			canvas.append(right_panel);			
+			canvas.draw(left_panel);
+
+			for (var status_id in desires){
+				self.show_localities_for_desire(status_id);
+			}
+		},
+
+		'show_localities_for_desire': function(status_id){
+
+			var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+
+			visits.get_localities_for_desire(status_id, function(err, rows){
+
+				var stats = self.render_stats(rows);
+				
+				var stats_wrapper = document.getElementById("desire-stats-wrapper-" + status_id);
+				stats_wrapper.appendChild(stats);
+				
+				namify.translate();	// PLEASE RUN ONCE WITH A WAITGROUP
+			});			
 		},
 		
 		'show_desire': function(status_id){
@@ -118,7 +145,8 @@
     				}
 			});
 
-			self.draw_visits_list(status_id, map);			
+			self.show_localities_for_desire(status_id);			
+			self.draw_visits_list(status_id, map);	
 		},
 
 		'render_desire': function(status_id){
@@ -134,7 +162,12 @@
 			var h2 = document.createElement("h2");
 			h2.appendChild(document.createTextNode(desire));
 
+			var stats_wrapper = document.createElement("div");
+			stats_wrapper.setAttribute("id", "desire-stats-wrapper-" + status_id);
+			stats_wrapper.setAttribute("class", "desire-stats-wrapper");				
+			
 			desire_wrapper.appendChild(h2);
+			desire_wrapper.appendChild(stats_wrapper);			
 			desire_wrapper.appendChild(visits_wrapper);
 
 			return desire_wrapper;
@@ -151,16 +184,128 @@
 					return false;
 				}
 
+				var count_rows = rows.length;
+
+				if (! count_rows){
+					return true;
+				}
+				
 				var list = visits.render_visits(rows);
 
+				var expandable = utils.render_expandable(list, { "label": "desires" });
+				
 				var wrapper = document.getElementById("visits-wrapper");
-				wrapper.appendChild(list);
+				wrapper.appendChild(expandable);
 
 				if (map){
 					geojson.add_visits_to_map(map, rows);
 				}
+
+				namify.translate();
 			});
 		},
+
+		'render_stats': function(rows){
+
+			var stats = document.createElement("ul");
+			stats.setAttribute("class", "list-inline desire-stats");
+			
+			var count_rows = rows.length;
+
+			if (! count_rows){
+				var item = document.createElement("li");
+				item.appendChild(document.createTextNode("Nothing yet."));
+				stats.appendChild(item);
+				return stats;
+			}
+
+			var by_count = {};
+			var counts = [];
+			
+			for (var i=0; i < count_rows; i++){
+
+				var row = rows[i];
+				
+				var wof_id = row["locality_id"];	// PLEASE FIX ME...
+				var count_visits = row["count_visits"];
+
+				if (! by_count[ count_visits ]){
+					
+					by_count[ count_visits ] = [ wof_id ];					
+					counts.push(count_visits);
+				}
+
+				else {
+					by_count[ count_visits ].push(wof_id);
+				}
+			}
+
+			counts.sort();
+			counts.reverse();
+			
+			var counts_unq = counts.length;
+			
+			for (var i=0; i < counts_unq; i++){
+
+				var count_visits = counts[i];
+
+				var wof_ids = by_count[count_visits];
+				var count_ids = wof_ids.length;
+
+				var place_list = document.createElement("ul");
+				place_list.setAttribute("class", "list-inline desire-stats-places");
+				
+				for (var j=0; j < count_ids; j++){
+
+					var wof_id = wof_ids[j];
+				
+					var place_item = document.createElement("li");
+					place_item.setAttribute("class", "desire-stats-places-item");
+					
+					var place = document.createElement("span");
+					place.setAttribute("class", "namify hey-look click-me");
+					place.setAttribute("data-wof-id", wof_id);
+					place.appendChild(document.createTextNode(wof_id));
+					
+					place.onclick = function(e){
+						
+						var el = e.target;
+						var wof_id = el.getAttribute("data-wof-id");
+						
+						var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+						places.show_place(wof_id);
+					};
+					
+					place_item.appendChild(place);
+					place_list.appendChild(place_item);
+				}
+
+				var item = document.createElement("li");
+				item.setAttribute("class", "desire-stats-item");
+				
+				item.appendChild(place_list);
+
+				var count = document.createElement("span");
+				count.setAttribute("class", "desire-stats-item-count");
+				
+				if (count_visits == 1){
+					count.appendChild(document.createTextNode(" once"));
+				}
+
+				else if (count_visits == 2){
+					count.appendChild(document.createTextNode(" twice"));
+				}
+
+				else {
+					count.appendChild(document.createTextNode(" " + count_visits + " times"));
+				}
+
+				item.appendChild(count);
+				stats.appendChild(item);
+			}
+
+			return stats;
+		}
 	};
 	
 	return self;

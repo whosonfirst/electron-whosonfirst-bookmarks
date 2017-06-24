@@ -133,6 +133,50 @@ q {
     font-weight: 700;
 }
 
+.desires-list-item {
+    list-style-type: none;
+}
+
+.desire-stats {
+    font-size: small;
+    display:inline;
+}
+
+.desire-stats-item {
+}
+
+.desire-stats-item:after {
+}
+
+.desire-stats-item-count {
+    color:#666;
+}
+
+.desire-stats-item-count:before {
+    content: "( ";
+}
+
+.desire-stats-item-count:after {
+    content: " )";
+}
+
+.desire-stats-places {
+    display:inline;
+}
+
+.desire-stats-places-item {
+    word-break: break-all !important;
+}
+
+.desire-stats-places-item:after {
+    content: " & ";
+    color:#666;    
+}
+
+.desire-stats-places-item:last-child:after {
+    content: "" !important;
+}
+
 .feedback {
 
 }
