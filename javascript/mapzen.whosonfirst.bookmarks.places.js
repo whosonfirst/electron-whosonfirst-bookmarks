@@ -35,8 +35,10 @@
 
 	const api = require("./mapzen.whosonfirst.api.js");
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
-	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js")	
+	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");
 
+	const screenshots = require("./mapzen.whosonfirst.bookmarks.screenshots.js");
+	
 	const utils = require("./mapzen.whosonfirst.utils.js");	
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
 	
@@ -134,6 +136,11 @@
 
 			map_el.setAttribute("data-screenshot", "place");
 			map_el.setAttribute("data-wof-id", wof_id);
+
+			if (screenshots.exists(wof_id)){
+				var data = screenshots.data_url(wof_id);
+				map_el.setAttribute("style", "background-image: url(" + data + ")");
+			}
 			
 			var status_select = document.createElement("select");
 			status_select.setAttribute("id", "status");

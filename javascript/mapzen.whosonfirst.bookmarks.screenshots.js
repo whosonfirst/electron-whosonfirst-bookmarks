@@ -47,6 +47,23 @@
 			var fpath = path.join(froot, fname);
 			return fpath;
 		},
+
+		'exists': function(wof_id){
+
+			var fpath = self.path(wof_id);
+			return fs.existsSync(fpath);
+		},
+
+		'data_url': function(wof_id){
+
+			var fpath = self.path(wof_id);
+			var bitmap = fs.readFileSync(fpath);
+			
+			var buf = new Buffer(bitmap);
+			var b64 = buf.toString('base64');
+
+			return "data:image/png;base64," + b64;
+		},
 		
 		'save': function(rsp, wof_id){
 
