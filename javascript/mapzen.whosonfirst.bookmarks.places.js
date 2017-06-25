@@ -125,22 +125,15 @@
 				pl = JSON.parse(pl);
 			}
 
+			var wof_id = pl["wof:id"];
 			var pt = pl["wof:placetype"];
-			
-			var lat = pl["geom:latitude"];
-			var lon = pl["geom:longitude"];
-			var bbox = pl["geom:bbox"];						
-			bbox = bbox.split(",");
-			
-			if ((pl["lbl:latitude"]) && (pl["lbl:longitude"])){
-
-				lat = pl["lbl:latitude"];
-				lon = pl["lbl:longitude"];				
-			}
-			
+						
 			var map_el = document.createElement("div");
 			map_el.setAttribute("id", "map");
 			map_el.setAttribute("data-place", JSON.stringify(pl));
+
+			map_el.setAttribute("data-screenshot", "place");
+			map_el.setAttribute("data-wof-id", wof_id);
 			
 			var status_select = document.createElement("select");
 			status_select.setAttribute("id", "status");
@@ -164,50 +157,49 @@
 
 			// note: we're not actually doing anything with routing yet because
 			// of geolocation hoohah - see below for details...
+
+			var enable_routing = false;
 			
-			var routing_select = document.createElement("select");
-			routing_select.setAttribute("id", "routing");
-
-			var modes = {
-				"pedestrian": "by foot",
-				"bicylcle": "on bike",
-				"auto": "by car",
-				"bus": "by transit"
-			};
-			
-			for (var mode in modes){
-
-				var option = document.createElement("option");
-				option.setAttribute("value", mode);
-				option.appendChild(document.createTextNode(modes[mode]));
+			if (enable_routing){
 				
-				routing_select.appendChild(option);
-			}
-
-			var routing_button = document.createElement("button");
-			routing_button.setAttribute("class", "btn");
-			routing_button.appendChild(document.createTextNode("Take me there"));
-
-			routing_button.onclick = function(e){
-				var el = e.target;
-
-				console.log("place " + lat + ", " + lon);
+				var routing_select = document.createElement("select");
+				routing_select.setAttribute("id", "routing");
 				
-				var on_locate = function(pos){
+				var modes = {
+					"pedestrian": "by foot",
+					"bicylcle": "on bike",
+					"auto": "by car",
+					"bus": "by transit"
+				};
+				
+				for (var mode in modes){
+					var option = document.createElement("option");
+					option.setAttribute("value", mode);
+					option.appendChild(document.createTextNode(modes[mode]));
+					routing_select.appendChild(option);
+				}
+				
+				var routing_button = document.createElement("button");
+				routing_button.setAttribute("class", "btn");
+				routing_button.appendChild(document.createTextNode("Take me there"));
+				
+				routing_button.onclick = function(e){
+					var el = e.target;
+
+					var on_locate = function(pos){
+						var current_lat = pos.coords.latitude;
+						var current_lon = pos.coords.longitude;
+						console.log("current " + current_lat + "," + current_lon);
+					};
 					
-					var current_lat = pos.coords.latitude;
-					var current_lon = pos.coords.longitude;
-
-					console.log("current " + current_lat + "," + current_lon);
+					var on_error = function(err){
+						console.log(err);
+						return false;
+					};
+					
+					navigator.geolocation.getCurrentPosition(on_locate, on_error);
 				};
-
-				var on_error = function(err){
-					console.log(err);
-					return false;
-				};
-				
-				navigator.geolocation.getCurrentPosition(on_locate, on_error);
-			};
+			}
 			
 			var controls = document.createElement("div");
 			controls.setAttribute("id", "controls");
@@ -221,9 +213,11 @@
 			// "Google Maps Geolocation API (requires enabling billing but is free to use; you can skip
 			// this one, in which case geolocation features of Chrome will not work)"
 			// https://developers.google.com/maps/documentation/geolocation/intro
-			// 
-			// controls.appendChild(routing_select);
-			// controls.appendChild(routing_button);
+
+			if (enable_routing){
+				controls.appendChild(routing_select);
+				controls.appendChild(routing_button);
+			}
 			
 			var visits_wrapper = document.createElement("div");
 			visits_wrapper.setAttribute("id", "visits");
