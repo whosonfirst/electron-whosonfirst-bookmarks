@@ -36,21 +36,26 @@
 	
 	var self = {
 
-		'save': function(rsp){
+		'path': function(wof_id){
 
-			var fname = screenshot_id + "." + rsp.type;
-			var froot = udata;
-					
-			if (screenshot_root){
-				froot = path.join(udata, screenshot_root);
-			}
+			var fname = wof_id + ".png";
+			var froot = self.id2root(wof_id);
+			
+			froot = path.join("places", froot);
+			froot = path.join(udata, froot);
+
+			var fpath = path.join(froot, fname);
+			return fpath;
+		},
+		
+		'save': function(rsp, wof_id){
+
+			var fpath = self.path(wof_id);
+			var froot = path.dirname(fpath);
 			
 			if (! fs.existsSync(froot)){
 				fsex.ensureDirSync(froot);
 			}
-			
-			var fpath = path.join(froot, fname);
-			// console.log("SAVE " + fpath);
 			
 			var fileReader = new FileReader();
 			
@@ -59,6 +64,7 @@
 			};
 			
 			fileReader.readAsArrayBuffer(rsp.blob);
+			console.log("SAVE SCREENSHOT AS " + fpath);
 		},
 
 		'id2root': function(id){
