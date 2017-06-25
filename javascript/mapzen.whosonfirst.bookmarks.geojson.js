@@ -207,9 +207,6 @@
 				
 				var lat = coords[1];
 				var lon = coords[0];
-
-				console.log("WTF LAT " + lat);
-				console.log("WTF LON " + lon);				
 				
 				if ((! min_lat) || (lat < min_lat)){
 					min_lat = lat;

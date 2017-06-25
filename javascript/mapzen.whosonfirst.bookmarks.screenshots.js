@@ -81,7 +81,7 @@
 			};
 			
 			fileReader.readAsArrayBuffer(rsp.blob);
-			console.log("SAVE SCREENSHOT AS " + fpath);
+			// console.log("SAVE SCREENSHOT AS " + fpath);
 		},
 
 		'id2root': function(id){

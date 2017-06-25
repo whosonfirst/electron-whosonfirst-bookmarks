@@ -25,25 +25,9 @@
 
 }(function(){
 
-	const pt = require("./mapzen.whosonfirst.bookmarks.placetypes.js");
-	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
-	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
-	
 	var self = {
 		
 		'init': function(){
-
-			var show_c = document.getElementById("show-cities");
-			show_c.onclick = function(){ pt.show_placetype("locality"); };
-
-			var show_n = document.getElementById("show-neighbourhoods");
-			show_n.onclick = function(){ pt.show_placetype("neighbourhood"); };
-			
-			var show_v = document.getElementById("show-visits");
-			show_v.onclick = function(){ visits.show_visits(); };
-
-			var show_d = document.getElementById("show-desires");
-			show_d.onclick = function(){ desires.show_desires(); };
 
 			if (navigator.onLine){
 				self.network_notice(true);

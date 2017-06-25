@@ -56,6 +56,44 @@ q {
     margin-left:2em;
 }
 
+#network-status {
+    margin-right:1em;
+    padding-top:.3em;
+    font-size:1.5em;
+    float:right;
+}
+
+.online:after {
+
+    /*
+      Unicode Character 'CLOUD' (U+2601)	
+   */
+    
+    content: "☁️";
+    color: #87ceeb !important;
+}
+
+.offline:after {
+    
+    /*
+	Unicode Character 'COMBINING ENCLOSING CIRCLE BACKSLASH' (U+20E0)
+	http://www.unicode.org/faq/char_combmark.html
+
+	TO DO: how do I make this work as an actual combining character with ☁️  ?
+   */
+    
+    content: "\20E0";
+    color: #ff0000 !important;
+}
+
+.online:hover:after {
+    content: "online";
+}
+
+.offline:hover:after {
+    content: "offline";
+}
+
 #search-results li {
     font-weight: 700;
 }

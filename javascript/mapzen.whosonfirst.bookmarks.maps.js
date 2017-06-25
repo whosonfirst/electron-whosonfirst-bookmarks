@@ -26,57 +26,24 @@
 }(function(){
 
 	const screenshots = require("./mapzen.whosonfirst.bookmarks.screenshots.js");
+
+	var sub = false;
 	
 	var self = {
-		
+
 		'new_map': function(el){
 
-			var tangram;
-			var scene;
-			
-			var tangram_subs = {};
-			
-			var id = el.getAttribute("id");
+			var map_id = el.getAttribute("id");
 
-			if (! id){
+			if (! map_id){
 				console.log("map element missing an 'id' attribute");
 				return false;
 			}
 			
-			var screenshot = el.getAttribute("data-screenshot");
-			var wof_id = el.getAttribute("data-wof-id");
-			
-			var do_screenshot = false;
-			
-			if (screenshot == "place"){
-				
-				wof_id = parseInt(wof_id);
-				
-				if (wof_id > 0){
-					do_screenshot = true;
-				}
-			}
-
-			// https://mapzen.com/documentation/tangram/Javascript-API/#screenshot
-			
-			if (do_screenshot){
-				
-				var on_view = function(){
-					scene.screenshot().then(function(rsp){
-						screenshots.save(rsp, wof_id);
-					});
-				};
-
-				// some day we will have multiple "view complete" actions
-				// but today we do not... (20170624/thisisaaronland)
-				
-				tangram_subs[ "view_complete" ] = on_view;
-			}
-
 			var api_key = document.body.getAttribute("data-api-key");			
 			L.Mapzen.apiKey = api_key;
 
-			var map = L.Mapzen.map(id, {
+			var map = L.Mapzen.map(map_id, {
     				tangramOptions: {
     					scene: L.Mapzen.BasemapStyles.Refill
     				}
@@ -85,13 +52,40 @@
 			map.on("tangramloaded", function(e){
 
 				// https://mapzen.com/documentation/tangram/Javascript-API/#events
-					
-				tangram = e.tangramLayer;
-				scene = tangram.scene;
+				// https://mapzen.com/documentation/tangram/Javascript-API/#screenshot
 				
-				scene.subscribe(tangram_subs);
+				var tangram = e.tangramLayer;
+				var scene = tangram.scene;
+
+				scene.subscribe({
+					"view_complete": function(){
+
+						// NOT HAPPY ABOUT THIS BUT IT SEEMS TO BE
+						// THE ONLY WAY TO MAKE IT WORK...
+						
+						var map_el = document.getElementById(map_id);
+						
+						var screenshot = map_el.getAttribute("data-screenshot");
+						var wof_id = map_el.getAttribute("data-wof-id");
+						wof_id = parseInt(wof_id);				
+						
+						if (wof_id < 0){
+							return;
+						}
+						
+						if (screenshot != "place"){					
+							return;
+						}
+
+						// console.log("SCREENSHOTING " + wof_id);
+						
+						scene.screenshot().then(function(rsp){
+							screenshots.save(rsp, wof_id);
+						});
+					}
+				});
 			});
-			
+
 			return map;
 		}		
 	}

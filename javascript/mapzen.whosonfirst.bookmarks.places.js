@@ -95,7 +95,7 @@
 			var sql = "SELECT * FROM places WHERE wof_id = ?";
 			var params = [ id ];
 
-			console.log(sql, params);
+			// console.log(sql, params);
 			
 			conn.get(sql, params, cb);			
 		},
@@ -123,6 +123,8 @@
 		
 		'draw_place': function(pl){
 
+			console.log("DRAW PLACE");
+			
 			if (typeof(pl) == "string"){
 				pl = JSON.parse(pl);
 			}
@@ -413,14 +415,12 @@
 			var wof_id = pl['wof:id'];
 			var name = pl['wof:name'];
 
-			console.log("save " + name + " (" + wof_id + ")");
-			
 			var body = JSON.stringify(pl);
 
 			var sql = "REPLACE INTO places (wof_id, body, created) VALUES (?, ?, ?)";
 			var params = [ wof_id, body, dt ];
 
-			console.log(sql, params);
+			// console.log(sql, params);
 			
 			var dt = new Date;
 			dt = dt.toISOString();
@@ -433,8 +433,6 @@
 			var wof_id = pl['wof:id'];
 			var hierarchies = pl['wof:hierarchy'];
 			var count = hierarchies.length;
-
-			console.log("SAVE HIER " + count);
 
 			var possible = ['neighbourhood_id', 'locality_id', 'region_id', 'country_id' ];
 			
