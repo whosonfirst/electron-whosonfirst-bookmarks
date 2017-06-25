@@ -26,7 +26,35 @@
 }(function(){
 
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
-	
+
+	const styles = {
+		"bbox": {
+			"color": "#000",
+			"weight": 2,
+			"opacity": 1,
+			"radius": 2,
+			"fillColor": "#000",
+			"fillOpacity": .5
+		},
+		"point": {
+			"color": "#000",
+			"weight": 2,
+			"opacity": 1,
+			"radius": 6,
+			"fillColor": "#0BBDFF",
+			"fillOpacity": 1
+		}
+	};
+			
+	const handlers = {
+		"point": function(style){
+			return function(feature, latlon){
+				var m = L.circleMarker(latlon, style);
+				return m;
+			};
+		},
+	};
+		
 	var self = {
 		
 		'init': function(){
@@ -122,7 +150,7 @@
 				
 				map.fitBounds(bounds, opts);
 
-				self.add_geojson_to_map(map, feature);
+				self.add_geojson_to_map(map, feature, styles["bbox"]);
 			};
 
 			req.open("get", url, true);
@@ -160,7 +188,7 @@
 			
 			map.fitBounds(bounds, opts);
 
-			self.add_geojson_to_map(map, feature);
+			self.add_geojson_to_map(map, feature, styles["bbox"]);
 		},
 
 		'add_latlon_to_map': function(map, lat, lon, zoom){
@@ -186,7 +214,7 @@
 
 			map.setView([lat, lon], 16);
 
-			self.add_geojson_to_map(map, feature);
+			self.add_geojson_to_map(map, feature, styles["point"], handlers["point"]);
 		},
 
 		'add_featurecollection_to_map': function(map, featurecollection){
@@ -237,7 +265,7 @@
 			
 			map.fitBounds(bounds, opts);
 
-			self.add_geojson_to_map(map, featurecollection);
+			self.add_geojson_to_map(map, featurecollection, styles["point"], handlers["point"]);
 		},
 
 		'add_visits_to_map': function(map, visits){
@@ -285,9 +313,22 @@
 			return feature_collection;
 		},
 
-		'add_geojson_to_map': function(map, geojson){
+		'add_geojson_to_map': function(map, geojson, style, handler){
 
-			var layer = L.geoJSON(geojson).addTo(map);
+			var args = {};
+
+			if (style){
+				args["style"] = style;
+			}
+
+			if ((handler) && (style)){
+				handler = handler(style);	// I don't love this...
+				args["pointToLayer"] = handler;
+			}
+			
+			var layer = L.geoJSON(geojson, args);
+
+			layer.addTo(map);
 			return layer;			
 		}
 	}
