@@ -63,6 +63,11 @@ CREATE UNIQUE INDEX `by_tag` ON tags (`tag`);
 CREATE UNIQUE INDEX `by_tagid` ON places_tags (`wof_id`, `tag_id`);
 CREATE INDEX `by_date_trips` ON trips (`start_date`, `end_date`);
 CREATE INDEX `by_locality_trips` ON trips (`locality_id`);
+
+CREATE TABLE list_items (list_id INTEGER, wof_id INTEGER, order INTEGER);
+CREATE TABLE list_items (list_id INTEGER, wof_id INTEGER, idx INTEGER);
+CREATE UNIQUE INDEX `by_list` ON `lists` (`name`);
+CREATE UNIQUE INDEX `by_list_item` ON list_items (`list_id`, `wof_id`);
 ```
 
 ## See also

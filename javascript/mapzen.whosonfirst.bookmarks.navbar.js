@@ -27,7 +27,8 @@
 
 	const pt = require("./mapzen.whosonfirst.bookmarks.placetypes.js");
 	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
-	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
+	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
+	const lists = require("./mapzen.whosonfirst.bookmarks.lists.js");	
 	
 	var self = {
 		
@@ -42,6 +43,9 @@
 			var show_v = document.getElementById("show-visits");
 			show_v.onclick = function(){ visits.show_visits(); };
 
+			var show_l = document.getElementById("show-lists");
+			show_l.onclick = function(){ lists.show_lists(); };
+			
 			var show_d = document.getElementById("show-desires");
 			show_d.onclick = function(){ desires.show_desires(); };
 
