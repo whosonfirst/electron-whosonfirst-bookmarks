@@ -43,7 +43,16 @@
 			"radius": 6,
 			"fillColor": "#0BBDFF",
 			"fillOpacity": 1
+		},
+		"point_transit": {
+			"color": "#000",
+			"weight": 2,
+			"opacity": 1,
+			"radius": 6,
+			"fillColor": "#FFA500",
+			"fillOpacity": 1
 		}
+		
 	};
 			
 	const handlers = {
@@ -191,7 +200,7 @@
 			self.add_geojson_to_map(map, feature, styles["bbox"]);
 		},
 
-		'add_latlon_to_map': function(map, lat, lon, zoom){
+		'add_latlon_to_map': function(map, lat, lon, zoom, style, handler){
 
 			if (! zoom){
 				zoom = 16;
@@ -214,10 +223,10 @@
 
 			map.setView([lat, lon], 16);
 
-			self.add_geojson_to_map(map, feature, styles["point"], handlers["point"]);
+			self.add_geojson_to_map(map, feature, style, handler);
 		},
 
-		'add_featurecollection_to_map': function(map, featurecollection){
+		'add_featurecollection_to_map': function(map, featurecollection, style, handler){
 
 			var min_lat;
 			var min_lon;
@@ -254,7 +263,7 @@
 			}
 
 			if ((min_lat == max_lat) && (min_lon == max_lon)){
-				return self.add_latlon_to_map(map, min_lat, min_lon);
+				return self.add_latlon_to_map(map, min_lat, min_lon, null, style, handler);
 			}
 			
 			var sw = L.latLng(min_lat, min_lon);
@@ -265,15 +274,62 @@
 			
 			map.fitBounds(bounds, opts);
 
-			self.add_geojson_to_map(map, featurecollection, styles["point"], handlers["point"]);
+			self.add_geojson_to_map(map, featurecollection, style, handler);
 		},
 
 		'add_visits_to_map': function(map, visits){
 
 			var feature_collection = self.visits_to_featurecollection(visits);
-			return self.add_featurecollection_to_map(map, feature_collection);			
+			return self.add_featurecollection_to_map(map, feature_collection);
 		},
 
+		'add_transit_stops_to_map': function(stops, map){
+
+			if (! stops){
+				return;
+			}
+
+			var count_stops = stops.length;
+
+			if (! count_stops){
+				return;
+			};
+
+			var featurecollection = self.transit_stops_to_featurecollection(stops);
+			self.add_featurecollection_to_map(map, featurecollection, styles["point_transit"]);
+		},
+
+		'transit_stops_to_featurecollection': function(rows){
+
+			var features = [];
+			
+			var count_rows = rows.length;
+
+			for (var i=0; i < count_rows; i++){
+
+				var row = rows[i];
+
+				var geom = row["geometry"];
+
+				var props = {};
+
+				var feature = {
+					"type": "Feature",
+					"geometry": geom,
+					"properties": props,
+				};
+
+				features.push(feature);				
+			}
+
+			var featurecollection = {
+				"type": "FeatureCollection",
+				"features": features,
+			};
+
+			return featurecollection;			
+		},
+		
 		'places_to_featurecollection': function(rows){
 
 			var features = [];
@@ -361,16 +417,20 @@
 
 		'add_geojson_to_map': function(map, geojson, style, handler){
 
-			var args = {};
-
-			if (style){
-				args["style"] = style;
+			if (! style){
+				style = styles["point"];
 			}
 
-			if ((handler) && (style)){
-				handler = handler(style);	// I don't love this...
-				args["pointToLayer"] = handler;
+			if (! handler){
+				handler = handlers["point"](style);
 			}
+			
+			var args = {
+				"style": style,
+				"pointToLayer": handler
+			}
+
+			console.log(args);
 			
 			var layer = L.geoJSON(geojson, args);
 

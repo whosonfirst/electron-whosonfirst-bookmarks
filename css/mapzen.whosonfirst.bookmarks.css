@@ -257,6 +257,15 @@ q {
     content: " this place is no longer \"a thing\"";
 }
 
+.nearby-transit-stops-list-item {
+    text-transform: lowercase;
+}
+
+.nearby-transit-stops-list-item:before {
+    content: attr(data-served-by) " ";
+    color: #ccc;
+}
+
 .object-list {
     margin: 0px;
     padding: 0px;

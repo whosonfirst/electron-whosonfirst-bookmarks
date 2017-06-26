@@ -37,6 +37,8 @@
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
 	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");
 
+	const transit = require("./mapzen.whosonfirst.bookmarks.transit.js");	
+
 	const screenshots = require("./mapzen.whosonfirst.bookmarks.screenshots.js");
 	
 	const utils = require("./mapzen.whosonfirst.utils.js");	
@@ -267,6 +269,9 @@
 
 			var lists_wrapper = document.createElement("div");
 			lists_wrapper.setAttribute("id", "lists-wrapper");
+
+			var transit_wrapper = document.createElement("div");
+			transit_wrapper.setAttribute("id", "transit-wrapper");
 			
 			var dates = self.render_dates(pl);			
 			var address = self.render_address(pl);
@@ -286,7 +291,8 @@
 			right_panel.appendChild(dates);			
 			right_panel.appendChild(desires_wrapper);			
 			right_panel.appendChild(visits_wrapper);
-			right_panel.appendChild(lists_wrapper);			
+			right_panel.appendChild(lists_wrapper);
+			right_panel.appendChild(transit_wrapper);			
 			right_panel.appendChild(details);
 			
 			canvas.reset();
@@ -302,6 +308,32 @@
 
 			var pt = pl["wof:placetype"];
 
+			if (pt == "venue"){
+
+				var lat = pl["geom:latitude"];
+				var lon = pl["geom:longitude"];				
+
+				var cb = function(err, rsp){
+
+					if (err){
+						fb.error(err);
+						return;
+					}
+
+					var stops = transit.render_stops(rsp["stops"]);
+
+					var open = false;
+					var expandable = utils.render_expandable(stops, { "label": "nearby transit", "open": open });
+					
+					var wrapper = document.getElementById("transit-wrapper");
+					wrapper.appendChild(expandable);
+
+					geojson.add_transit_stops_to_map(rsp["stops"], map);
+				};
+				
+				transit.get_nearby(lat, lon, cb);
+			}
+			
 			if ((pt == "neighbourhood") || (pt == "locality") || (pt == "region") || (pt == "country")){
 				
 				var placetypes = require("./mapzen.whosonfirst.bookmarks.placetypes.js");
