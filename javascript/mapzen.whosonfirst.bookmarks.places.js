@@ -325,38 +325,57 @@
 		'draw_lists': function(pl){
 
 			var lists = require("./mapzen.whosonfirst.bookmarks.lists.js");
-
-			var cb = function(err, rows){
+			
+			var get_cb = function(err, rows){
 
 				if (err){
 					fb.error(err);
 					return;
 				}
 
-				var wof_id = pl["wof:id"];
-
-				var lists_menu = lists.render_lists_menu(rows, function(err){
+				var lists_for_place = lists.render_lists_for_place(rows, pl);
+								
+				var select_cb = function(err, rows){
 
 					if (err){
 						fb.error(err);
 						return;
 					}
+					
+					var wof_id = pl["wof:id"];
+					
+					var lists_menu = lists.render_lists_menu(rows, function(err){
+						
+						if (err){
+							fb.error(err);
+							return;
+						}
+	
+						self.draw_lists(pl);
+					});
 
-					self.draw_lists(pl);
-				});
-				
-				lists_menu.setAttribute("data-wof-id", wof_id);
-				
-				var open = true;
-				var expandable = utils.render_expandable(lists_menu, { "label": "lists", "open": open });
+					var lists_controls = document.createElement("div");
+					lists_controls.appendChild(lists_for_place);
+					lists_controls.appendChild(lists_menu);					
 
-				var lists_wrapper = document.getElementById("lists-wrapper");
-				lists_wrapper.innerHTML = "";
-				
-				lists_wrapper.appendChild(expandable);
+					var open = false;
+					var expandable = utils.render_expandable(lists_controls, { "label": "lists", "open": open });
+
+					var lists_wrapper = document.getElementById("lists-wrapper");
+					lists_wrapper.innerHTML = "";
+
+					lists_wrapper.appendChild(expandable);
+
+					// I DON'T LIKE THIS AT ALL...
+					
+					var menu = document.getElementById("lists-menu");
+					menu.setAttribute("data-wof-id", wof_id);					
+				};
+
+				lists.get_lists(select_cb);
 			};
 
-			lists.get_lists(cb);
+			lists.get_lists_for_place(pl, get_cb);			
 		},
 		
 		'draw_visits_list': function(pl, map){

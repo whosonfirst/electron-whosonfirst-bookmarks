@@ -50,7 +50,7 @@
 			
 		},
 
-		'create_new_list': function(cb){
+		'create_list': function(cb){
 
 			var d = dialogs();
 			
@@ -65,15 +65,7 @@
 					return false;
 				}
 				
-				self.add_list(name, function(err){
-
-					if (err){
-						fb.error(err);
-						return false;
-					}
-					
-					cb();
-				});
+				self.add_list(name, cb);
 			})
 		},
 
@@ -85,7 +77,16 @@
 			var sql = "INSERT INTO lists (name, created) VALUES (?,?)";
 			var params = [ name, dt ];
 
-			conn.run(sql, params, cb);
+			conn.run(sql, params, function(err){
+
+				if (err){
+					cb(err);
+					return;
+				}
+
+				var list_id = this.lastID;
+				self.get_list(list_id, cb);
+			});
 		},
 
 		'add_list_item': function(list_id, wof_id, cb){
@@ -320,8 +321,18 @@
 				self.create_new_list(self.show_lists);
 			};
 			
+			var list = self.render_lists(rows);
+			
+			left_panel.appendChild(button);			
+			left_panel.appendChild(list);
+			
+			canvas.draw(left_panel);			
+		},
+
+		'render_lists': function(rows){
+
 			var list = document.createElement("ul");
-			list.setAttribute("class", "list");
+			list.setAttribute("class", "list lists");
 
 			var count_rows = rows.length;
 
@@ -333,7 +344,7 @@
 				
 				var span = document.createElement("span");
 				span.setAttribute("data-list-id", list_id);
-				span.setAttribute("class", "hey-look click-me");
+				span.setAttribute("class", "lists-item hey-look click-me");
 				span.appendChild(document.createTextNode(list_name));
 
 				span.onclick = function(e){
@@ -345,7 +356,7 @@
 				};
 		
 				var remove = document.createElement("span");
-				remove.setAttribute("class", "btn btn-sm remove");				
+				remove.setAttribute("class", "btn btn-sm remove lists-item-remove");	
 				remove.setAttribute("data-list-id", list_id);
 				remove.setAttribute("data-list-name", list_name);				
 				remove.appendChild(document.createTextNode("⃠"));
@@ -383,11 +394,81 @@
 
 				list.appendChild(item);
 			}
+
+			return list;
+		},
+
+		'render_lists_for_place': function(rows, pl){
+
+			var wof_id = pl["wof:id"];
 			
-			left_panel.appendChild(button);			
-			left_panel.appendChild(list);
-			
-			canvas.draw(left_panel);			
+			var list = document.createElement("ul");
+			list.setAttribute("class", "list-inline lists-for-place");
+
+			var count_rows = rows.length;
+
+			for (var i=0; i < count_rows; i++){
+
+				var row = rows[i];
+				var list_id = row["id"];
+				var list_name = row["name"];				
+				
+				var span = document.createElement("span");
+				span.setAttribute("data-list-id", list_id);
+				span.setAttribute("class", "lists-for-place-item hey-look click-me");
+				span.appendChild(document.createTextNode(list_name));
+
+				span.onclick = function(e){
+
+					var el = e.target;
+					var list_id = el.getAttribute("data-list-id");
+
+					self.show_list(list_id);
+				};
+		
+				var remove = document.createElement("span");
+				remove.setAttribute("class", "btn btn-sm remove lists-item-remove");
+				remove.setAttribute("data-list-name", list_name);				
+				remove.setAttribute("data-list-id", list_id);
+				remove.setAttribute("data-wof-id", wof_id);				
+				remove.appendChild(document.createTextNode("⃠"));
+
+				remove.onclick = function(e){
+
+					var el = e.target;
+					var list_id = el.getAttribute("data-list-id");
+					var list_name = el.getAttribute("data-list-name");
+
+					var q = "Are you sure you want to remove this place from list '" + list_name + "' ?";
+					var d = dialogs();					
+
+					d.confirm(q, function(ok){
+
+						if (! ok){
+							return;
+						}
+
+						self.remove_list_item(list_id, wof_id, function(err){
+
+							if (err){
+								fb.error(err);
+								return false;
+							}
+
+							var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+							places.draw_lists(pl);
+						});
+					});
+				};
+				
+				var item = document.createElement("li");
+				item.appendChild(span);
+				item.appendChild(remove);				
+
+				list.appendChild(item);
+			}
+
+			return list;
 		},
 		
 		'show_lists_menu': function(){
@@ -409,13 +490,17 @@
 			var select = document.createElement("select");
 			select.setAttribute("id", "lists-menu");
 			select.setAttribute("class", "form-control");
-
+			
+			var create_option = document.createElement("option");
+			create_option.setAttribute("value", "-1");
+			create_option.appendChild(document.createTextNode("Create new list"));			
+			
 			var null_option = document.createElement("option");
 			null_option.setAttribute("value", "0");
-			null_option.appendChild(document.createTextNode(""));
 
-			select.appendChild(null_option);
-			
+			select.appendChild(null_option);			
+			select.appendChild(create_option);
+
 			for (var i=0; i < count_rows; i++){
 
 				var row = rows[i];
@@ -429,25 +514,18 @@
 				select.appendChild(option)
 			}
 			
-			var create_option = document.createElement("option");
-			create_option.setAttribute("value", "-1");
-			create_option.appendChild(document.createTextNode("Create new list"));
-			
-			select.appendChild(create_option);
-
 			select.onchange = function(e){
 
-				var el = e.target;
-				
-				var wof_id = el.getAttribute("data-wof-id");
+				var select_el = e.target;
+				var wof_id = select_el.getAttribute("data-wof-id");
 
 				if (! wof_id){
 					console.log("missing WOF ID");
 					return false;
 				}
 				
-				var idx = el.selectedIndex;
-				var list_id = el.options[idx].value;
+				var idx = select_el.selectedIndex;
+				var list_id = select_el.options[idx].value;
 
 				if (list_id == 0){
 					return;
@@ -455,25 +533,54 @@
 
 				if (list_id == -1){
 					
-					self.create_new_list(function(err, row){
+					self.create_list(function(err, row){
 
 						if (err){
-							cb(err);
+							fb.error(err);
+							return;
 						}
-
-						console.log(row);
-						return;
-
-						var list_id = row["foo"];
+						
+						var list_id = row["id"];
 						self.add_list_item(list_id, wof_id, cb);
 					});
 				}
 
-				self.add_list_item(list_id, wof_id, cb);
+				var d = dialogs();				
+
+				d.confirm("Are you sure you want to add this item?", function(ok){
+
+					if (! ok){
+						return;
+					}
+					
+					self.add_list_item(list_id, wof_id, cb);
+				});
 			};
+
+			var label = document.createElement("label");
+			label.setAttribute("for", "lists-menu");
+			label.appendChild(document.createTextNode("Add to list"));
 			
-			return select;
-		}
+			var wrapper = document.createElement("div");
+			wrapper.setAttribute("class", "form-group");
+			wrapper.appendChild(label);			
+			wrapper.appendChild(select);
+			
+			return wrapper;
+		},
+
+		'get_lists_for_place': function(pl, cb){
+
+			var wof_id = pl["wof:id"];
+			
+			// var sql = "SELECT list_id FROM lists WHERE wof_id = ?";
+
+			var sql = "SELECT l.* FROM lists l, list_items i WHERE l.id = i.list_id AND i.wof_id = ?";
+			var params = [ wof_id ];
+
+			conn.all(sql, params, cb);
+		},
+
 	}
 
 	return self;

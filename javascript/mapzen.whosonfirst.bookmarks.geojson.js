@@ -29,12 +29,12 @@
 
 	const styles = {
 		"bbox": {
-			"color": "#000",
-			"weight": 2,
+			"color": "#ff0099",
+			"weight": 3,
 			"opacity": 1,
 			"radius": 2,
 			"fillColor": "#000",
-			"fillOpacity": .5
+			"fillOpacity": 0
 		},
 		"point": {
 			"color": "#000",
