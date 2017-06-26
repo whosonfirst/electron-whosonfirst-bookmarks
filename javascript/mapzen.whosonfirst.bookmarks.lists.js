@@ -34,13 +34,14 @@
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 
 	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");
+	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
 	
 	const dialogs = require("dialogs");		// https://www.npmjs.com/package/dialogs
 	
 	/*
 	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
 	const places = require("./mapzen.whosonfirst.bookmarks.places.js");
-	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
+
 	const utils = require("./mapzen.whosonfirst.utils.js");
 	*/
 	
@@ -168,6 +169,14 @@
 			conn.all(sql, params, cb);			
 		},
 
+		'get_list_places': function(list_id, cb){
+
+			var sql = "SELECT p.* FROM places p, list_items i WHERE i.wof_id = p.wof_id AND i.list_id = ?";
+			var params = [ list_id ];
+
+			conn.all(sql, params, cb);			
+		},
+		
 		'show_list': function(id){
 
 			self.get_list(id, function(err, row){
@@ -219,7 +228,17 @@
 				}
 
 				self.draw_list_items(rows, map);
-			});			
+			});
+
+
+			self.get_list_places(list_id, function(err, rows){
+
+				var featurecollection = geojson.places_to_featurecollection(rows);
+				console.log(featurecollection);
+				
+				geojson.add_featurecollection_to_map(map, featurecollection);
+			});
+			
 		},
 
 		'draw_list_items': function(rows, map){

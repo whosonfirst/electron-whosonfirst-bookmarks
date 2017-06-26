@@ -273,7 +273,53 @@
 			var feature_collection = self.visits_to_featurecollection(visits);
 			return self.add_featurecollection_to_map(map, feature_collection);			
 		},
-		
+
+		'places_to_featurecollection': function(rows){
+
+			var features = [];
+			
+			var count_rows = rows.length;
+
+			for (var i=0; i < count_rows; i++){
+
+				var row = rows[i];
+
+				var pl = JSON.parse(row["body"]);
+				
+				var lat = pl['geom:latitude'];
+				var lon = pl['geom:longitude'];
+
+				if ((pl['lbl:latitude']) && (pl['lbl:longitude'])){
+					lat = pl['lbl:latitude'];
+					lon = pl['lbl:longitude'];
+				}
+			
+				var coords = [ lon, lat ];
+				
+				var geom = {
+					"type": "Point",
+					"coordinates": coords,
+				};
+
+				var props = {};
+
+				var feature = {
+					"type": "Feature",
+					"geometry": geom,
+					"properties": props,
+				};
+
+				features.push(feature);				
+			}
+
+			var feature_collection = {
+				"type": "FeatureCollection",
+				"features": features,
+			};
+
+			return feature_collection;
+		},
+
 		'visits_to_featurecollection': function(visits){
 
 			var features = [];
