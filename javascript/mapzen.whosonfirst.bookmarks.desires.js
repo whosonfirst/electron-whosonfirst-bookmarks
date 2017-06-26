@@ -38,7 +38,8 @@
 		4: "again",
 		5: "again maybe",
 		6: "again never",
-		7: "meh"
+		7: "meh",
+		8: "i would try this",		
 	};
 	
 	var self = {
