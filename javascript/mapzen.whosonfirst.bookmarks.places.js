@@ -265,6 +265,9 @@
 			var desires_wrapper = document.createElement("div");
 			desires_wrapper.setAttribute("id", "desires");
 
+			var lists_wrapper = document.createElement("div");
+			lists_wrapper.setAttribute("id", "lists-wrapper");
+			
 			var dates = self.render_dates(pl);			
 			var address = self.render_address(pl);
 			var details = self.render_details(pl);
@@ -283,6 +286,7 @@
 			right_panel.appendChild(dates);			
 			right_panel.appendChild(desires_wrapper);			
 			right_panel.appendChild(visits_wrapper);
+			right_panel.appendChild(lists_wrapper);			
 			right_panel.appendChild(details);
 			
 			canvas.reset();
@@ -292,6 +296,8 @@
 			var map = maps.new_map(map_el);
 			geojson.add_place_to_map(map, pl);
 
+			self.draw_lists(pl);
+			
 			self.draw_visits_list(pl, map);
 
 			var pt = pl["wof:placetype"];
@@ -316,6 +322,43 @@
 			namify.translate();
 		},
 
+		'draw_lists': function(pl){
+
+			var lists = require("./mapzen.whosonfirst.bookmarks.lists.js");
+
+			var cb = function(err, rows){
+
+				if (err){
+					fb.error(err);
+					return;
+				}
+
+				var wof_id = pl["wof:id"];
+
+				var lists_menu = lists.render_lists_menu(rows, function(err){
+
+					if (err){
+						fb.error(err);
+						return;
+					}
+
+					self.draw_lists(pl);
+				});
+				
+				lists_menu.setAttribute("data-wof-id", wof_id);
+				
+				var open = true;
+				var expandable = utils.render_expandable(lists_menu, { "label": "lists", "open": open });
+
+				var lists_wrapper = document.getElementById("lists-wrapper");
+				lists_wrapper.innerHTML = "";
+				
+				lists_wrapper.appendChild(expandable);
+			};
+
+			lists.get_lists(cb);
+		},
+		
 		'draw_visits_list': function(pl, map){
 
 			var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
