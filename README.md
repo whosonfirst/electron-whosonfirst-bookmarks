@@ -44,11 +44,7 @@ CREATE TABLE visits (
 			date TEXT,
 			name TEXT);
 
-CREATE TABLE places (
-			wof_id INTEGER,
-			body TEXT,
-			created TEXT
-		);
+CREATE TABLE places (wof_id INTEGER PRIMARY KEY, body TEXT,	created TEXT);
 
 CREATE TABLE tags (id INTEGER PRIMARY KEY AUTOINCREMENT, tag TEXT);
 
