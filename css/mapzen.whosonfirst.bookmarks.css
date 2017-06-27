@@ -26,6 +26,7 @@ q {
     overflow: scroll;
     background-color:#fff;
     padding: .5em;
+    border: 1px solid blue;
 }
 
 #controls {
@@ -39,10 +40,15 @@ q {
     font-size:small;
 }
 
+#footer {
+    border: 1px solid red;
+}
+
 #header {
     background-color: #fff;
     padding-top:2em;
     padding-bottom:1em;
+    border:solid 1px green;
 }
 
 #main {
@@ -57,7 +63,6 @@ q {
 }
 
 #network-status {
-    margin-right:1em;
     padding-top:.3em;
     font-size:1.5em;
     float:right;
