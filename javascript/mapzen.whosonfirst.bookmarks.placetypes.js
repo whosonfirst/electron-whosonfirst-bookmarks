@@ -43,6 +43,88 @@
 		'init': function(){
 		},
 
+		'show_neighbourhoods_for_locality': function(wof_id){
+
+			self.get_neighbourhoods_for_locality(wof_id, function(err, rows){
+
+				var span = document.createElement("span");
+				span.setAttribute("class", "namify click-me");
+				span.setAttribute("data-wof-id", wof_id);
+				span.appendChild(document.createTextNode(wof_id));
+
+				span.onclick = function(e){
+
+					var el = e.target;
+					var wof_id = el.getAttribute("data-wof-id");
+
+					var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+					places.show_place(wof_id);
+				};
+				
+				var header = document.createElement("h4");
+				header.appendChild(document.createTextNode("Neighbourhoods in "));
+				header.appendChild(span);
+				
+				var neighbourhoods = self.render_neighbourhoods_for_locality(rows);
+
+				var left_panel = document.createElement("div");
+				left_panel.setAttribute("class", "col-md-6 panel panel-left");
+				
+				var right_panel = document.createElement("div");
+				right_panel.setAttribute("class", "col-md-6 panel panel-right");
+				
+				var map_el = document.createElement("div");
+				map_el.setAttribute("id", "map");
+				
+				left_panel.appendChild(map_el);
+				
+				right_panel.appendChild(header);				
+				right_panel.appendChild(neighbourhoods);
+				
+				canvas.reset();
+				canvas.append(left_panel);
+				canvas.append(right_panel);
+
+				namify.translate();
+			});
+		},
+
+		'render_neighbourhoods_for_locality': function(rows){
+
+			var list = document.createElement("ul");
+			list.setAttribute("class", "list");
+			
+			var count_rows = rows.length;
+
+			for (var i=0; i < count_rows; i++){
+
+				var row = rows[i];
+				var wof_id = row["wof_id"];
+
+				if (! wof_id){
+					continue;
+				}
+				
+				var item = document.createElement("li");
+				item.setAttribute("class", "namify click-me");
+				item.setAttribute("data-wof-id", wof_id);
+				item.appendChild(document.createTextNode(wof_id));
+
+				item.onclick = function(e){
+
+					var el = e.target;
+					var wof_id = el.getAttribute("data-wof-id");
+
+					var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+					places.show_place(wof_id);
+				};
+				
+				list.appendChild(item);
+			}
+
+			return list;
+		},
+		
 		'show_placetype': function(pt){
 
 			var pt_col = pt + "_id";
@@ -122,7 +204,8 @@
 				sm.appendChild(document.createTextNode("you've mentioned stuff here"));
 				
 				var visits = document.createElement("span");
-				visits.setAttribute("class", "placetype-count");
+				visits.setAttribute("class", "placetype-count click-me hey-look");
+				visits.setAttribute("data-wof-id", wof_id);
 				
 				if (count_visits == 1){
 					visits.appendChild(document.createTextNode(" once"));
@@ -134,6 +217,11 @@
 
 				visits.onclick = function(e){
 
+					var el = e.target;
+					var wof_id = el.getAttribute("data-wof-id");
+
+					var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+					places.show_place(wof_id);					
 				};
 
 				sm.appendChild(visits);
@@ -335,12 +423,23 @@
 
 			var mentions = document.getElementById("placetype-mentions-" + wof_id);
 
+			var show_neighbourhoods = function(e){
+				
+				var el = e.target;
+				var wof_id = el.getAttribute("data-wof-id");
+
+				self.show_neighbourhoods_for_locality(wof_id);
+			};
+			
 			if (count_hoods == 1){
 
 				var span = document.createElement("span");
 				span.setAttribute("class", "hey-look click-me");
-				span.appendChild(document.createTextNode("one neighbourhood"));
-				
+				span.setAttribute("data-wof-id", wof_id);
+				span.appendChild(document.createTextNode("one neighbourhood"));				
+
+				span.onclick = show_neighbourhoods;
+					
 				mentions.appendChild(document.createTextNode(" in "));
 				mentions.appendChild(span);
 			}
@@ -349,7 +448,10 @@
 
 				var span = document.createElement("span");
 				span.setAttribute("class", "hey-look click-me");
+				span.setAttribute("data-wof-id", wof_id);				
 				span.appendChild(document.createTextNode(count_hoods + " neighbourhoods"));
+
+				span.onclick = show_neighbourhoods;
 				
 				mentions.appendChild(document.createTextNode(" spanning "));
 				mentions.appendChild(span);				
@@ -467,6 +569,14 @@
 			}
 
 			return desires_list;
+		},
+
+		'get_neighbourhoods_for_locality': function(wof_id, cb){
+
+			var sql = "SELECT DISTINCT(neighbourhood_id) AS wof_id, COUNT(id) AS count_visits FROM visits WHERE locality_id = ? GROUP BY wof_id ORDER BY count_visits DESC";
+			var params = [ wof_id ];
+
+			conn.all(sql, params, cb);
 		}
 		
 	}
