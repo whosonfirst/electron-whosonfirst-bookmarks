@@ -161,7 +161,8 @@
 			}
 			
 			var status_button = document.createElement("button");
-			status_button.setAttribute("class", "btn btn-primary");
+			status_button.setAttribute("id", "status-button");			
+			status_button.setAttribute("class", "btn btn-default");
 			status_button.appendChild(document.createTextNode("Save"));
 
 			status_button.onclick = self.add_place;
@@ -278,10 +279,10 @@
 			var details = self.render_details(pl);
 			
 			var left_panel = document.createElement("div");
-			left_panel.setAttribute("class", "col-md-6 panel");
+			left_panel.setAttribute("class", "col-md-6 panel panel-left");
 
 			var right_panel = document.createElement("div");
-			right_panel.setAttribute("class", "col-md-6 panel");
+			right_panel.setAttribute("class", "col-md-6 panel panel-right");
 			
 			left_panel.appendChild(map_el);
 			left_panel.appendChild(controls);

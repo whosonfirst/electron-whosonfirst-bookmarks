@@ -430,8 +430,6 @@
 				"pointToLayer": handler
 			}
 
-			console.log(args);
-			
 			var layer = L.geoJSON(geojson, args);
 
 			layer.addTo(map);

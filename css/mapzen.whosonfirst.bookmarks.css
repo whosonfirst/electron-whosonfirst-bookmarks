@@ -23,10 +23,10 @@ q {
 
 #canvas {
     min-height:600px;
+    max-height:600px;    
     overflow: scroll;
     background-color:#fff;
     padding: .5em;
-    border: 1px solid blue;
 }
 
 #controls {
@@ -37,18 +37,31 @@ q {
 #feedback {
     background-color: #fff;
     margin:.5em;
+    margin-left: 2em;
     font-size:small;
 }
 
 #footer {
-    border: 1px solid red;
+    background-color:#fff;
+    min-height:75px;
+    max-height:75px;
+    /*
+    border-top:1px dashed #ededed;
+    padding-top:1em;
+    */
 }
 
+#footer-left {
+
+}
+
+#footer-right {
+
+}
 #header {
     background-color: #fff;
     padding-top:2em;
     padding-bottom:1em;
-    border:solid 1px green;
 }
 
 #main {
@@ -113,7 +126,15 @@ q {
 
 #search-wrapper {
     float:right !important:
-    border:1px solid green;
+}
+
+#status {
+    margin-right: .5em;
+}
+
+#status-button {
+
+
 }
 
 .address {
@@ -293,13 +314,26 @@ q {
 }
 
 .panel {
-    min-height:600px;
-    max-height:600px;
+    min-height:575px;
+    max-height:575px;
     overflow: scroll;
+    margin-bottom: 0px !important;
+    padding-bottom: 0px !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;    
+}
+
+.panel-left {
+
 }
 
 .panel-right {
-    border-bottom: 1px solid #000;
+    min-height:500px !important;    
+    max-height:500px !important;
+    width:50%;
+}
+
+.col-md-6 {
 }
 
 .place-details {

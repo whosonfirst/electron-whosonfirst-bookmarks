@@ -30,7 +30,7 @@
 
     <div class="row" id="header">
       
-      <div class="col-md-12">
+      <div class="col-md-10">
 
 	<ul class="list-inline">
 	    <li><button id="show-trips" class="btn btn-default btn-sm" disabled="disabled">trips</button></li>	    	    	    	  
@@ -41,6 +41,9 @@
 	    <li><button id="show-desires" class="btn btn-default btn-sm">desires</button></li>	  
 	</ul>
       </div>
+      <div class="col-md-1">
+        <div id="network-status" class="online"></div>
+      </div>
       
    </div>
 
@@ -49,13 +52,13 @@
    </div>
 
    <div class="row" id="footer">
-     <div class="col-md-8" style="border:solid thin;">
-       <!--  id="network-status" class="online"  -->
-       <div id="party-parrot"></div>
+     
+     <div class="col-md-8" id="footer-left">
+       <!-- <div id="party-parrot"></div> -->
        <div id="feedback"></div>
      </div>
      
-      <div class="col-md-4" style="border:solid thin;">
+      <div class="col-md-4" id="footer-left">
 
 	 <div id="search-wrapper">
 	 <form class="form-inline" id="search">
@@ -77,12 +80,13 @@
 	   -->
 	   
 	   <div class="form-group">	   
-	     <button type="submit" class="btn btn-primary" id="search-submit" class="btn">Search</button>
+	     <button type="submit" class="btn btn-default" id="search-submit" class="btn">Search</button>
 	   </div>
 	   
 	 </form>
+
 	 </div>
-	
+
       </div>
      
    </div>

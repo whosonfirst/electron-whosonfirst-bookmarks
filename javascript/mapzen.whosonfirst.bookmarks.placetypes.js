@@ -148,10 +148,10 @@
 			}
 
 			var left_panel = document.createElement("div");
-			left_panel.setAttribute("class", "col-md-6 panel");
+			left_panel.setAttribute("class", "col-md-6 panel panel-left");
 			
 			var right_panel = document.createElement("div");
-			right_panel.setAttribute("class", "col-md-6 panel");
+			right_panel.setAttribute("class", "col-md-6 panel panel-right");
 							
 			var map_el = document.createElement("div");
 			map_el.setAttribute("id", "map");

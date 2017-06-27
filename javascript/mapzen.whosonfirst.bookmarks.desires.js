@@ -125,10 +125,10 @@
 			var desire_wrapper = self.render_desire(status_id);
 			
 			var left_panel = document.createElement("div");
-			left_panel.setAttribute("class", "col-md-6 panel");
+			left_panel.setAttribute("class", "col-md-6 panel panel-left");
 
 			var right_panel = document.createElement("div");
-			right_panel.setAttribute("class", "col-md-6 panel");
+			right_panel.setAttribute("class", "col-md-6 panel panel-right");
 
 			left_panel.appendChild(map_el);
 			
@@ -162,10 +162,10 @@
 			var desire_wrapper = self.render_desire(status_id);
 			
 			var left_panel = document.createElement("div");
-			left_panel.setAttribute("class", "col-md-6 panel");
+			left_panel.setAttribute("class", "col-md-6 panel panel-left");
 
 			var right_panel = document.createElement("div");
-			right_panel.setAttribute("class", "col-md-6 panel");
+			right_panel.setAttribute("class", "col-md-6 panel panel-right");
 
 			left_panel.appendChild(map);
 			right_panel.appendChild(desire_wrapper);

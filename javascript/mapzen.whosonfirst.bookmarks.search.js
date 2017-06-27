@@ -34,8 +34,9 @@
 	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
 	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
-	const parrot = require("./mapzen.whosonfirst.partyparrot.js");
 	const utils = require("./mapzen.whosonfirst.utils.js");	
+
+	// const parrot = require("./mapzen.whosonfirst.partyparrot.js");
 	
 	var self = {
 		
@@ -243,8 +244,6 @@
 
 			var on_success = function(rsp){
 
-				parrot.stop();
-				
 				var possible = rsp["places"];
 				var count = possible.length;
 
@@ -310,7 +309,6 @@
 			};
 
 			api.execute_method(method, args, on_success, on_error);
-			parrot.start("searching!");
 		}
 	}
 
