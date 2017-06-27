@@ -239,7 +239,7 @@
 
 			var method = "whosonfirst.places.search";
 
-			args["extras"] = "addr:,geom:,wof:hierarchy,wof:tags";
+			args["extras"] = "addr:,edtf:,geom:,lbl:,mz:,wof:hierarchy,wof:tags";
 			args["per_page"] = 15;
 
 			var on_success = function(rsp){

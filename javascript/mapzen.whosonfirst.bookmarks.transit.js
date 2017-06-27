@@ -86,7 +86,6 @@
 			for (var i=0; i < count_stops; i++){
 
 				var stop = rows[i];
-				console.log(stop);
 				
 				var name = stop["name"];
 				var osid = stop["onestop_id"];

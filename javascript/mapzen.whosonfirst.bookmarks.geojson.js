@@ -108,7 +108,7 @@
 				return;
 			}
 
-			var mz_uri = pl["mz:url"];
+			var mz_uri = pl["mz:uri"];
 
 			if (mz_uri){
 
@@ -117,7 +117,7 @@
 					return;
 				};
 					
-				self.add_mzuri_to_map(map, mz_uri, on_success, on_error);
+				self.add_mzuri_to_map(map, mz_uri, on_error);
 				return;
 			}
 
@@ -162,7 +162,7 @@
 				self.add_geojson_to_map(map, feature, styles["bbox"]);
 			};
 
-			req.open("get", url, true);
+			req.open("get", mz_uri, true);
 			req.send();
 		},
 		
