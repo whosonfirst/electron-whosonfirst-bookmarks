@@ -394,6 +394,44 @@
 			}
 
 			return stats;
+		},
+
+		'render_menu': function(selected, onclick){
+
+			var wrapper = document.createElement("div");
+			wrapper.setAttribute("class", "desire-wrapper");
+			
+			var status_select = document.createElement("select");
+			status_select.setAttribute("id", "status");
+
+			var all_desires = self.get_list();
+
+			for (var id in all_desires){
+
+				var option = document.createElement("option");
+				option.setAttribute("value", id);
+				option.appendChild(document.createTextNode(all_desires[id]));
+
+				if ((selected) && (selected == id)){
+					option.setAttribute("selected", "selected");
+				}
+				
+				status_select.appendChild(option);
+			}
+			
+			var status_button = document.createElement("button");
+			status_button.setAttribute("id", "status-button");			
+			status_button.setAttribute("class", "btn btn-default");
+			status_button.appendChild(document.createTextNode("Save"));
+
+			if (onclick){
+				status_button.onclick = onclick;
+			}
+
+			wrapper.appendChild(status_select);
+			wrapper.appendChild(status_button);
+
+			return wrapper;
 		}
 	};
 	

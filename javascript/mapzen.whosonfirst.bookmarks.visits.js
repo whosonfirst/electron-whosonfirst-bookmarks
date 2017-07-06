@@ -25,8 +25,6 @@
 
 }(function(){
 
-	console.log("VISITS");
-	
 	const db = require("./mapzen.whosonfirst.bookmarks.database.js");
 	const conn = db.conn();
 	
@@ -158,6 +156,16 @@
 			wrapper.appendChild(place_details);
 			wrapper.appendChild(p);			
 
+			var cb = function(e){
+
+				var status = document.getElementById("status");
+				status = status.value;
+				
+			};
+			
+			var select = desires.render_menu(status_id, cb);
+			// wrapper.appendChild(select);
+			
 			var details = utils.render_object(row);
 			var details_wrapper = utils.render_expandable(details);
 			
