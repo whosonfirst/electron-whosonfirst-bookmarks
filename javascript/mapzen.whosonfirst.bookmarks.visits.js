@@ -159,12 +159,23 @@
 			var cb = function(e){
 
 				var status = document.getElementById("status");
-				status = status.value;
+				var status_id = status.value;
+
+				var dt = new Date;
+				dt = dt.toISOString();
 				
+				var update = {
+					"status_id" : status_id,
+					"date": dt
+				};
+
+				self.update_visit(row, update, function(r){
+					self.show_visit(row["id"]);
+				});
 			};
 			
 			var select = desires.render_menu(status_id, cb);
-			// wrapper.appendChild(select);
+			wrapper.appendChild(select);
 			
 			var details = utils.render_object(row);
 			var details_wrapper = utils.render_expandable(details);
@@ -247,9 +258,6 @@
 
 			var sql = "SELECT * FROM visits WHERE id = ?";
 			var params = [ id ];
-
-			console.log(sql, params);
-
 			conn.get(sql, params, cb);
 		},
 		
@@ -440,6 +448,24 @@
 			};
 
 			self.save_visit(pl, status_id, on_save);
+		},
+
+		'update_visit': function(visit, update, cb){
+
+			var where = [];
+			var params = [];
+
+			for (var k in update){
+				where.push(k + " = ?")
+				params.push(update[k])
+			}
+
+			where = where.join(",");
+			
+			var sql = "UPDATE visits SET " + where + " WHERE id = ?";
+			params.push(visit["id"]);
+
+			conn.run(sql, params, cb);
 		},
 		
 		'save_visit': function(pl, status_id, cb){
