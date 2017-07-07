@@ -37,7 +37,9 @@ CREATE TABLE visits (
 			longitude NUMERIC,
 			wof_id INTEGER,
 			neighbourhood_id INTEGER,
+			macrohood_id INTEGER,
 			locality_id INTEGER,
+			metroarea_id INTEGER,			
 			region_id INTEGER,
 			country_id INTEGER,
 			status_id INTEGER,
@@ -55,6 +57,11 @@ CREATE TABLE trips (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, start_date 
 CREATE INDEX `by_date` ON visits (`date`);
 CREATE INDEX `by_locality` ON visits (`locality_id`, `neighbourhood_id`);
 CREATE INDEX `by_neighbourhood` ON visits (`neighbourhood_id`);
+
+CREATE INDEX `by_macrohood` ON VISITS (`macrohood_id`);
+CREATE INDEX `by_metroarea` ON VISITS (`metroarea_id`);
+CREATE INDEX `by_locality_macro` ON VISITS (`locality_id`, `macrohood_id`);
+
 CREATE UNIQUE INDEX `by_tag` ON tags (`tag`);
 CREATE UNIQUE INDEX `by_tagid` ON places_tags (`wof_id`, `tag_id`);
 CREATE INDEX `by_date_trips` ON trips (`start_date`, `end_date`);

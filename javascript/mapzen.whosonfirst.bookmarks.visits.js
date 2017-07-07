@@ -504,13 +504,16 @@
 			var hier = pl['wof:hierarchy'];
 			hier = hier[0];				// PLEASE FIX ME
 
-			var neighbourhood_id = 0
-			var locality_id = 0
-			var region_id = 0
-			var country_id = 0
+			var neighbourhood_id = 0;
+			var macrohood_id = 0;		
+			var locality_id = 0;
+			var metroarea_id = 0;			
+			var region_id = 0;
+			var country_id = 0;
 
 			if (hier){
 				neighbourhood_id = hier['neighbourhood_id'];
+				macrohood_id = hier['macrohood_id'];				
 				locality_id = hier['locality_id'];
 				region_id = hier['region_id'];
 				country_id = hier['country_id'];			
@@ -519,9 +522,9 @@
 			var dt = new Date;
 			dt = dt.toISOString();
 
-			var sql = "INSERT INTO visits (wof_id, name, latitude, longitude, neighbourhood_id, locality_id, region_id, country_id, status_id, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			var sql = "INSERT INTO visits (wof_id, name, latitude, longitude, neighbourhood_id, macrohood_id, locality_id, metroarea_id, region_id, country_id, status_id, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
-			var params = [wof_id, name, lat, lon, neighbourhood_id, locality_id, region_id, country_id, status_id, dt];
+			var params = [wof_id, name, lat, lon, neighbourhood_id, macrohood_id, locality_id, metroarea_id, region_id, country_id, status_id, dt];
 
 			conn.run(sql, params, cb);
 		},

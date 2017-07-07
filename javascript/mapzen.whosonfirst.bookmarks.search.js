@@ -61,7 +61,7 @@
 
 		'parse_query': function(q, cb){
 
-			var re_wofid = /(?:wof)?id\:(\d+)/;
+			var re_wofid = /(?:wof)?id\:\s?(\d+)/;
 			var m_wofid = q.match(re_wofid);
 			
 			if (m_wofid){
