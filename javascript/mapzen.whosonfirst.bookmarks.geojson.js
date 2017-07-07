@@ -25,6 +25,7 @@
 
 }(function(){
 
+	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");	
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
 
 	const styles = {
@@ -434,7 +435,64 @@
 
 			layer.addTo(map);
 			return layer;			
+		},
+
+		// t is for "tangram"
+		
+		't_add_geojson_to_map': function(map, geojson){
+
+			// this doesn't work yet and really it seems like a kludge
+			// what we really want to do is, when we trigger a Tangram
+			// screenshot event, is to find all the GeoJSON Leaflet layers
+			// and convert them equivalent Tangram scene/layer thingies
+			// (20170707/thisisaaronland)
+			
+			return;
+			
+			// HACK...
+			var scene = maps.get_scene();
+
+			if (! scene){
+				setTimeout(function(){
+					self.t_add_geojson_to_map(map, geojson);
+				}, 1000);
+
+				return;
+			}
+			
+			var polys = {
+				"color": "rgba(255, 255, 0, 0.6)"
+			};
+			
+			var lines = {
+				"color": "rgb(255, 0, 153)", "width": "4px", "order":1000
+			};
+			
+			var source_id = "debug";
+
+			scene.config.layers.fixme = {
+		      		"data": {
+					"source": source_id
+				},
+				"draw": {
+					"polygons-overlay": polys,
+					"lines": lines
+				}
+			};
+		    
+			scene.config.styles['polygons-overlay'] = { "base": "polygons",  "blend": "overlay" };
+			
+			var source = {
+				"type": "GeoJSON",
+				"data": geojson
+			};
+
+			scene.setDataSource(source_id, source);
+
+			scene.updateConfig({ rebuild: true }).then(function() {});
+			scene.updateConfig({ rebuild: true }).then(function() {});
 		}
+		
 	}
 
 	return self;

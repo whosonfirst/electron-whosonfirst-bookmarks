@@ -28,6 +28,7 @@
 	const screenshots = require("./mapzen.whosonfirst.bookmarks.screenshots.js");
 
 	var sub = false;
+	var wtf;	// hack: see notes in mapzen.whosonfirst.bookmarks.geojson.js
 	
 	var self = {
 
@@ -57,6 +58,8 @@
 				var tangram = e.tangramLayer;
 				var scene = tangram.scene;
 
+				wtf = scene;	// hack: see notes in mapzen.whosonfirst.bookmarks.geojson.js
+				
 				scene.subscribe({
 					"view_complete": function(){
 
@@ -77,8 +80,6 @@
 							return;
 						}
 
-						// console.log("SCREENSHOTING " + wof_id);
-						
 						scene.screenshot().then(function(rsp){
 							screenshots.save(rsp, wof_id);
 						});
@@ -87,7 +88,13 @@
 			});
 
 			return map;
-		}		
+		},
+
+		// hack: see notes in mapzen.whosonfirst.bookmarks.geojson.js
+		
+		'get_scene': function(){
+			return wtf;
+		}
 	}
 
 	return self;
