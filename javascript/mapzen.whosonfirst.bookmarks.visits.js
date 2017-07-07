@@ -144,7 +144,16 @@
 			q.setAttribute("class", "click-me");
 			q.appendChild(document.createTextNode(desire));
 
-			var desc = self.render_visit_description(row);
+			var desc = self.render_visit_description(row, function(e){
+
+				var uw = document.getElementById("update-visit-wrapper");
+				var display = uw.style.display;
+
+				display = (display == "none") ? "block" : "none";
+				uw.style.display = display;
+				
+				return false;
+			});
 			
 			var p = document.createElement("p");
 			p.appendChild(desc);
@@ -155,6 +164,14 @@
 			wrapper.appendChild(h2);
 			wrapper.appendChild(place_details);
 			wrapper.appendChild(p);			
+
+			var update_wrapper = document.createElement("div");
+			update_wrapper.setAttribute("id", "update-visit-wrapper");
+
+			update_wrapper.style.display = "none";
+			
+			var update_header = document.createElement("h3");
+			update_header.appendChild(document.createTextNode("Update this visit"));
 
 			var cb = function(e){
 
@@ -175,7 +192,11 @@
 			};
 			
 			var select = desires.render_menu(status_id, cb);
-			wrapper.appendChild(select);
+
+			update_wrapper.appendChild(update_header);			
+			update_wrapper.appendChild(select);
+
+			wrapper.appendChild(update_wrapper);
 			
 			var details = utils.render_object(row);
 			var details_wrapper = utils.render_expandable(details);
@@ -185,8 +206,17 @@
 			return wrapper;
 		},
 
-		'render_visit_description': function(row){
+		'render_visit_description': function(row, cb){
 
+			if (! cb){
+				
+				cb = function(e){
+					var el = e.target;
+					var status_id = el.getAttribute("data-status-id");
+					desires.show_desire(status_id);
+				};
+			}
+			
 			var id = row["id"];
 
 			var status_id = row["status_id"];
@@ -198,11 +228,7 @@
 
 			q.appendChild(document.createTextNode(desire));
 
-			q.onclick = function(e){
-				var el = e.target;
-				var status_id = el.getAttribute("data-status-id");
-				desires.show_desire(status_id);
-			};
+			q.onclick = cb;
 		
 			var desc = document.createElement("span");
 			desc.setAttribute("id", "visit-description-" + id);
