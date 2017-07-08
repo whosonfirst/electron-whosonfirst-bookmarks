@@ -52,7 +52,9 @@ CREATE TABLE tags (id INTEGER PRIMARY KEY AUTOINCREMENT, tag TEXT);
 
 CREATE TABLE places_tags (wof_id INTEGER, tag_id INTEGER);
 
-CREATE TABLE trips (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, start_date TEXT, end_date TEXT, locality_id INTEGER, status_id INTEGER, notes TEXT);
+CREATE TABLE trips (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, arrival TEXT, departure TEXT, wof_id INTEGER, status_id INTEGER, notes TEXT);
+CREATE INDEX `trips_by_date` ON trips (`arrival`, `departure`);
+CREATE INDEX `trips_by_wofid` ON trips (`wof_id`);
 
 CREATE INDEX `by_date` ON visits (`date`);
 CREATE INDEX `by_locality` ON visits (`locality_id`, `neighbourhood_id`);
@@ -64,8 +66,6 @@ CREATE INDEX `by_locality_macro` ON VISITS (`locality_id`, `macrohood_id`);
 
 CREATE UNIQUE INDEX `by_tag` ON tags (`tag`);
 CREATE UNIQUE INDEX `by_tagid` ON places_tags (`wof_id`, `tag_id`);
-CREATE INDEX `by_date_trips` ON trips (`start_date`, `end_date`);
-CREATE INDEX `by_locality_trips` ON trips (`locality_id`);
 
 CREATE TABLE list_items (list_id INTEGER, wof_id INTEGER, order INTEGER);
 CREATE TABLE list_items (list_id INTEGER, wof_id INTEGER, idx INTEGER);

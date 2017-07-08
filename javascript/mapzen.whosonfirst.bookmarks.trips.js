@@ -40,11 +40,85 @@
 	
 	var self = {
 
-		'draw_trips': function(){
+		'show_trips': function(){
 
+			self.get_trips(function(err, rows){
 
+				if (err){
+					fb.error(err);
+					return false;
+				}
+
+				self.draw_trips(rows);
+			});
 		},
 
+		'get_trips': function(cb){
+
+			var sql = "SELECT * FROM trips ORDER BY arrival DESC, departure ASC";
+			var params = [];
+
+			conn.all(sql, params, cb);			
+		},
+
+		'draw_trips': function(rows){
+
+			var left_panel = document.createElement("div");
+			left_panel.setAttribute("class", "col-md-6 panel panel-left");
+
+			var right_panel = document.createElement("div");
+			right_panel.setAttribute("class", "col-md-6 panel panel-right");
+
+			var map_el = document.createElement("div");
+			map_el.setAttribute("id", "map");
+
+			var button = document.createElement("button");
+			button.setAttribute("class", "btn btn-sm");
+			button.appendChild(document.createTextNode("Add trip"));
+
+			button.onclick = function(e){
+				self.show_trip();
+				return false;
+			};
+			
+			var trips_list = self.render_trips_list(rows);
+			
+			left_panel.appendChild(map_el);
+			right_panel.appendChild(button);			
+			right_panel.appendChild(trips_list);
+
+			canvas.reset();			
+			canvas.append(left_panel);
+			canvas.append(right_panel);			
+		},
+
+		'render_trips_list': function(rows){
+
+			var count = rows.length;
+			
+			var list = document.createElement("ul");
+
+			for (var i=0; i < count; i++){
+
+				var trip = rows[i];
+
+				var dest = document.createElement("span");
+				dest.setAttribute("data-wof-id", trip["wof_id"]);
+				dest.appendChild(document.createTextNode(trip["name"]));
+
+				var dates = document.createElement("span");
+				dates.appendChild(document.createTextNode(trip["arrival"] + " - " + trip["departure"]));
+
+				var item = document.createElement("li");
+				item.appendChild(dest);
+				item.appendChild(dates);
+				
+				list.appendChild(item);
+			}
+
+			return list;
+		},
+		
 		'show_trip': function(trip){
 
 			var left_panel = document.createElement("div");
@@ -157,6 +231,7 @@
 			arrival_input.setAttribute("id", "calendar-arrival");
 			arrival_input.setAttribute("name", "calendar-arrival");			
 			arrival_input.setAttribute("type", "text");
+			arrival_input.setAttribute("size", "10");			
 			arrival_input.setAttribute("placeholder", "YYYY-MM-DD");
 			arrival_input.setAttribute("class", "trips-calendar form-control");
 
@@ -165,14 +240,15 @@
 
 			var departure_group = document.createElement("div");
 			departure_group.setAttribute("class", "form-group");
-
+			
 			var departure_label = document.createElement("label");
 			departure_label.setAttribute("for", "calendar-departure");
 			departure_label.appendChild(document.createTextNode("departure"));
 			
 			var departure_input = document.createElement("input");
 			departure_input.setAttribute("id", "calendar-departure");
-			departure_input.setAttribute("name", "calendar-departure");			
+			departure_input.setAttribute("name", "calendar-departure");
+			departure_input.setAttribute("size", "10");						
 			departure_input.setAttribute("type", "text");
 			departure_input.setAttribute("placeholder", "YYYY-MM-DD");			
 			departure_input.setAttribute("class", "trips-calendar form-control");
@@ -232,6 +308,49 @@
 
 			button.onclick = function(e){
 
+				try {
+					var dest_el = document.getElementById("destination");
+					var name = dest_el.value;
+					var wof_id = dest_el.getAttribute("data-wof-id");
+
+					var arrival_el = document.getElementById("calendar-arrival");
+					var arrival = arrival_el.value;
+					
+					var departure_el = document.getElementById("calendar-departure");
+					var departure = departure_el.value;
+					
+					var status = document.getElementById("calendar-status");
+					var status_id = status.value;
+					
+					var notes = "";
+					
+					var tr = {
+						'name': name,
+						'wof_id': wof_id,
+						'arrival': arrival,
+						'departure': departure,
+						'status_id': status_id,
+						'notes': notes,
+					};
+
+					self.add_trip(tr, function(err){
+
+						if (err){
+							console.log(err);
+							return false;
+						}
+
+						var trip_id = this.lastID;
+						self.show_trips();
+					});
+					
+				}
+
+				catch(e){
+
+					console.log(e);
+				}
+				
 				return false;
 			};
 			
@@ -247,6 +366,21 @@
 			trip_form.appendChild(button);			
 			
 			return trip_form;
+		},
+
+		'add_trip': function(trip, cb){
+
+			var wof_id = trip["wof_id"];
+			var name = trip["name"];			
+			var arrival = trip["arrival"];
+			var departure = trip["departure"];
+			var status_id = trip["status_id"];
+			var notes = trip["notes"];			
+			
+			var sql = "INSERT INTO trips (wof_id, name, arrival, departure, status_id, notes) VALUES (?, ?, ?, ?, ?, ?)";
+			var params = [ wof_id, name, arrival, departure, status_id, notes ];
+
+			conn.run(sql, params, cb);
 		}
 	}
 

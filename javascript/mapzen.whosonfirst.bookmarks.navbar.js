@@ -51,7 +51,7 @@
 			show_d.onclick = function(){ desires.show_desires(); };
 
 			var show_t = document.getElementById("show-trips");
-			show_t.onclick = function(){ trips.show_trip(); };
+			show_t.onclick = function(){ trips.show_trips(); };
 			
 			if (navigator.onLine){
 				self.network_notice(true);
