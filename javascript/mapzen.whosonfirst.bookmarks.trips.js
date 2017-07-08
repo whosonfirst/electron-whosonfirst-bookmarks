@@ -29,7 +29,9 @@
 	const conn = db.conn();
 
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
-	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");	
+	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");
+
+	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");		
 
 	const status = {
 		0: "unknown",
@@ -104,8 +106,19 @@
 
 				var dest = document.createElement("span");
 				dest.setAttribute("data-wof-id", trip["wof_id"]);
+				dest.setAttribute("data-trip-id", trip["id"]);				
+				dest.setAttribute("class", "hey-look click-me");
 				dest.appendChild(document.createTextNode(trip["name"]));
 
+				dest.onclick = function(e){
+
+					var el = e.target;
+					var trip_id = el.getAttribute("data-trip-id");
+
+					self.show_trip(trip_id);
+					return false;
+				};
+				
 				var dates = document.createElement("span");
 				dates.appendChild(document.createTextNode(trip["arrival"] + " - " + trip["departure"]));
 
@@ -118,8 +131,29 @@
 
 			return list;
 		},
+
+		'get_trip': function(trip_id, cb){
+
+			var sql = "SELECT * FROM trips WHERE id = ?";
+			var params = [ trip_id ];
+
+			conn.get(sql, params, cb);
+		},
 		
-		'show_trip': function(trip){
+		'show_trip': function(trip_id){
+
+			self.get_trip(trip_id, function(err, row){
+
+				if (err){
+					fb.error(err);
+					return false;
+				}
+				
+				self.draw_trip(row);
+			});
+		},
+		
+		'draw_trip': function(trip){			
 
 			var left_panel = document.createElement("div");
 			left_panel.setAttribute("class", "col-md-6 panel panel-left");
@@ -151,6 +185,12 @@
 			
 			map.fitBounds(bounds, opts);
 
+			// maybe?
+			
+			if (trip){
+				return;
+			}
+			
 			// please get API key...
 
 			// https://mapzen.com/documentation/mapzen-js/search/#control-the-search-query-behavior
@@ -214,7 +254,8 @@
 			dest_input.setAttribute("type", "text");
 			dest_input.setAttribute("class", "trips-destination form-control");
 			dest_input.setAttribute("data-wof-id", "");			
-
+			dest_input.setAttribute("disabled", "disabled");
+			
 			dest_group.appendChild(dest_label);
 			dest_group.appendChild(dest_input);			
 
@@ -295,10 +336,12 @@
 			notes_label.setAttribute("for", "calendar-notes");
 			notes_label.appendChild(document.createTextNode("notes"));
 
-			var notes_text = document.createElement("textarea");
-
+			var notes_input = document.createElement("textarea");
+			notes_input.setAttribute("id", "calendar-notes");
+			notes_input.setAttribute("name", "calendar-notes");
+			
 			notes_group.appendChild(notes_label);
-			notes_group.appendChild(notes_text);
+			notes_group.appendChild(notes_input);
 			
 			// save button
 
@@ -319,10 +362,11 @@
 					var departure_el = document.getElementById("calendar-departure");
 					var departure = departure_el.value;
 					
-					var status = document.getElementById("calendar-status");
-					var status_id = status.value;
+					var status_el = document.getElementById("calendar-status");
+					var status_id = status_el.value;
 					
-					var notes = "";
+					var notes_el = document.getElementById("calendar-notes");
+					var notes = notes_el.value;
 					
 					var tr = {
 						'name': name,
@@ -333,21 +377,11 @@
 						'notes': notes,
 					};
 
-					self.add_trip(tr, function(err){
-
-						if (err){
-							console.log(err);
-							return false;
-						}
-
-						var trip_id = this.lastID;
-						self.show_trips();
-					});
-					
+					// console.log(tr);
+					self.save_trip(tr);					
 				}
 
 				catch(e){
-
 					console.log(e);
 				}
 				
@@ -364,10 +398,49 @@
 			trip_form.appendChild(status_group);
 			trip_form.appendChild(notes_group);			
 			trip_form.appendChild(button);			
+
+			if (trip){
+
+				// TO DO : trip ID
+
+				console.log(trip);
+				
+				dest_input.value = trip["name"];
+				dest_input.setAttribute("data-wof-id", trip["wof_id"]);
+
+				arrival_input.value = trip["arrival"];
+				departure_input.value = trip["departure"];
+
+				// TO DO : status
+				
+				notes_input.value = trip["notes"];				
+			}
 			
 			return trip_form;
 		},
 
+		'save_trip': function(trip){
+
+			self.add_trip(trip, function(err){
+				
+				if (err){
+					console.log(err);
+					return false;
+				}
+
+				var wof_id = trip["wof_id"];
+
+				setTimeout(function(){
+					var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+					places.fetch_place(wof_id);
+				}, 10);
+				
+				var trip_id = this.lastID;
+				self.show_trips();
+			});
+			
+		},
+		
 		'add_trip': function(trip, cb){
 
 			var wof_id = trip["wof_id"];
