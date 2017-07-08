@@ -29,6 +29,7 @@
 	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
 	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
 	const lists = require("./mapzen.whosonfirst.bookmarks.lists.js");	
+	const trips = require("./mapzen.whosonfirst.bookmarks.trips.js");
 	
 	var self = {
 		
@@ -49,6 +50,9 @@
 			var show_d = document.getElementById("show-desires");
 			show_d.onclick = function(){ desires.show_desires(); };
 
+			var show_t = document.getElementById("show-trips");
+			show_t.onclick = function(){ trips.show_add_trip(); };
+			
 			if (navigator.onLine){
 				self.network_notice(true);
 			}
