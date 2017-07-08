@@ -29,9 +29,15 @@
 	const conn = db.conn();
 
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
+	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");	
 
-	// https://www.npmjs.com/package/js-datepicker
-
+	const status = {
+		0: "unknown",
+		1: "tentative",
+		2: "confirmed",
+		3: "i want this to happen"
+	};
+	
 	var self = {
 
 		'draw_trips': function(){
@@ -39,7 +45,7 @@
 
 		},
 
-		'show_add_trip': function(){
+		'show_trip': function(trip){
 
 			var left_panel = document.createElement("div");
 			left_panel.setAttribute("class", "col-md-6 panel panel-left");
@@ -50,36 +56,199 @@
 			var map_el = document.createElement("div");
 			map_el.setAttribute("id", "map");
 
-			var trip_form = document.createElement("form");
-
-			var dest = document.createElement("input");
-			dest.setAttribute("type", "text");
-
-			var start = document.createElement("div");
-			start.setAttribute("id", "start");
-
-			var end = document.createElement("div");
-			end.setAttribute("id", "end");
-			
-			trip_form.appendChild(dest);
-			trip_form.appendChild(start);
-			trip_form.appendChild(end);			
+			var edit_form = self.render_edit_trip(trip);
 			
 			left_panel.appendChild(map_el);
-			right_panel.appendChild(trip_form);
+			right_panel.appendChild(edit_form);
 
 			canvas.reset();			
 			canvas.append(left_panel);
 			canvas.append(right_panel);			
 
-			var start_picker = require("js-datepicker/datepicker.js");
-			start_picker(start, {});
+			var map = maps.new_map(map_el);
 
-			var end_picker = require("js-datepicker/datepicker.js");
-			end_picker(end, {});
+			// please do something smarter...
 			
+			var sw = L.latLng(-50, -150);
+			var ne = L.latLng(50, 150);
+			
+			var bounds = L.latLngBounds(sw, ne);
+			var opts = { "padding": [100, 100] };
+			
+			map.fitBounds(bounds, opts);
+
+			// please get API key...
+
+			// https://mapzen.com/documentation/mapzen-js/search/#control-the-search-query-behavior
+			// https://mapzen.com/documentation/search/search/#available-search-parameters
+			
+			var layers = [
+				"locality",
+				"country"
+			];
+
+			var params = {
+				"sources": "wof"
+			};
+			
+			var opts = {
+				"layer": layers,
+				"params": params,
+				"panToPoint": false,
+			};
+			
+			var geocoder = L.Mapzen.geocoder();
+			geocoder.addTo(map, opts);
+
+			// https://github.com/mapzen/leaflet-geocoder#events
+			
+			geocoder.on('select', function(e) {
+
+				var feature = e.feature;
+				
+				if (! feature){
+					return;
+				}
+				
+				var bbox = feature['bbox'];
+				var props = feature['properties'];
+
+				var name = props["name"];
+				var wof_id = props["source_id"];
+
+				var dest = document.getElementById("destination");
+				dest.setAttribute("data-wof-id", wof_id);
+				dest.value = name;
+			});
+		},
+
+		'render_edit_trip': function(trip){
+
+			// destination
+
+			var dest_group = document.createElement("div");
+			dest_group.setAttribute("class", "form-group");
+			dest_group.setAttribute("id", "trip-form");			
+
+			var dest_label = document.createElement("label");
+			dest_label.setAttribute("for", "destination");
+			dest_label.appendChild(document.createTextNode("destination"));
+			
+			var dest_input = document.createElement("input");
+			dest_input.setAttribute("id", "destination");
+			dest_input.setAttribute("name", "destination");			
+			dest_input.setAttribute("type", "text");
+			dest_input.setAttribute("class", "trips-destination form-control");
+			dest_input.setAttribute("data-wof-id", "");			
+
+			dest_group.appendChild(dest_label);
+			dest_group.appendChild(dest_input);			
+
+			// arrival, departure
+			
+			var arrival_group = document.createElement("div");
+			arrival_group.setAttribute("class", "form-group");
+
+			var arrival_label = document.createElement("label");
+			arrival_label.setAttribute("for", "calendar-arrival");
+			arrival_label.appendChild(document.createTextNode("arrival"));
+			
+			var arrival_input = document.createElement("input");
+			arrival_input.setAttribute("id", "calendar-arrival");
+			arrival_input.setAttribute("name", "calendar-arrival");			
+			arrival_input.setAttribute("type", "text");
+			arrival_input.setAttribute("placeholder", "YYYY-MM-DD");
+			arrival_input.setAttribute("class", "trips-calendar form-control");
+
+			arrival_group.appendChild(arrival_label);
+			arrival_group.appendChild(arrival_input);			
+
+			var departure_group = document.createElement("div");
+			departure_group.setAttribute("class", "form-group");
+
+			var departure_label = document.createElement("label");
+			departure_label.setAttribute("for", "calendar-departure");
+			departure_label.appendChild(document.createTextNode("departure"));
+			
+			var departure_input = document.createElement("input");
+			departure_input.setAttribute("id", "calendar-departure");
+			departure_input.setAttribute("name", "calendar-departure");			
+			departure_input.setAttribute("type", "text");
+			departure_input.setAttribute("placeholder", "YYYY-MM-DD");			
+			departure_input.setAttribute("class", "trips-calendar form-control");
+
+			departure_group.appendChild(departure_label);
+			departure_group.appendChild(departure_input);			
+			
+			var calendar_group = document.createElement("div");			
+			calendar_group.appendChild(arrival_group);
+			calendar_group.appendChild(departure_group);			
+
+			// status
+
+			var status_group = document.createElement("div");
+			status_group.setAttribute("class", "form-group");
+
+			var status_label = document.createElement("label");
+			status_label.setAttribute("for", "calendar-status");
+			status_label.appendChild(document.createTextNode("status"));
+			
+			var status_input = document.createElement("select");
+			status_input.setAttribute("id", "calendar-status");
+			status_input.setAttribute("name", "calendar-status");			
+			status_input.setAttribute("class", "trips-status form-control");
+
+			for (var i in status){
+
+				var option = document.createElement("option");
+				option.setAttribute("value", i);
+				option.appendChild(document.createTextNode(status[i]));
+
+				status_input.appendChild(option);
+			}
+			
+			status_group.appendChild(status_label);
+			status_group.appendChild(status_input);			
+			
+			// notes
+
+			var notes_group = document.createElement("div");
+			notes_group.setAttribute("class", "form-group");
+
+			var notes_label = document.createElement("label");
+			notes_label.setAttribute("for", "calendar-notes");
+			notes_label.appendChild(document.createTextNode("notes"));
+
+			var notes_text = document.createElement("textarea");
+
+			notes_group.appendChild(notes_label);
+			notes_group.appendChild(notes_text);
+			
+			// save button
+
+			var button = document.createElement("button");
+			button.setAttribute("class", "btn btn-primary");
+			button.appendChild(document.createTextNode("Save trip"));
+
+			button.onclick = function(e){
+
+				return false;
+			};
+			
+			// form
+
+			var trip_form = document.createElement("form");
+			trip_form.setAttribute("class", "form");
+			
+			trip_form.appendChild(dest_group);
+			trip_form.appendChild(calendar_group);
+			trip_form.appendChild(status_group);
+			trip_form.appendChild(notes_group);			
+			trip_form.appendChild(button);			
+			
+			return trip_form;
 		}
-	};
+	}
 
 	return self;
 }));
