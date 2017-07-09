@@ -56,7 +56,7 @@
 			
 			var args = {
 				"id": id,
-				"extras": "addr:,edtf:,geom:,lbl:,mz:,wof:hierarchy,wof:tags"
+				"extras": "addr:,edtf:,geom:,lbl:,mz:,wof:hierarchy,wof:superseded_by,wof:tags"
 			};
 
 			var api_key = document.body.getAttribute("data-api-key");
@@ -125,8 +125,6 @@
 		
 		'draw_place': function(pl){
 
-			console.log("DRAW PLACE");
-			
 			if (typeof(pl) == "string"){
 				pl = JSON.parse(pl);
 			}
@@ -277,6 +275,16 @@
 			var dates = self.render_dates(pl);			
 			var address = self.render_address(pl);
 			var details = self.render_details(pl);
+
+			var mentions_count = document.createElement("span");
+			mentions_count.setAttribute("id", "placetype-count-" + wof_id);
+			
+			var mentions_span = document.createElement("span");
+			mentions_span.setAttribute("id", "placetype-mentions-" + wof_id);
+			
+			var mentions_wrapper = document.createElement("div");
+			mentions_wrapper.appendChild(mentions_count);			
+			mentions_wrapper.appendChild(mentions_span);
 			
 			var left_panel = document.createElement("div");
 			left_panel.setAttribute("class", "col-md-6 panel panel-left");
@@ -289,7 +297,8 @@
 			
 			right_panel.appendChild(h2);
 			right_panel.appendChild(address);
-			right_panel.appendChild(dates);			
+			right_panel.appendChild(dates);
+			right_panel.appendChild(mentions_wrapper);
 			right_panel.appendChild(desires_wrapper);			
 			right_panel.appendChild(visits_wrapper);
 			right_panel.appendChild(lists_wrapper);
@@ -352,6 +361,49 @@
 				});
 			}
 
+			if (pt == "locality"){
+
+				var pts = require("./mapzen.whosonfirst.bookmarks.placetypes.js");
+
+				pts.get_visit_count_for_locality(wof_id, function(err, row){
+
+					if (err){
+						return;
+					}
+
+					var count = row["count_visits"];
+					var count_wrapper = document.getElementById("placetype-count-" + wof_id);
+
+					if (count == 0){
+						return;
+					}
+					
+					else if (count == 1){
+						count_wrapper.appendChild(document.createTextNode("you have mentioned "));
+
+						var sp = document.createElement("span");
+						sp.setAttribute("class", "hey-look");
+						sp.appendChild(document.createTextNode("one place"));
+
+						count_wrapper.appendChild(sp);
+						count_wrapper.appendChild(document.createTextNode(" here"));
+					}
+
+					else {
+
+						count_wrapper.appendChild(document.createTextNode("you have mentioned stuff here "));
+
+						var sp = document.createElement("span");
+						sp.setAttribute("class", "hey-look");
+						sp.appendChild(document.createTextNode(count + " times"));
+
+						count_wrapper.appendChild(sp);
+						
+						pts.get_neighbourhood_count_for_locality(wof_id, placetypes.draw_neighbourhood_count_for_locality);
+					}
+				});			
+			}
+			
 			namify.translate();
 		},
 

@@ -577,7 +577,15 @@
 			var params = [ wof_id ];
 
 			conn.all(sql, params, cb);
-		}
+		},
+
+		'get_visit_count_for_locality': function(wof_id, cb){
+			
+			var sql = "SELECT COUNT(id) AS count_visits FROM visits WHERE locality_id = ?";
+			var params = [ wof_id ];
+
+			conn.get(sql, params, cb);
+		},
 		
 	}
 
