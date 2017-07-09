@@ -30,7 +30,8 @@
 
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");
-
+	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
+	
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");		
 
 	const status = {
@@ -135,9 +136,70 @@
 
 			canvas.reset();			
 			canvas.append(left_panel);
-			canvas.append(right_panel);			
+			canvas.append(right_panel);
+
+			var map = maps.new_map(map_el);
+			self.draw_map_for_trips(map, rows);
 		},
 
+		'draw_map_for_trips': function(map, rows){
+
+			var count = rows.length;
+			
+			var tmp = {};
+
+			for (var i=0; i < count; i++){
+				var trip = rows[i];
+				var wof_id = trip["wof_id"];
+				tmp[ wof_id ] ++;
+			}
+
+			var places = [];
+
+			for (var wof_id in tmp){
+				places.push(wof_id);
+			}
+
+			var sql = "SELECT * FROM places WHERE wof_id in (" + places.join(",") + ")";
+			var params = [];
+
+			console.log(sql);
+			
+			conn.all(sql, params, function(err, rows){
+
+				if (err){
+					console.log(err);
+					return;
+				}
+
+				var features = [];
+				
+				var count = rows.length;
+
+				for (var i = 0; i < count; i++){
+
+					var row = rows[i];
+					var body = row["body"];
+
+					var data = JSON.parse(body);
+
+					var lat = data["geom:latitude"];
+					var lon = data["geom:longitude"];
+
+					var coords = [ lon, lat ];
+					var geom = { "type": "Point", "coordinates": coords };
+
+					var feature = { "type": "Feature", "geometry": geom };
+					features.push(feature);
+				}
+
+				var featurecollection = { "type": "FeatureCollection", "features": features };
+				geojson.add_featurecollection_to_map(map, featurecollection);
+			});
+			
+			console.log(places);
+		},
+		
 		'render_trips_list': function(rows){
 
 			var count = rows.length;
@@ -196,6 +258,29 @@
 				dates.setAttribute("class", "trips-list-item-dates");
 				dates.appendChild(document.createTextNode(trip["arrival"] + " to " + trip["departure"]));
 
+				var remove = document.createElement("button");
+				remove.setAttribute("class", "btn btn-sm remove");
+				remove.setAttribute("data-trip-id", trip["id"]);
+				
+				remove.appendChild(document.createTextNode("⃠"));
+				
+				remove.onclick = function(e){
+					
+					var el = e.target;
+					var id = el.getAttribute("data-trip-id");
+				
+					if (! confirm("Are you sure you want to delete this trip?")){
+						return false;
+					}
+					
+					self.remove_trip(id, function(){
+						self.show_trips();
+					});
+					
+					return false;
+				};
+				
+				dates.appendChild(remove);
 				var meta = document.createElement("li");
 				meta.setAttribute("class", "list trips-list-item-meta");
 
@@ -231,7 +316,6 @@
 				item.appendChild(dest_wrapper);				
 				item.appendChild(dates);
 				item.appendChild(meta);				
-
 				
 				list.appendChild(item);
 			}
@@ -554,7 +638,14 @@
 
 				setTimeout(function(){
 					var places = require("./mapzen.whosonfirst.bookmarks.places.js");
-					places.fetch_place(wof_id);
+					
+					places.fetch_place(wof_id, function(pl){
+						console.log("FETCH PLACE");
+						places.save_place(pl, function(e){
+							console.log("SAVE PLACE");
+							console.log(e);
+						});
+					});
 				}, 10);
 				
 				var trip_id = this.lastID;
@@ -597,6 +688,14 @@
 
 			var sql = "UPDATE trips SET " + changes + " WHERE id = ?";
 			
+			conn.run(sql, params, cb);
+		},
+
+		'remove_trip': function(trip_id, cb){
+
+			var sql = "DELETE FROM trips WHERE id = ?";
+			var params = [ trip_id ];
+
 			conn.run(sql, params, cb);
 		}
 	}
