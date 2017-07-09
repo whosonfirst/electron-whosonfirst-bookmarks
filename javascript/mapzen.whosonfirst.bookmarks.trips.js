@@ -63,6 +63,48 @@
 			conn.all(sql, params, cb);			
 		},
 
+		'show_trips_for_place': function(wof_id){
+
+			self.get_trips_for_place(wof_id, function(err, rows){
+
+				if (err){
+					fb.error(err);
+					return false;
+				}
+
+				self.draw_trips(rows);
+			});
+		},
+
+		'get_trips_for_place': function(wof_id, cb){
+
+			var sql = "SELECT * FROM trips WHERE wof_id = ? ORDER BY arrival DESC, departure ASC";
+			var params = [ wof_id ];
+
+			conn.all(sql, params, cb);			
+		},
+
+		'show_trips_for_status': function(status_id){
+
+			self.get_trips_for_status(status_id, function(err, rows){
+
+				if (err){
+					fb.error(err);
+					return false;
+				}
+
+				self.draw_trips(rows);
+			});
+		},
+
+		'get_trips_for_status': function(status_id, cb){
+
+			var sql = "SELECT * FROM trips WHERE status_id = ? ORDER BY arrival DESC, departure ASC";
+			var params = [ status_id ];
+
+			conn.all(sql, params, cb);			
+		},
+		
 		'draw_trips': function(rows){
 
 			var left_panel = document.createElement("div");
@@ -77,7 +119,9 @@
 			var button = document.createElement("button");
 			button.setAttribute("class", "btn btn-sm");
 			button.appendChild(document.createTextNode("Add trip"));
-
+			
+			button.setAttribute("style", "float:right");	// sudo make me a CSS class...
+			
 			button.onclick = function(e){
 				self.show_trip();
 				return false;
@@ -99,32 +143,95 @@
 			var count = rows.length;
 			
 			var list = document.createElement("ul");
-
+			list.setAttribute("class", "list trips-list");
+			
 			for (var i=0; i < count; i++){
 
 				var trip = rows[i];
 
+				var status_label = status[ trip["status_id" ]];
+
 				var dest = document.createElement("span");
 				dest.setAttribute("data-wof-id", trip["wof_id"]);
 				dest.setAttribute("data-trip-id", trip["id"]);				
-				dest.setAttribute("class", "hey-look click-me");
+				dest.setAttribute("class", "trips-list-item-destination hey-look click-me");
 				dest.appendChild(document.createTextNode(trip["name"]));
 
 				dest.onclick = function(e){
-
+					
 					var el = e.target;
 					var trip_id = el.getAttribute("data-trip-id");
 
 					self.show_trip(trip_id);
 					return false;
 				};
-				
-				var dates = document.createElement("span");
-				dates.appendChild(document.createTextNode(trip["arrival"] + " - " + trip["departure"]));
 
+				var dest_all = document.createElement("span");
+				dest_all.setAttribute("class", "trips-list-item-destination-all");
+				dest_all.setAttribute("title", "only show trips to this destination");
+				dest_all.setAttribute("data-wof-id", trip["wof_id"]);				
+				dest_all.appendChild(document.createTextNode("🌐"));
+
+				dest_all.onclick = function(e){
+					
+					var el = e.target;
+					var wof_id = el.getAttribute("data-wof-id");
+
+					try {
+						self.show_trips_for_place(wof_id);
+					}
+
+					catch (e){
+						console.log(e);
+					}
+					
+					return false;
+				};
+
+				var dest_wrapper = document.createElement("div");
+				dest_wrapper.appendChild(dest);
+				dest_wrapper.appendChild(dest_all);				
+								
+				var dates = document.createElement("div");
+				dates.setAttribute("class", "trips-list-item-dates");
+				dates.appendChild(document.createTextNode(trip["arrival"] + " to " + trip["departure"]));
+
+				var meta = document.createElement("li");
+				meta.setAttribute("class", "list trips-list-item-meta");
+
+				if (trip["notes"]){
+
+					var notes = document.createElement("li");
+					notes.setAttribute("class", "trips-list-item-notes");					
+					notes.appendChild(document.createTextNode(trip["notes"]));
+					meta.appendChild(notes);
+				}
+
+				var status_el = document.createElement("li");
+				status_el.setAttribute("data-status-id", trip["status_id"]);
+				status_el.setAttribute("class", "trips-list-item-status trips-list-item-status-" + status_label + " click-me");
+				status_el.appendChild(document.createTextNode(status_label));
+
+				status_el.onclick = function(e){
+
+					var el = e.target;
+					var status_id = el.getAttribute("data-status-id");
+
+					self.show_trips_for_status(status_id);
+					return false;
+				};
+
+				meta.appendChild(status_el);
+				
+				//
+				
 				var item = document.createElement("li");
-				item.appendChild(dest);
+				item.setAttribute("class", "trips-list-item");
+
+				item.appendChild(dest_wrapper);				
 				item.appendChild(dates);
+				item.appendChild(meta);				
+
 				
 				list.appendChild(item);
 			}
@@ -321,6 +428,12 @@
 				option.setAttribute("value", i);
 				option.appendChild(document.createTextNode(status[i]));
 
+				// see notes below
+				
+				if ((trip) && (trip["status_id"] == i)){
+					option.setAttribute("selected", "selected");
+				}
+				
 				status_input.appendChild(option);
 			}
 			
@@ -343,15 +456,49 @@
 			notes_group.appendChild(notes_label);
 			notes_group.appendChild(notes_input);
 			
-			// save button
+			// save button (onclick defined below)
 
 			var button = document.createElement("button");
 			button.setAttribute("class", "btn btn-primary");
 			button.appendChild(document.createTextNode("Save trip"));
+			
+			// form
+
+			var trip_form = document.createElement("form");
+			trip_form.setAttribute("id", "trip-form");
+			trip_form.setAttribute("class", "form");
+			
+			trip_form.appendChild(dest_group);
+			trip_form.appendChild(calendar_group);
+			trip_form.appendChild(status_group);
+			trip_form.appendChild(notes_group);			
+			trip_form.appendChild(button);			
+
+			if (trip){
+
+				trip_form.setAttribute("data-trip-id", trip["id"]);
+				
+				dest_input.value = trip["name"];
+				dest_input.setAttribute("data-wof-id", trip["wof_id"]);
+
+				arrival_input.value = trip["arrival"];
+				departure_input.value = trip["departure"];
+
+				// status_id is updated above because I am not sure
+				// how to do that here... (20170709/thisisaaronland)
+				
+				notes_input.value = trip["notes"];				
+			}
+
+			// onclick
 
 			button.onclick = function(e){
 
 				try {
+
+					var form = document.getElementById("trip-form");
+					var trip_id = form.getAttribute("data-trip-id");
+					
 					var dest_el = document.getElementById("destination");
 					var name = dest_el.value;
 					var wof_id = dest_el.getAttribute("data-wof-id");
@@ -377,8 +524,11 @@
 						'notes': notes,
 					};
 
-					// console.log(tr);
-					self.save_trip(tr);					
+					if (trip_id){
+						self.update_trip({"id": trip_id}, tr, self.show_trips);
+					} else {
+						self.save_trip(tr);
+					}
 				}
 
 				catch(e){
@@ -387,34 +537,6 @@
 				
 				return false;
 			};
-			
-			// form
-
-			var trip_form = document.createElement("form");
-			trip_form.setAttribute("class", "form");
-			
-			trip_form.appendChild(dest_group);
-			trip_form.appendChild(calendar_group);
-			trip_form.appendChild(status_group);
-			trip_form.appendChild(notes_group);			
-			trip_form.appendChild(button);			
-
-			if (trip){
-
-				// TO DO : trip ID
-
-				console.log(trip);
-				
-				dest_input.value = trip["name"];
-				dest_input.setAttribute("data-wof-id", trip["wof_id"]);
-
-				arrival_input.value = trip["arrival"];
-				departure_input.value = trip["departure"];
-
-				// TO DO : status
-				
-				notes_input.value = trip["notes"];				
-			}
 			
 			return trip_form;
 		},
@@ -453,6 +575,28 @@
 			var sql = "INSERT INTO trips (wof_id, name, arrival, departure, status_id, notes) VALUES (?, ?, ?, ?, ?, ?)";
 			var params = [ wof_id, name, arrival, departure, status_id, notes ];
 
+			conn.run(sql, params, cb);
+		},
+
+		'update_trip': function(trip, update, cb){
+
+			var trip_id = trip["id"];
+
+			var changes = [];			
+			var params = [];
+
+			for (var k in update){
+				var v = update[k];
+				changes.push(k + " = ?");
+				params.push(v);
+			};
+
+			params.push(trip_id);
+
+			changes = changes.join(",");
+
+			var sql = "UPDATE trips SET " + changes + " WHERE id = ?";
+			
 			conn.run(sql, params, cb);
 		}
 	}

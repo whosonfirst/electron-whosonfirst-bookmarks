@@ -420,6 +420,47 @@ q {
     font-weight: 700;
 }
 
+.trips-list {
+    padding: 0px;
+    margin: 0px;
+    
+}
+
+.trips-list-item {
+    list-style-type: none;
+    margin-bottom: 1em;
+}
+
+.trips-list-item-destination {
+
+}
+
+.trips-list-item-destination-all {
+    font-size:small;
+    margin-left: 1em;
+}
+
+.trips-list-item-meta {
+    margin-top:.5em;
+    font-size:small;
+}
+
+.trips-list-item-status {
+
+}
+
+.trips-list-item-status-confirmed {
+    color: green;
+}
+
+.trips-list-item-dates {
+}
+
+.trips-list-item-notes {
+    font-size:small;
+    font-style:italic;
+}
+
 .visited {
     color: green !important;
 }
