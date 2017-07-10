@@ -399,6 +399,7 @@
 			var opts = {
 				"layer": layers,
 				"params": params,
+				"focus": false,
 				"panToPoint": false,
 			};
 			
@@ -418,6 +419,8 @@
 				var bbox = feature['bbox'];
 				var props = feature['properties'];
 
+				console.log(props);
+				
 				var name = props["name"];
 				var wof_id = props["source_id"];
 

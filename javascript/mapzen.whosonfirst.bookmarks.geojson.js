@@ -25,6 +25,8 @@
 
 }(function(){
 
+	// http://leafletjs.com/reference-1.1.0.html#layergroup-setzindex
+	
 	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");	
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
 
