@@ -60,7 +60,10 @@
 			
 	const handlers = {
 		"point": function(style){
+			
 			return function(feature, latlon){
+
+				console.log(feature);
 				var m = L.circleMarker(latlon, style);
 				return m;
 			};

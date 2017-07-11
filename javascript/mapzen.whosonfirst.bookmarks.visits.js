@@ -361,7 +361,9 @@
 				item.setAttribute("class", "visits-list-item");
 				item.setAttribute("data-latitude", lat);
 				item.setAttribute("data-longitude", lon);
-
+				item.setAttribute("data-desire-label", desire);
+				item.setAttribute("data-name", row["name"]);				
+				
 				if (! skip_header){
 					item.appendChild(span);
 				}
@@ -399,6 +401,9 @@
 				var lat = el.getAttribute("data-latitude");
 				var lon = el.getAttribute("data-longitude");				
 
+				var name = el.getAttribute("data-name");
+				var desire = el.getAttribute("desire");
+				
 				lat = parseFloat(lat);
 				lon = parseFloat(lon);				
 				
@@ -425,7 +430,10 @@
 					"coordinates": coords
 				};
 				
-				var props = {};
+				var props = {
+					"name": name,
+					"desire": desire
+				};
 
 				var feature = {
 					"type": "Feature",
