@@ -419,7 +419,7 @@
 				var bbox = feature['bbox'];
 				var props = feature['properties'];
 
-				console.log(props);
+				// console.log(props);
 				
 				var name = props["name"];
 				var wof_id = props["source_id"];

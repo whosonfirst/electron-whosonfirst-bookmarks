@@ -33,11 +33,11 @@
 	const styles = {
 		"bbox": {
 			"color": "#ff0099",
-			"weight": 3,
+			"weight": 1,
 			"opacity": 1,
 			"radius": 2,
-			"fillColor": "#000",
-			"fillOpacity": 0
+			"fillColor": "#ffff00",
+			"fillOpacity": .3
 		},
 		"point": {
 			"color": "#000",
@@ -162,7 +162,8 @@
 				
 				map.fitBounds(bounds, opts);
 
-				self.add_geojson_to_map(map, feature, styles["bbox"]);
+				var layer = self.add_geojson_to_map(map, feature, styles["bbox"]);
+				// cb(layer);
 			};
 
 			req.open("get", mz_uri, true);
@@ -200,7 +201,8 @@
 			
 			map.fitBounds(bounds, opts);
 
-			self.add_geojson_to_map(map, feature, styles["bbox"]);
+			var layer = self.add_geojson_to_map(map, feature, styles["bbox"]);
+			return layer;
 		},
 
 		'add_latlon_to_map': function(map, lat, lon, zoom, style, handler){
@@ -226,7 +228,8 @@
 
 			map.setView([lat, lon], 16);
 
-			self.add_geojson_to_map(map, feature, style, handler);
+			var layer = self.add_geojson_to_map(map, feature, style, handler);
+			return layer;
 		},
 
 		'add_featurecollection_to_map': function(map, featurecollection, style, handler){
@@ -277,13 +280,16 @@
 			
 			map.fitBounds(bounds, opts);
 
-			self.add_geojson_to_map(map, featurecollection, style, handler);
+			var layer = self.add_geojson_to_map(map, featurecollection, style, handler);
+			return layer;
 		},
 
 		'add_visits_to_map': function(map, visits){
 
 			var feature_collection = self.visits_to_featurecollection(visits);
-			return self.add_featurecollection_to_map(map, feature_collection);
+			
+			var layer = self.add_featurecollection_to_map(map, feature_collection);
+			return layer;
 		},
 
 		'add_transit_stops_to_map': function(stops, map){
@@ -299,7 +305,9 @@
 			};
 
 			var featurecollection = self.transit_stops_to_featurecollection(stops);
-			self.add_featurecollection_to_map(map, featurecollection, styles["point_transit"]);
+			
+			var layer = self.add_featurecollection_to_map(map, featurecollection, styles["point_transit"]);
+			return layer;
 		},
 
 		'transit_stops_to_featurecollection': function(rows){

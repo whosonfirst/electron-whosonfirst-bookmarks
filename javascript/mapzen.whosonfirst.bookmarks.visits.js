@@ -84,7 +84,7 @@
 			canvas.append(right_panel);			
 
 			var map = maps.new_map(map_el);
-			geojson.add_visit_to_map(map, row);
+			var layer = geojson.add_visit_to_map(map, row);
 			
 			namify.translate();
 
@@ -458,8 +458,10 @@
 			canvas.append(right_panel);
 
 			var map = maps.new_map(map_el);
-			geojson.add_featurecollection_to_map(map, feature_collection);
-
+			
+			var layer = geojson.add_featurecollection_to_map(map, feature_collection);
+			layer.setZIndex(500);
+			
 			namify.translate();
 		},
 
