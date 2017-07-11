@@ -403,7 +403,7 @@
 				"panToPoint": false,
 			};
 
-			var geocoder = L.Mapzen.geocoder(undefined, opts);
+			var geocoder = L.Mapzen.geocoder(opts);
 			geocoder.addTo(map);
 
 			// https://github.com/mapzen/leaflet-geocoder#events
