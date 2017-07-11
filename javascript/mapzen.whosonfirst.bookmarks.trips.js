@@ -397,14 +397,14 @@
 			};
 			
 			var opts = {
-				"layer": layers,
+				"layers": layers,
 				"params": params,
 				"focus": false,
 				"panToPoint": false,
 			};
-			
-			var geocoder = L.Mapzen.geocoder();
-			geocoder.addTo(map, opts);
+
+			var geocoder = L.Mapzen.geocoder(undefined, opts);
+			geocoder.addTo(map);
 
 			// https://github.com/mapzen/leaflet-geocoder#events
 			
