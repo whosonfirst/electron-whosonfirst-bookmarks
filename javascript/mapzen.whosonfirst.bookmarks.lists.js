@@ -236,7 +236,8 @@
 				var featurecollection = geojson.places_to_featurecollection(rows);
 				console.log(featurecollection);
 				
-				geojson.add_featurecollection_to_map(map, featurecollection);
+				var layer = geojson.add_featurecollection_to_map(map, featurecollection);
+				layer.setZIndex(500);				
 			});
 			
 		},

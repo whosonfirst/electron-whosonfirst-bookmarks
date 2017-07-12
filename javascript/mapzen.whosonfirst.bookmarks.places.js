@@ -310,8 +310,13 @@
 			canvas.append(right_panel);			
 
 			var map = maps.new_map(map_el);
-			geojson.add_place_to_map(map, pl);
+			
+			var layer = geojson.add_place_to_map(map, pl);
 
+			if (layer){
+				layer.setZIndex(200);
+			}
+			
 			self.draw_lists(pl);
 			
 			self.draw_visits_list(pl, map);
@@ -338,7 +343,8 @@
 					var wrapper = document.getElementById("transit-wrapper");
 					wrapper.appendChild(expandable);
 
-					geojson.add_transit_stops_to_map(rsp["stops"], map);
+					var layer = geojson.add_transit_stops_to_map(rsp["stops"], map);
+					layer.setZIndex(300);
 				};
 				
 				transit.get_nearby(lat, lon, cb);
@@ -495,8 +501,9 @@
 				
 				visits_wrapper.appendChild(expandable);			
 
-				geojson.add_visits_to_map(map, rows);
-
+				var layer = geojson.add_visits_to_map(map, rows);
+				layer.setZIndex(500);
+				
 				namify.translate();				
 			};
 			

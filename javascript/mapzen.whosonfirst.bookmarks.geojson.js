@@ -118,19 +118,23 @@
 
 			if (mz_uri){
 
+				var on_success = function(layer){
+					layer.setZIndex(100);
+				};
+				
 				var on_error = function(e){
 					self.add_bbox_to_map(map, min_lat, min_lon, max_lat, max_lon);
 					return;
 				};
 					
-				self.add_mzuri_to_map(map, mz_uri, on_error);
+				self.add_mzuri_to_map(map, mz_uri, on_success, on_error);
 				return;
 			}
 
-			self.add_bbox_to_map(map, min_lat, min_lon, max_lat, max_lon);			
+			return self.add_bbox_to_map(map, min_lat, min_lon, max_lat, max_lon);			
 		},
 
-		'add_mzuri_to_map': function(map, mz_uri, on_error){
+		'add_mzuri_to_map': function(map, mz_uri, on_success, on_error){
 
 			var req = new XMLHttpRequest();
 
@@ -166,7 +170,7 @@
 				map.fitBounds(bounds, opts);
 
 				var layer = self.add_geojson_to_map(map, feature, styles["bbox"]);
-				// cb(layer);
+				on_success(layer);
 			};
 
 			req.open("get", mz_uri, true);

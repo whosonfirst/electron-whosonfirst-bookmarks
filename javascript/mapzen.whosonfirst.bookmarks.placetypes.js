@@ -373,7 +373,8 @@
 						"features": features,
 					};
 
-					geojson.add_featurecollection_to_map(map, feature_collection);
+					var layer = geojson.add_featurecollection_to_map(map, feature_collection);
+					layer.setZIndex(500);					
 				};
 
 				conn.all(sql, params, cb);

@@ -283,7 +283,8 @@
 			wrapper.appendChild(expandable);
 
 			if (map){
-				geojson.add_visits_to_map(map, rows);
+				var layer = geojson.add_visits_to_map(map, rows);
+				layer.setZIndex(500);
 			}
 
 			namify.translate();
