@@ -237,7 +237,6 @@
 				console.log(featurecollection);
 				
 				var layer = geojson.add_featurecollection_to_map(map, featurecollection);
-				layer.setZIndex(500);				
 			});
 			
 		},

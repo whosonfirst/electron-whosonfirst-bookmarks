@@ -84,7 +84,7 @@
 			canvas.append(right_panel);			
 
 			var map = maps.new_map(map_el);
-			var layer = geojson.add_visit_to_map(map, row);
+			geojson.add_visit_to_map(map, row);
 			
 			namify.translate();
 
@@ -368,8 +368,7 @@
 					item.appendChild(span);
 				}
 				
-				item.appendChild(sm);
-				
+				item.appendChild(sm);				
 				list.appendChild(item);
 			}
 
@@ -394,6 +393,8 @@
 			var items = visits.getElementsByClassName("visits-list-item");
 			var count = items.length;			
 
+			var visit_rows = [];
+			
 			for (var i=0; i < count; i++){
 
 				var el = items[i];
@@ -401,53 +402,19 @@
 				var lat = el.getAttribute("data-latitude");
 				var lon = el.getAttribute("data-longitude");				
 
-				var name = el.getAttribute("data-name");
-				var desire = el.getAttribute("desire");
-				
 				lat = parseFloat(lat);
 				lon = parseFloat(lon);				
 				
-				if ((! swlat) || (lat < swlat)){
-					swlat = lat;
-				}
-				
-				if ((! swlon) || (lon < swlon)){
-					swlon = lon;
-				}
-				
-				if ((! nelat) || (lat > nelat)){
-					nelat = lat;
-				}
-				
-				if ((! nelon) || (lon > nelon)){
-					nelon = lon;
-				}
+				var name = el.getAttribute("data-name");
+				var desire = el.getAttribute("desire");
 
-				var coords = [ lon, lat ];
-				
-				var geom = {
-					"type": "Point",
-					"coordinates": coords
-				};
-				
-				var props = {
-					"name": name,
-					"desire": desire
+				var row = {
+					"latitude": lat,
+					"longitude": lon
 				};
 
-				var feature = {
-					"type": "Feature",
-					"geometry": geom,
-					"properties": props
-				};
-
-				features.push(feature);
+				visit_rows.push(row);
 			}
-
-			var feature_collection = {
-				"type": "FeatureCollection",
-				"features": features,
-			};
 			
 			var left_panel = document.createElement("div");
 			left_panel.setAttribute("class", "col-md-6 panel panel-left");
@@ -467,8 +434,7 @@
 
 			var map = maps.new_map(map_el);
 			
-			var layer = geojson.add_featurecollection_to_map(map, feature_collection);
-			layer.setZIndex(500);
+			geojson.add_visits_to_map(map, visit_rows);
 			
 			namify.translate();
 		},

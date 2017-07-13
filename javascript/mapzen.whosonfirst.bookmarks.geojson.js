@@ -63,7 +63,8 @@
 			
 			return function(feature, latlon){
 
-				console.log(feature);
+				// console.log(feature);
+				
 				var m = L.circleMarker(latlon, style);
 				return m;
 			};
@@ -81,7 +82,11 @@
 			var lat = visit["latitude"];
 			var lon = visit["longitude"];
 
-			return self.add_latlon_to_map(map, lat, lon);
+			var more = {
+				"z-index": 500
+			};
+			
+			return self.add_latlon_to_map(map, lat, lon, more);
 		},
 		
 		'add_place_to_map': function(map, pl){
@@ -119,7 +124,7 @@
 			if (mz_uri){
 
 				var on_success = function(layer){
-					layer.setZIndex(100);
+					// 
 				};
 				
 				var on_error = function(e){
@@ -169,7 +174,12 @@
 				
 				map.fitBounds(bounds, opts);
 
-				var layer = self.add_geojson_to_map(map, feature, styles["bbox"]);
+				var more = {
+					"z-index": 100,
+					"style": styles["bbox"]
+				};
+				
+				var layer = self.add_geojson_to_map(map, feature, more);
 				on_success(layer);
 			};
 
@@ -208,11 +218,16 @@
 			
 			map.fitBounds(bounds, opts);
 
-			var layer = self.add_geojson_to_map(map, feature, styles["bbox"]);
+			var more = {
+				"style": styles["bbox"],
+				"z-index": 100
+			};
+			
+			var layer = self.add_geojson_to_map(map, feature, more);
 			return layer;
 		},
 
-		'add_latlon_to_map': function(map, lat, lon, zoom, style, handler){
+		'add_latlon_to_map': function(map, lat, lon, zoom){
 
 			if (! zoom){
 				zoom = 16;
@@ -235,11 +250,15 @@
 
 			map.setView([lat, lon], 16);
 
-			var layer = self.add_geojson_to_map(map, feature, style, handler);
+			var more = {
+				"z-index": 500,
+			};
+			
+			var layer = self.add_geojson_to_map(map, feature, more);
 			return layer;
 		},
 
-		'add_featurecollection_to_map': function(map, featurecollection, style, handler){
+		'add_featurecollection_to_map': function(map, featurecollection, more){
 
 			var min_lat;
 			var min_lon;
@@ -276,7 +295,7 @@
 			}
 
 			if ((min_lat == max_lat) && (min_lon == max_lon)){
-				return self.add_latlon_to_map(map, min_lat, min_lon, null, style, handler);
+				return self.add_latlon_to_map(map, min_lat, min_lon, null);
 			}
 			
 			var sw = L.latLng(min_lat, min_lon);
@@ -286,8 +305,8 @@
 			var opts = { "padding": [100, 100] };
 			
 			map.fitBounds(bounds, opts);
-
-			var layer = self.add_geojson_to_map(map, featurecollection, style, handler);
+			
+			var layer = self.add_geojson_to_map(map, featurecollection, more);
 			return layer;
 		},
 
@@ -296,6 +315,8 @@
 			var feature_collection = self.visits_to_featurecollection(visits);
 			
 			var layer = self.add_featurecollection_to_map(map, feature_collection);
+			layer.setZIndex(500);
+			
 			return layer;
 		},
 
@@ -312,8 +333,13 @@
 			};
 
 			var featurecollection = self.transit_stops_to_featurecollection(stops);
+
+			var more = {
+				"style": styles["point_transit"],
+				"z-index": 200,
+			};
 			
-			var layer = self.add_featurecollection_to_map(map, featurecollection, styles["point_transit"]);
+			var layer = self.add_featurecollection_to_map(map, featurecollection, more);
 			return layer;
 		},
 
@@ -433,8 +459,18 @@
 			return feature_collection;
 		},
 
-		'add_geojson_to_map': function(map, geojson, style, handler){
+		'add_geojson_to_map': function(map, geojson, more){
 
+			if (! more){
+				more = {};
+			}
+
+			console.log("ADD GEOJSON");
+			console.log(more);
+			
+			var style = more["style"];
+			var handler = more["handler"];
+			
 			if (! style){
 				style = styles["point"];
 			}
@@ -449,8 +485,12 @@
 			}
 
 			var layer = L.geoJSON(geojson, args);
-
 			layer.addTo(map);
+
+			if (more["z-index"]){
+				layer.setZIndex(more["z-index"]);
+			}
+			
 			return layer;			
 		},
 
