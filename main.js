@@ -29,6 +29,19 @@ function createMainWindow () {
 	mainWindow.on('closed', function (){
 		mainWindow = null
 	});
+
+	/*
+	mainWindow.webContents.once("did-finish-load", function (){
+
+		var http = require("http");
+		var crypto = require("crypto");
+		var server = http.createServer(function (req, res){
+			
+		});
+		
+		server.listen(9999);
+	});
+	*/
 }
 
 function createSettingsWindow () {
