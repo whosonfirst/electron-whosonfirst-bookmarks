@@ -37,6 +37,14 @@
 			"fillColor": "#ffff00",
 			"fillOpacity": .3
 		},
+		"poly": {
+			"color": "#ff0099",
+			"weight": 1,
+			"opacity": 1,
+			"radius": 2,
+			"fillColor": "#ffff00",
+			"fillOpacity": .3
+		},		
 		"point": {
 			"color": "#000",
 			"weight": 2,
@@ -208,18 +216,21 @@
 			var lon = visit["longitude"];
 
 			var more = {
-				"z-index": 500
+				// "z-index": 500
 			};
 			
-			return self.add_latlon_to_map(map, lat, lon, 16, more);
+			var layer = self.add_latlon_to_map(map, lat, lon, 16, more);
+			layer.bringToFront();
+		},
+
+		'add_places_to_map': function(map, rows){
+
+			var featurecollection = self.places_to_featurecollection(rows);
+			return self.add_featurecollection_to_map(map, featurecollection);
 		},
 		
 		'add_place_to_map': function(map, pl){
-			
-			var more = {
-				"z-index": 100,
-			};
-			
+						
 			var pt = pl["wof:placetype"];
 
 			var lat = pl["geom:latitude"];
@@ -231,8 +242,8 @@
 			}
 			
 			if (pt == "venue"){
-				self.add_latlon_to_map(map, lat, lon, null, more);
-				return;
+				var layer = self.add_latlon_to_map(map, lat, lon);
+				return layer;
 			}
 
 			var bbox = pl["geom:bbox"];
@@ -244,8 +255,8 @@
 			var max_lon = bbox[2];
 
 			if ((min_lat == max_lat) && (min_lon == max_lon)){
-				self.add_latlon_to_map(map, lat, lon, null, more);
-				return;
+				var layer = self.add_latlon_to_map(map, lat, lon);
+				return layer
 			}
 
 			var mz_uri = pl["mz:uri"];
@@ -253,7 +264,7 @@
 			if (mz_uri){
 
 				var on_success = function(layer){
-					// 
+					layer.bringToBack();
 				};
 				
 				var on_error = function(e){
@@ -265,14 +276,22 @@
 				return;
 			}
 
-			return self.add_bbox_to_map(map, min_lat, min_lon, max_lat, max_lon, more);
+			var more = {
+				// "z-index": 100,
+				"style": styles["bbox"]				
+			};
+			
+			var layer = self.add_bbox_to_map(map, min_lat, min_lon, max_lat, max_lon, more);
+			layer.bringToBack();
+
+			return layer;
 		},
 
 		'add_mzuri_to_map': function(map, mz_uri, on_success, on_error){
 
 			var more = {
-				"z-index": 100,
-				"style": styles["bbox"]
+				// "z-index": 100,
+				"style": styles["poly"]
 			};
 			
 			var req = new XMLHttpRequest();
@@ -321,10 +340,13 @@
 			var feature_collection = self.visits_to_featurecollection(visits);
 
 			var more = {
-				"z-index": 500
+				// "z-index": 500
 			};
 			
-			return self.add_featurecollection_to_map(map, feature_collection, more);
+			var layer = self.add_featurecollection_to_map(map, feature_collection, more);
+			layer.bringToFront();
+
+			return layer;
 		},
 
 		'add_transit_stops_to_map': function(stops, map){
@@ -343,7 +365,7 @@
 
 			var more = {
 				"style": styles["point_transit"],
-				"z-index": 200,
+				// "z-index": 200,
 			};
 			
 			return self.add_featurecollection_to_map(map, featurecollection, more);
@@ -383,6 +405,8 @@
 			map.fitBounds(bounds, opts);
 
 			var layer = self.add_geojson_to_map(map, feature, more);
+			layer.bringToBack();
+			
 			return layer;
 		},
 
@@ -488,9 +512,10 @@
 			layer.addTo(map);
 
 			// http://leafletjs.com/reference-1.1.0.html#layergroup-setzindex
+			// https://github.com/Leaflet/Leaflet/issues/3427 (sigh...)
 			
 			if (more["z-index"]){
-				layer.setZIndex(more["z-index"]);
+				var z = layer.setZIndex(more["z-index"]);
 			}
 			
 			return layer;			

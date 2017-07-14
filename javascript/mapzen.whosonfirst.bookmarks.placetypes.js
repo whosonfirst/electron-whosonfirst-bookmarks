@@ -331,49 +331,7 @@
 						return false;
 					}
 
-					var features = [];
-
-					var count_rows = rows.length;
-
-					for (var i=0; i < count_rows; i++){
-
-						var row = rows[i];
-						var body = row['body'];
-						var props = JSON.parse(body);
-
-						var lat = props['geom:latitude'];
-						var lon = props['geom:longitude'];
-
-						if ((props['lbl:latitude']) && (props['lbl:longitude'])){
-							
-							lat = props['lbl:latitude'];
-							lon = props['lbl:longitude'];
-						}
-
-						var coords = [ lon, lat ];
-						
-						var geom = {
-							"type": "Point",
-							"coordinates": coords
-						};
-						
-						var props = {};
-
-						var feature = {
-							"type": "Feature",
-							"geometry": geom,
-							"properties": props,
-						};
-
-						features.push(feature);
-					}
-
-					var feature_collection = {
-						"type": "FeatureCollection",
-						"features": features,
-					};
-
-					geojson.add_featurecollection_to_map(map, feature_collection);
+					geojson.add_places_to_map(map, rows);
 				};
 
 				conn.all(sql, params, cb);
