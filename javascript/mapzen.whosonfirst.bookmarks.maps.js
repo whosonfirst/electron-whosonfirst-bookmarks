@@ -71,12 +71,6 @@
 				
 				scene.rebuild();
 				
-				/*
-				scene.updateConfig({ rebuild: true }).then(function(e) {
-					console.log("UPDATE");
-				});
-				*/
-				
 				wtf = scene;	// hack: see notes in mapzen.whosonfirst.bookmarks.geojson.js
 				
 				scene.subscribe({
