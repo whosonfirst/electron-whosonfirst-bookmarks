@@ -58,6 +58,25 @@
 				var tangram = e.tangramLayer;
 				var scene = tangram.scene;
 
+				var mz = scene["sources"]["mapzen"];
+				var tile_url = mz["url"];
+				
+				tile_url = tile_url.replace("https://tile.mapzen.com", "http://localhost:9229");
+				mz["url"] = tile_url;
+				
+				scene.setDataSource('mapzen', {
+					'type': 'TopoJSON',
+					'url': tile_url,
+				});
+				
+				scene.rebuild();
+				
+				/*
+				scene.updateConfig({ rebuild: true }).then(function(e) {
+					console.log("UPDATE");
+				});
+				*/
+				
 				wtf = scene;	// hack: see notes in mapzen.whosonfirst.bookmarks.geojson.js
 				
 				scene.subscribe({

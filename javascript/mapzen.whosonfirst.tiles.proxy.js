@@ -36,6 +36,7 @@
 		'server': function(cache){
 
 			if (! cache.init()){
+				console.log("[proxy][server] ERR cache initialization failed");
 				return;
 			}
 			
@@ -56,9 +57,14 @@
 
 				var rel_path = p.pathname;
 
+				console.log("[proxy][request] " + rel_path);
+				
 				var data = cache.get(rel_path);
 
 				if (data){
+
+					console.log("[proxy][cache] HIT");
+					
 					res.writeHead(200);	// TO DO: headers?
 					res.write(data);
 					res.end();
@@ -66,6 +72,7 @@
 				}
 								
 				var mz_url = "https://tile.mapzen.com" + url;
+				console.log("[proxy][fetch] " + mz_url);
 				
 				https.get(mz_url , function(mz_rsp){
 					
@@ -89,9 +96,9 @@
 					});
 					
 					mz_rsp.on('end', function(){
-						res.end();
-						
+						res.end();						
 						cache.set(rel_path, mz_body);
+						console.log("[proxy][fetch] COMPLETE");
 					});
 					
 				});
