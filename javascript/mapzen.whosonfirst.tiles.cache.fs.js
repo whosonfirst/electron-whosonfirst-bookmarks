@@ -58,7 +58,9 @@
 				console.log("[cache][fs][" + key + "] MISS");
 				return;
 			}
-			
+
+			// TO DO check mtime (fs.statSync) and time-to-expire (currently undefined) here...
+
 			var fh = fs.openSync(tile_path, "r");
 			
 			if (! fh){

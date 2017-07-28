@@ -45,6 +45,11 @@ function createMainWindow () {
 		const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.fs.js");
 		const proxy = require("./javascript/mapzen.whosonfirst.tiles.proxy.js");
 
+		if (! cache.init()){
+			console.log("[proxy] FAIL cache initialization failed");
+			return false;
+		}
+		
 		const server = proxy.server(cache);
 		
 		if (! server){

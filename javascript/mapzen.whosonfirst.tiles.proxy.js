@@ -34,11 +34,6 @@
 	var self = {
 
 		'server': function(cache){
-
-			if (! cache.init()){
-				console.log("[proxy][server] ERR cache initialization failed");
-				return;
-			}
 			
 			// sudo fix me to generate TLS-stuff at start-up and
 			// use https.createServer...
