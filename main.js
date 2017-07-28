@@ -52,6 +52,15 @@ function createMainWindow () {
 			return false;
 		}
 
+		try {
+			server.listen(proxy_port);
+		}
+
+		catch (e) {
+			console.log("[proxy] FAIL unable to start proxy server, because " + e);
+			return false;
+		}
+		
 		// https://electron.atom.io/docs/api/web-request/
 		
 		// this is where we are intercepting requests (rather than say rewriting
@@ -109,7 +118,6 @@ function createMainWindow () {
 			server.close();
 		});
 		
-		server.listen(proxy_port);		
 		return true;
 	});
 }
