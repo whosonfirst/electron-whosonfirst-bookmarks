@@ -57,6 +57,12 @@
 
 				var rel_path = p.pathname;
 
+				if (rel_path == "/"){
+					res.writeHead(404);
+					res.end();
+					return;
+				}
+				
 				console.log("[proxy][request] " + rel_path);
 				
 				var data = cache.get(rel_path);

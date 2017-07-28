@@ -32,14 +32,43 @@ function createMainWindow () {
 	
 	mainWindow.webContents.once("did-finish-load", function (){
 
+		var tile_endpoint = 'https://tile.mapzen.com';
+		var tile_urls = tile_endpoint + '/*';
+		
+		var local_endpoint = "http://localhost";
+		var local_port = 9229;
+		
 		const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.fs.js");
 		const proxy = require("./javascript/mapzen.whosonfirst.tiles.proxy.js");
 
 		const server = proxy.server(cache);
 		
-		if (server){
-			server.listen(9229);
+		if (! server){
+			console.log("Failed to create proxy server");
+			return false;
 		}
+
+		const {session} = require('electron')
+
+		const filter = {
+			urls: [ tile_urls,]
+		}
+		
+		session.defaultSession.webRequest.onBeforeRequest(filter, (details, callback) => {
+
+			var req_url = details["url"];
+			var local_url = local_endpoint + ":" + local_port;
+			
+			var redir = req_url.replace("https://tile.mapzen.com", local_url);
+			
+			callback({
+				'cancel': false,
+				'redirectURL': redir
+			});
+		});
+		
+		server.listen(local_port);
+		return true;
 	});
 }
 
