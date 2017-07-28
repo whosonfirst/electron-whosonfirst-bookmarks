@@ -32,11 +32,15 @@ function createMainWindow () {
 	
 	mainWindow.webContents.once("did-finish-load", function (){
 
-		var tile_endpoint = 'https://tile.mapzen.com';
-		var tile_urls = tile_endpoint + '/*';
-		
-		var local_endpoint = "http://localhost";
-		var local_port = 9229;
+		var tiles_endpoint = 'https://tile.mapzen.com';
+
+		var proxy_host = "http://localhost";
+		var proxy_port = 9229;
+
+		var proxy_endpoint = proxy_host + ":" + proxy_port;
+
+		// this is the actual proxy server and caching logic for handling tiles
+		// stuff - we handle intercepting requests below
 		
 		const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.fs.js");
 		const proxy = require("./javascript/mapzen.whosonfirst.tiles.proxy.js");
@@ -44,30 +48,68 @@ function createMainWindow () {
 		const server = proxy.server(cache);
 		
 		if (! server){
-			console.log("Failed to create proxy server");
+			console.log("[proxy] FAIL unable to create proxy server");
 			return false;
 		}
 
-		const {session} = require('electron')
-
-		const filter = {
-			urls: [ tile_urls,]
-		}
+		// https://electron.atom.io/docs/api/web-request/
 		
-		session.defaultSession.webRequest.onBeforeRequest(filter, (details, callback) => {
+		// this is where we are intercepting requests (rather than say rewriting
+		// the source url for tiles in mapzen/tangram.js) - in a different universe
+		// we could put all the caching logic here but the electron web-request
+		// stuff doesn't actually give you access to body of a response so... there
+		// is literally nothing to cache. in addition to pre-filtering requests to
+		// tile.mapzen we are post-filtering on the proxy server to check for errors
+		// at which point we _stop_ the proxy server causing the pre-filter to no
+		// longer issue redirects. unfortunately if we encounter a proxy error there
+		// is no way to issue a redirect (to the default tiles endpoint)
+		
+		const {session} = require('electron')
+		
+		var tiles_match = tiles_endpoint + '/*';		
+		var proxy_match = proxy_endpoint + '/*';
 
-			var req_url = details["url"];
-			var local_url = local_endpoint + ":" + local_port;
+		const tiles_filter = {
+			urls: [ tiles_match,]
+		}
+
+		const proxy_filter = {
+			urls: [ proxy_match,]
+		}
+
+		// FYI - cached requests/URLs never even make it this far
+		
+		session.defaultSession.webRequest.onBeforeRequest(tiles_filter, (details, callback) => {
+
+			if (! server.listening){
+				console.log("[proxy] SKIP server not listening");
+				callback({});
+				return;
+			}
 			
-			var redir = req_url.replace("https://tile.mapzen.com", local_url);
+			var req_url = details["url"];
+			var redir_url = req_url.replace(tiles_endpoint, proxy_endpoint);
+			
+			console.log("[proxy] REDIRECT from " + tiles_endpoint + " TO " + proxy_endpoint);
 			
 			callback({
 				'cancel': false,
-				'redirectURL': redir
+				'redirectURL': redir_url
 			});
 		});
+
+
+		session.defaultSession.webRequest.onErrorOccurred(proxy_filter, (details, callback) => {
+
+			var err = details["error"];
+
+			console.log("[proxy] ERR stop listening because " + err);
+			server.close();
+
+			// TO DO: issue redirect here? how... ?
+		});
 		
-		server.listen(local_port);
+		server.listen(proxy_port);		
 		return true;
 	});
 }
