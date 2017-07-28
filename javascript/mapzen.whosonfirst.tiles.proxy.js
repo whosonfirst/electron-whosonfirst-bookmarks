@@ -80,7 +80,7 @@
 					
 					var mz_status = mz_rsp.statusCode;
 					var mz_headers = mz_rsp.headers;
-					var mz_body = null;
+					var mz_body = '';
 					
 					if (mz_status != 200){
 						res.writeHead(mz_status, mz_headers);
