@@ -70,11 +70,11 @@ function createMainWindow () {
 		var proxy_match = proxy_endpoint + '/*';
 
 		const tiles_filter = {
-			urls: [ tiles_match,]
+			urls: [ tiles_match ]
 		}
 
 		const proxy_filter = {
-			urls: [ proxy_match,]
+			urls: [ proxy_match ]
 		}
 
 		// FYI - cached requests/URLs never even make it this far
@@ -98,15 +98,15 @@ function createMainWindow () {
 			});
 		});
 
-
-		session.defaultSession.webRequest.onErrorOccurred(proxy_filter, (details, callback) => {
+		// maybe don't shut down the proxy server on the first error but track (n)
+		// errors over (y) seconds?
+		
+		session.defaultSession.webRequest.onErrorOccurred(proxy_filter, (details) => {
 
 			var err = details["error"];
 
 			console.log("[proxy] ERR stop listening because " + err);
 			server.close();
-
-			// TO DO: issue redirect here? how... ?
 		});
 		
 		server.listen(proxy_port);		
