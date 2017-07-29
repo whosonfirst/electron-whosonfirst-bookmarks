@@ -43,51 +43,29 @@
 	
 	var self = {
 
-		'init': function(){
+		'init': function(cb){
 
-			var wg = self.waitgroup();
-			wg.add(1);
-			
 			new mbtiles(tile_cache, function(err, conn){
 				
 				if (err){
 					console.log("[cache][mbtiles] ERR failed to create database connection");
+					return cb(err);
 				}
 
-				else {
-					dbconn = conn;
-				}
-				
-				wg.done();
+				dbconn = conn;
+				return cb(null);
 			});
-
-			var cb = function(){
-				
-				if (! dbconn){
-					return false;
-				}
-				
-				console.log("[cache][mbtiles] CONN database connection successful");
-				return true;
-			};
-
-			wg.wait(cb);
-
-			return true;	// THIS IS A BUG because the waitgroup stuff doesn't work correctly...
 		},
 
-		'get': function(key){
+		'get': function(key, cb){
 
 			console.log("[cache][mbtiles] GET cache for '" + key + "'");
 			
 			var zxy = self.key_to_zxy(key);
 
 			if (! zxy){
-				return false;
+				return cb("Failed to parse key", null);
 			}
-
-			var wg = self.waitgroup();
-			wg.add(1);
 
 			var data;
 			
@@ -95,7 +73,7 @@
 
 				if (err){
 					console.log("[cache][mbtiles] ERR failed to get cache for '" + key + "'");
-					console.log(err);
+					return cb(err, null);
 				}
 
 				else {
@@ -108,37 +86,23 @@
 
 					catch (e){
 						console.log("[cache][mbtiles] ERR failed to parse cache for '" + key + "'");
-						console.log(err);
+						return cb(err, null);
 					}
 				}
-				
-				wg.done();
+
+				return cb(null, data);
 			});
-
-			var cb = function(){
-				console.log("[cache][mbtiles] GET complete for '" + key + "'");
-				return data;
-			};
-
-			console.log("GET WAIT... for " + key);
-			wg.wait(cb);
-
-			console.log("GET RETURN... for " + key);			
-			console.log("GET RETURN... with " + data);			
 		},
 
-		'set': function(key, data){
+		'set': function(key, data, cb){
 
 			console.log("[cache][mbtiles] SET cache for '" + key + "'");
 			
 			var zxy = self.key_to_zxy(key);
 
 			if (! zxy){
-				return false;
+				return cb("Failed to parse key");
 			}
-
-			var wg = self.waitgroup();
-			wg.add(1);
 
 			var buf = new buffer.Buffer.from(JSON.stringify(data));
 
@@ -148,10 +112,7 @@
 				
 				if (err){
 					console.log("[cache][mbtiles] ERR failed to configure database for writing");
-					console.log(err);
-					
-					wg.done();
-					return false;
+					return cb(err);
 				}
 
 				dbconn.putTile(zxy.Z, zxy.X, zxy.Y, buf, function(err, rsp){
@@ -160,10 +121,7 @@
 					
 					if (err){
 						console.log("[cache][mbtiles] ERR failed to set cache for '" + key + "'");
-						console.log(err);
-
-						wg.done();
-						return false;
+						return cb(err);
 					}
 
 					dbconn.stopWriting(function(err){
@@ -172,22 +130,13 @@
 
 						if (err){
 							console.log("[cache][mbtiles] ERR failed to commit database writes");
-							console.log(err);
+							return cb(err);
 						}
-						
-						wg.done();
-						return false;
+
+						return cb(null);
 					});
-					
-					wg.done();
 				});
 			});
-
-			var cb = function(){
-				console.log("[cache][mbtiles] SET complete for '" + key + "'");
-			};
-			
-			wg.wait(cb);
 		},
 
 		'key_to_zxy': function(key){
@@ -198,7 +147,7 @@
 
 			if (! m){
 				console.log("[cache][mbtiles] ERR failed to parse key '" + key + "'");
-				return ;
+				return null;
 			}
 			
 			var z = parseInt(m[1]);
@@ -207,11 +156,6 @@
 
 			console.log("[cache][mbtiles] KEY '" + key + "' becomes Z: (" + z + ") X: (" + x + ") Y: (" + y + ")");
 			return { Z: z, X: x, Y: y };
-		},
-
-		'waitgroup': function(){
-			var wg = require("./mapzen.whosonfirst.waitgroup.js");
-			return wg;
 		}
 	};
 
