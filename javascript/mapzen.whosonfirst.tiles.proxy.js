@@ -58,31 +58,11 @@
 					return;
 				}
 
-				console.log("[proxy][request] " + rel_path);
-				
-				var data = cache.get(rel_path);
-				var len = 0;
-
-				if (data){
-					len = data.length;
-				}
-				
-				console.log("[proxy][request] CACHE " + len);
-				
-				if (data){
-
-					console.log("[proxy][cache] HIT");
-					
-					res.writeHead(200);	// TO DO: headers?
-					res.write(data);
-					res.end();
-					return;
-				}
-								
 				var mz_url = "https://tile.mapzen.com" + url;
-				console.log("[proxy][fetch] " + mz_url);
 				
-				https.get(mz_url , function(mz_rsp){
+				console.log("[proxy][request] " + rel_path);
+
+				var on_fetch = function(mz_rsp){
 					
 					mz_rsp.setEncoding('utf8');
 					
@@ -104,14 +84,31 @@
 					});
 					
 					mz_rsp.on('end', function(){
-						res.end();						
-						cache.set(rel_path, mz_body);
-						console.log("[proxy][fetch] COMPLETE");
+						console.log("[proxy] COMPLETE " + mz_url);
+						res.end();
+						cache.set(rel_path, mz_body, function(){});
 					});
-					
-				});
-			});
+				};
+				
+				var on_get = function(err, data){
 
+					if (data){
+						console.log("[proxy][cache] HIT " + rel_path);
+						res.writeHead(200);	// TO DO: headers?
+						res.write(data);
+						res.end();
+						return;
+					}
+
+					console.log("[proxy][cache] MISS " + rel_path);				
+					console.log("[proxy] FETCH " + mz_url);
+				
+					https.get(mz_url, on_fetch);
+				};
+				
+				cache.get(rel_path, on_get);
+			});
+			
 			return server;
 		}
 		

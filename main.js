@@ -42,87 +42,87 @@ function createMainWindow () {
 		// this is the actual proxy server and caching logic for handling tiles
 		// stuff - we handle intercepting requests below
 
-		// const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.mbtiles.js");
-		const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.fs.js");
-		
-		const proxy = require("./javascript/mapzen.whosonfirst.tiles.proxy.js");
+		const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.mbtiles.js");
+		// const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.fs.js");
 
-		if (! cache.init()){
-			console.log("[proxy] FAIL cache initialization failed");
-			return false;
-		}
-		
-		const server = proxy.server(cache);
-		
-		if (! server){
-			console.log("[proxy] FAIL unable to create proxy server");
-			return false;
-		}
+		cache.init(function(err){
 
-		try {
-			server.listen(proxy_port);
-		}
-
-		catch (e) {
-			console.log("[proxy] FAIL unable to start proxy server, because " + e);
-			return false;
-		}
-		
-		// https://electron.atom.io/docs/api/web-request/
-		
-		// this is where we are intercepting requests (rather than say rewriting
-		// the source url for tiles in mapzen/tangram.js) - in a different universe
-		// we could put all the caching logic here but the electron web-request
-		// stuff doesn't actually give you access to body of a response so... there
-		// is literally nothing to cache. in addition to pre-filtering requests to
-		// tile.mapzen we are post-filtering on the proxy server to check for errors
-		// at which point we _stop_ the proxy server causing the pre-filter to no
-		// longer issue redirects. unfortunately if we encounter a proxy error there
-		// is no way to issue a redirect (to the default tiles endpoint)
-		
-		const {session} = require('electron')
-		
-		var tiles_match = tiles_endpoint + '/*';		
-		var proxy_match = proxy_endpoint + '/*';
-
-		const tiles_filter = {
-			urls: [ tiles_match ]
-		}
-
-		const proxy_filter = {
-			urls: [ proxy_match ]
-		}
-
-		// FYI - cached requests/URLs never even make it this far
-		
-		session.defaultSession.webRequest.onBeforeRequest(tiles_filter, (details, callback) => {
-
-			if (! server.listening){
-				console.log("[proxy] SKIP server not listening");
-				callback({});
-				return;
+			if (err){
+				console.log("[proxy] FAIL cache initialization failed");
+				return false;
 			}
 			
-			var req_url = details["url"];
-			var redir_url = req_url.replace(tiles_endpoint, proxy_endpoint);
-			
-			console.log("[proxy] REDIRECT from " + tiles_endpoint + " TO " + proxy_endpoint);
-			
-			callback({
-				'cancel': false,
-				'redirectURL': redir_url
-			});
-		});
-
-		// maybe don't shut down the proxy server on the first error but track (n)
-		// errors over (y) seconds?
+			const proxy = require("./javascript/mapzen.whosonfirst.tiles.proxy.js");
+			const server = proxy.server(cache);
 		
-		session.defaultSession.webRequest.onErrorOccurred(proxy_filter, (details) => {
-
-			var err = details["error"];
-
-			console.log("[proxy] ERR stop listening because " + err);
-			server.close();
+			if (! server){
+				console.log("[proxy] FAIL unable to create proxy server");
+				return false;
+			}
+			
+			try {
+				server.listen(proxy_port);
+			}
+			
+			catch (e) {
+				console.log("[proxy] FAIL unable to start proxy server, because " + e);
+				return false;
+			}
+		
+			// https://electron.atom.io/docs/api/web-request/
+		
+			// this is where we are intercepting requests (rather than say rewriting
+			// the source url for tiles in mapzen/tangram.js) - in a different universe
+			// we could put all the caching logic here but the electron web-request
+			// stuff doesn't actually give you access to body of a response so... there
+			// is literally nothing to cache. in addition to pre-filtering requests to
+			// tile.mapzen we are post-filtering on the proxy server to check for errors
+			// at which point we _stop_ the proxy server causing the pre-filter to no
+			// longer issue redirects. unfortunately if we encounter a proxy error there
+			// is no way to issue a redirect (to the default tiles endpoint)
+			
+			const {session} = require('electron')
+			
+			var tiles_match = tiles_endpoint + '/*';		
+			var proxy_match = proxy_endpoint + '/*';
+			
+			const tiles_filter = {
+				urls: [ tiles_match ]
+			}
+			
+			const proxy_filter = {
+				urls: [ proxy_match ]
+			}
+			
+			// FYI - cached requests/URLs never even make it this far
+			
+			session.defaultSession.webRequest.onBeforeRequest(tiles_filter, (details, callback) => {
+				
+				if (! server.listening){
+					console.log("[proxy] SKIP server not listening");
+					callback({});
+					return;
+				}
+				
+				var req_url = details["url"];
+				var redir_url = req_url.replace(tiles_endpoint, proxy_endpoint);
+				
+				console.log("[proxy] REDIRECT from " + tiles_endpoint + " TO " + proxy_endpoint);
+				
+				callback({
+					'cancel': false,
+					'redirectURL': redir_url
+				});
+			});
+			
+			// maybe don't shut down the proxy server on the first error but track (n)
+			// errors over (y) seconds?
+			
+			session.defaultSession.webRequest.onErrorOccurred(proxy_filter, (details) => {
+				var err = details["error"];
+				console.log("[proxy] ERR stop listening because " + err);
+				server.close();
+			});
 		});
 		
 		return true;
