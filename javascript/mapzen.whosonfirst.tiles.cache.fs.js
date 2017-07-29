@@ -37,42 +37,45 @@
 	
 	var self = {
 
-		'init': function(){
+		// Please update me to use fs.stat and asynchronous methods...
+		// (20170729/thisisaaronland)
+		
+		'init': function(cb){
 			
 			if (! fs.existsSync(tile_cache)){
 				
 				if (! fs.mkdirSync(tile_cache)){
 					console.log("[cache][fs] ERR can not create '" + tile_cache + "'");
-					return false;
+					return cb("failed to create tile cache");
 				}
 			}
 
-			return true;
+			return cb(null);
 		},
 
-		'get': function(key){
+		'get': function(key, cb){
 			
 			var tile_path = self.key_to_tile_path(key);
 			
 			if (! fs.existsSync(tile_path)){
 				console.log("[cache][fs][" + key + "] MISS");
-				return;
+				return cb("cache miss", null);
 			}
-
-			// TO DO check mtime (fs.statSync) and time-to-expire (currently undefined) here...
 
 			var fh = fs.openSync(tile_path, "r");
 			
 			if (! fh){
 				console.log("[cache][fs][" + key + "] ERR failed to open '" + tile_path + "' for reading");
-				return;
+				return cb("read error", null);
 			}
 
 			console.log("[cache][fs][" + key + "] HIT");			
-			return fs.readFileSync(fh);
+			var body = fs.readFileSync(fh);
+
+			return cb(null, body);
 		},
 
-		'set': function(key, data){
+		'set': function(key, data, cb){
 
 			var tile_path = self.key_to_tile_path(key);
 			var tile_root = path.dirname(tile_path);
@@ -81,7 +84,7 @@
 				
 				if (! mkdirp.sync(tile_root)){
 					console.log("[cache][fs][" + key + "] ERR failed to mkdir");
-					return false;
+					return cb("mkdir error");
 				}
 			}
 
@@ -89,35 +92,20 @@
 					
 			if (! fh){
 				console.log("[cache][fs][" + key + "] ERR failed to open '" + tile_path + "' for writing");
-				return;
+				return cb("open error");
 			}
 
-			fs.writeSync(fh, data)
-			fs.close(fh);
+			try {
+				fs.writeSync(fh, data)
+				fs.close(fh);
+			}
 
-			console.log("[cache][fs][" + key + "] SET");
-		},
-
-		'update': function(key, data){
-
-			var tile_path = self.key_to_tile_path(key);
-
-			if (! fs.exists(tile_path)){
-				console.log("[cache][fs][" + key + "] ERR file '" + tile_path + "' does not exist");
-				return;
+			catch (e){
+				return cb("write error");
 			}
 			
-			var fh = fs.openSync(tile_path, "a", 0o644);
-					
-			if (! fh){
-				console.log("[cache][fs][" + key + "] ERR failed to open '" + tile_path + "' for appending");
-				return;
-			}
-
-			fs.writeSync(fh, data)
-			fs.close(fh);
-
-			console.log("[cache][fs][" + key + "] UPDATE");			
+			console.log("[cache][fs][" + key + "] SET");
+			return cb(null);
 		},
 
 		'key_to_tile_path': function(key){
