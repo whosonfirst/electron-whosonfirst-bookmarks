@@ -24,7 +24,7 @@
         }
 
 }(function(){
-
+	
 	const screenshots = require("./mapzen.whosonfirst.bookmarks.screenshots.js");
 
 	var sub = false;
@@ -40,10 +40,12 @@
 				console.log("map element missing an 'id' attribute");
 				return false;
 			}
-			
+
 			var api_key = document.body.getAttribute("data-api-key");
 			L.Mapzen.apiKey = api_key;
 
+			console.log(L.Mapzen.BasemapStyles.Refill);
+			
 			var map = L.Mapzen.map(map_id, {
     				tangramOptions: {
     					scene: L.Mapzen.BasemapStyles.Refill

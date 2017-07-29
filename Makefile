@@ -6,6 +6,12 @@ tangram:
 	curl -s -o javascript/tangram.js https://mapzen.com/tangram/tangram.debug.js
 	curl -s -o javascript/tangram.min.js https://mapzen.com/tangram/tangram.min.js
 
+leaflet:
+	curl -s -o javascript/leaflet.zip http://cdn.leafletjs.com/leaflet/v1.1.0/leaflet.zip
+
+refill:
+	curl -s -o tangram/refill-style.zip https://mapzen.com/carto/refill-style/refill-style.zip
+
 mapzenjs:
 	curl -s -o css/mapzen.js.css https://mapzen.com/js/mapzen.css
 	curl -s -o javascript/mapzen.js https://mapzen.com/js/mapzen.min.js
