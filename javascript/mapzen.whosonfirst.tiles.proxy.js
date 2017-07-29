@@ -34,7 +34,7 @@
 	var self = {
 
 		'server': function(cache){
-			
+
 			// sudo fix me to generate TLS-stuff at start-up and
 			// use https.createServer...
 			
@@ -57,11 +57,18 @@
 					res.end();
 					return;
 				}
-				
+
 				console.log("[proxy][request] " + rel_path);
 				
 				var data = cache.get(rel_path);
+				var len = 0;
 
+				if (data){
+					len = data.length;
+				}
+				
+				console.log("[proxy][request] CACHE " + len);
+				
 				if (data){
 
 					console.log("[proxy][cache] HIT");

@@ -41,8 +41,10 @@ function createMainWindow () {
 
 		// this is the actual proxy server and caching logic for handling tiles
 		// stuff - we handle intercepting requests below
-		
+
+		// const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.mbtiles.js");
 		const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.fs.js");
+		
 		const proxy = require("./javascript/mapzen.whosonfirst.tiles.proxy.js");
 
 		if (! cache.init()){
