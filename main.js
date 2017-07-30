@@ -81,7 +81,7 @@ function createMainWindow () {
 			// longer issue redirects. unfortunately if we encounter a proxy error there
 			// is no way to issue a redirect (to the default tiles endpoint)
 			
-			const {session} = require('electron')
+			const {session} = require('electron');
 			
 			var tiles_match = tiles_endpoint + '/*';		
 			var proxy_match = proxy_endpoint + '/*';
@@ -127,6 +127,22 @@ function createMainWindow () {
 		
 		return true;
 	});
+
+	const {session} = require('electron');
+	
+	var goog_filter = {
+		urls: [ 'https://fonts.gstatic.com/*' ]
+	};
+
+	session.defaultSession.webRequest.onBeforeRequest(goog_filter, (details, callback) => {
+
+		console.log("BLOCK " + details["url"]);
+		
+		callback({
+			'cancel': true,
+		});
+	});
+	
 }
 
 function createSettingsWindow () {

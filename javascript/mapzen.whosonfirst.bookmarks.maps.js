@@ -42,13 +42,30 @@
 			}
 
 			var api_key = document.body.getAttribute("data-api-key");
+
+			var map = L.map(map_id);
+
+			var tangram = Tangram.leafletLayer({
+				scene: {
+					import: "/tangram/refile-style.zip",
+					global: {
+						sdk_mapzen_api_key: api_key
+					}
+				},
+				numWorkers: 2,
+        			unloadInvisibleTiles: false,
+				updateWhenIdle: false,
+				attribution: "",
+			});
+			
+			/*
 			L.Mapzen.apiKey = api_key;
 
 			console.log(L.Mapzen.BasemapStyles.Refill);
 			
 			var map = L.Mapzen.map(map_id, {
     				tangramOptions: {
-    					scene: L.Mapzen.BasemapStyles.Refill
+    					scene: L.Mapzen.BasemapStyles.Refill,
     				}
 			});
 			
@@ -88,7 +105,8 @@
 					}
 				});
 			});
-
+			*/
+			
 			return map;
 		},
 
