@@ -119,15 +119,20 @@ function createMainWindow () {
 			// errors over (y) seconds?
 			
 			session.defaultSession.webRequest.onErrorOccurred(proxy_filter, (details) => {
+				
+				var url = details["url"];				
 				var err = details["error"];
-				console.log("[proxy] ERR stop listening because " + err);
-				server.close();
+				
+				console.log("[proxy] ERR requesting " + url +", because " + err);				
+				// console.log("[proxy] ERR stop listening because " + err);
+				// server.close();
 			});
 		});
 		
 		return true;
 	});
 
+	/*
 	const {session} = require('electron');
 	
 	var goog_filter = {
@@ -142,6 +147,16 @@ function createMainWindow () {
 			'cancel': true,
 		});
 	});
+
+	var all_filter = {
+		urls: [ '*' ]
+	};
+	
+	session.defaultSession.webRequest.onBeforeRequest(all_filter, (details, callback) => {
+		console.log("REQUEST " + details["url"]);
+		callback({});
+	});
+	*/
 	
 }
 

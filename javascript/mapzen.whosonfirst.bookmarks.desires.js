@@ -156,8 +156,8 @@
 
 		'show_desires_for_place': function(status_id, wof_id){
 
-			var map = document.createElement("div");
-			map.setAttribute("id", "map");
+			var map_el = document.createElement("div");
+			map_el.setAttribute("id", "map");
 
 			var desire_wrapper = self.render_desire(status_id);
 			
@@ -167,22 +167,14 @@
 			var right_panel = document.createElement("div");
 			right_panel.setAttribute("class", "col-md-6 panel panel-right");
 
-			left_panel.appendChild(map);
+			left_panel.appendChild(map_el);
 			right_panel.appendChild(desire_wrapper);
 			
 			canvas.reset();
 			canvas.append(left_panel);
 			canvas.append(right_panel);			
 
-			var api_key = document.body.getAttribute("data-api-key");			
-			L.Mapzen.apiKey = api_key;
-
-			var map = L.Mapzen.map('map', {
-    				tangramOptions: {
-    					scene: L.Mapzen.BasemapStyles.Refill
-    				}
-			});
-
+			var map = maps.new_map(map_el);
 
 			var places = require("./mapzen.whosonfirst.bookmarks.places.js");
 
