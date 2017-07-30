@@ -107,10 +107,20 @@ function createMainWindow () {
 			
 			var req_url = details["url"];
 			console.log("[filter] REQUEST " + req_url);
-
+			
 			// because the mapzen styleguide...
 			
-			if (req_url.match(/^https?\:\/\/.*\.gstatic\.com/)){
+			if (req_url.match(/^https?\:\/\/fonts\.gstatic\.com/)){
+				console.log("[filter] BLOCK " + req_url);
+				return callback({cancel: true});
+			}
+
+			else if (req_url.match(/^https?\:\/\/fonts\.googleapis\.com/)){
+				console.log("[filter] BLOCK " + req_url);
+				return callback({cancel: true});
+			}
+
+			else if (req_url.match(/^https?\:\/\/maxcdn\.bootstrapcdn\.com/)){
 				console.log("[filter] BLOCK " + req_url);
 				return callback({cancel: true});
 			}
