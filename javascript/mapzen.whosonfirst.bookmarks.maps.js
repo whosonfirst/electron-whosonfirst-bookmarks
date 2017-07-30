@@ -47,7 +47,7 @@
 
 			var tangram = Tangram.leafletLayer({
 				scene: {
-					import: "/tangram/refile-style.zip",
+					import: "tangram/refill-style.zip",
 					global: {
 						sdk_mapzen_api_key: api_key
 					}
@@ -57,6 +57,8 @@
 				updateWhenIdle: false,
 				attribution: "",
 			});
+
+			tangram.addTo(map);
 			
 			/*
 			L.Mapzen.apiKey = api_key;
