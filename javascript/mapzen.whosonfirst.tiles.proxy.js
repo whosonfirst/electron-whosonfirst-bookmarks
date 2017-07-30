@@ -60,7 +60,7 @@
 
 				var mz_url = "https://tile.mapzen.com" + url;
 				
-				console.log("[proxy][request] " + rel_path);
+				console.log("[proxy][cache] GET " + rel_path);
 
 				var on_fetch = function(mz_rsp){
 					
@@ -84,9 +84,16 @@
 					});
 					
 					mz_rsp.on('end', function(){
-						console.log("[proxy] COMPLETE " + mz_url);
 						res.end();
-						cache.set(rel_path, mz_body, function(){});
+						
+						cache.set(rel_path, mz_body, function(err){
+
+							if (err){
+								return;
+							}
+							
+							console.log("[proxy][cache] SET " + rel_path);
+						});
 					});
 				};
 				

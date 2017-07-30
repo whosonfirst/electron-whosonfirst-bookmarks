@@ -39,9 +39,11 @@ function createMainWindow () {
 
 		var proxy_endpoint = proxy_host + ":" + proxy_port;
 
+		var server;
+		
 		// this is the actual proxy server and caching logic for handling tiles
 		// stuff - we handle intercepting requests below
-
+		
 		const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.mbtiles.js");
 		// const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.fs.js");
 
@@ -53,7 +55,7 @@ function createMainWindow () {
 			}
 			
 			const proxy = require("./javascript/mapzen.whosonfirst.tiles.proxy.js");
-			const server = proxy.server(cache);
+			server = proxy.server(cache);
 		
 			if (! server){
 				console.log("[proxy] FAIL unable to create proxy server");
@@ -68,96 +70,83 @@ function createMainWindow () {
 				console.log("[proxy] FAIL unable to start proxy server, because " + e);
 				return false;
 			}
+
+			return true;
+		});
+
+		// https://electron.atom.io/docs/api/web-request/
 		
-			// https://electron.atom.io/docs/api/web-request/
+		// this is where we are intercepting requests (rather than say rewriting
+		// the source url for tiles in mapzen/tangram.js) - in a different universe
+		// we could put all the caching logic here but the electron web-request
+		// stuff doesn't actually give you access to body of a response so... there
+		// is literally nothing to cache. in addition to pre-filtering requests to
+		// tile.mapzen we are post-filtering on the proxy server to check for errors
+		// at which point we _stop_ the proxy server causing the pre-filter to no
+		// longer issue redirects. unfortunately if we encounter a proxy error there
+		// is no way to issue a redirect (to the default tiles endpoint)
 		
-			// this is where we are intercepting requests (rather than say rewriting
-			// the source url for tiles in mapzen/tangram.js) - in a different universe
-			// we could put all the caching logic here but the electron web-request
-			// stuff doesn't actually give you access to body of a response so... there
-			// is literally nothing to cache. in addition to pre-filtering requests to
-			// tile.mapzen we are post-filtering on the proxy server to check for errors
-			// at which point we _stop_ the proxy server causing the pre-filter to no
-			// longer issue redirects. unfortunately if we encounter a proxy error there
-			// is no way to issue a redirect (to the default tiles endpoint)
+		const {session} = require('electron');
+		
+		var tiles_match = tiles_endpoint + '/*';		
+		var proxy_match = proxy_endpoint + '/*';
+		
+		const tiles_filter = {
+			urls: [ tiles_match ]
+		}
+		
+		const proxy_filter = {
+			urls: [ proxy_match ]
+		}
+		
+		var all_filter = {
+			urls: [ '*' ]
+		};
+		
+		// FYI - cached requests/URLs never even make it this far
+		
+		session.defaultSession.webRequest.onBeforeRequest(all_filter, (details, callback) => {
 			
-			const {session} = require('electron');
+			var req_url = details["url"];
+			console.log("[filter] REQUEST " + req_url);
 			
-			var tiles_match = tiles_endpoint + '/*';		
-			var proxy_match = proxy_endpoint + '/*';
-			
-			const tiles_filter = {
-				urls: [ tiles_match ]
+			if (req_url.match(/^https?\:\/\/.*\.gstatic\.com/)){
+				console.log("[filter] BLOCK " + req_url);
+				return callback({cancel: true});
 			}
 			
-			const proxy_filter = {
-				urls: [ proxy_match ]
-			}
-			
-			// FYI - cached requests/URLs never even make it this far
-			
-			session.defaultSession.webRequest.onBeforeRequest(tiles_filter, (details, callback) => {
+			else if (req_url.match(/https\:\/\/tile\.mapzen\.com/)){
 				
-				if (! server.listening){
-					console.log("[proxy] SKIP server not listening");
-					callback({});
+				if ((! server) || (! server.listening)){
+					console.log("[fitler] SKIP proxy server not listening");
+					return callback({});
 					return;
 				}
 				
-				var req_url = details["url"];
 				var redir_url = req_url.replace(tiles_endpoint, proxy_endpoint);
 				
-				console.log("[proxy] REDIRECT from " + tiles_endpoint + " TO " + proxy_endpoint);
-				
-				callback({
-					'cancel': false,
-					'redirectURL': redir_url
-				});
-			});
+				// console.log("[filter] REDIRECT " + tiles_endpoint + " TO " + proxy_endpoint);
+				return callback({'redirectURL': redir_url});
+			}
 			
-			// maybe don't shut down the proxy server on the first error but track (n)
-			// errors over (y) seconds?
-			
-			session.defaultSession.webRequest.onErrorOccurred(proxy_filter, (details) => {
-				
-				var url = details["url"];				
-				var err = details["error"];
-				
-				console.log("[proxy] ERR requesting " + url +", because " + err);				
-				// console.log("[proxy] ERR stop listening because " + err);
-				// server.close();
-			});
+			else {
+				return callback({});
+			}
 		});
 		
-		return true;
-	});
-
-	/*
-	const {session} = require('electron');
-	
-	var goog_filter = {
-		urls: [ 'https://fonts.gstatic.com/*' ]
-	};
-
-	session.defaultSession.webRequest.onBeforeRequest(goog_filter, (details, callback) => {
-
-		console.log("BLOCK " + details["url"]);
+		// maybe don't shut down the proxy server on the first error but track (n)
+		// errors over (y) seconds?
 		
-		callback({
-			'cancel': true,
+		session.defaultSession.webRequest.onErrorOccurred(proxy_filter, (details) => {
+			
+			var url = details["url"];				
+			var err = details["error"];
+			
+			console.log("[filter] ERROR proxying " + url +", because " + err);				
+			// console.log("[proxy] ERR stop listening because " + err);
+			// server.close();
 		});
 	});
-
-	var all_filter = {
-		urls: [ '*' ]
-	};
-	
-	session.defaultSession.webRequest.onBeforeRequest(all_filter, (details, callback) => {
-		console.log("REQUEST " + details["url"]);
-		callback({});
-	});
-	*/
-	
 }
 
 function createSettingsWindow () {

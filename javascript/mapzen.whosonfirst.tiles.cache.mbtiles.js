@@ -59,7 +59,7 @@
 
 		'get': function(key, cb){
 
-			console.log("[cache][mbtiles] GET cache for '" + key + "'");
+			// console.log("[cache][mbtiles] GET cache for '" + key + "'");
 			
 			var zxy = self.key_to_zxy(key);
 
@@ -72,7 +72,7 @@
 			dbconn.getTile(zxy.Z, zxy.X, zxy.Y, function(err, buf, headers){
 
 				if (err){
-					console.log("[cache][mbtiles] ERR failed to get cache for '" + key + "'");
+					// console.log("[cache][mbtiles] ERR failed to get cache for '" + key + "'");
 					return cb(err, null);
 				}
 
@@ -85,7 +85,7 @@
 					}
 
 					catch (e){
-						console.log("[cache][mbtiles] ERR failed to parse cache for '" + key + "'");
+						// console.log("[cache][mbtiles] ERR failed to parse cache for '" + key + "'");
 						return cb(err, null);
 					}
 				}
@@ -96,7 +96,7 @@
 
 		'set': function(key, data, cb){
 
-			console.log("[cache][mbtiles] SET cache for '" + key + "'");
+			// console.log("[cache][mbtiles] SET cache for '" + key + "'");
 			
 			var zxy = self.key_to_zxy(key);
 
@@ -111,7 +111,7 @@
 				// console.log("[cache][mbtiles] START writing");
 				
 				if (err){
-					console.log("[cache][mbtiles] ERR failed to configure database for writing");
+					// console.log("[cache][mbtiles] ERR failed to configure database for writing");
 					return cb(err);
 				}
 
@@ -120,7 +120,7 @@
 					// console.log("[cache][mbtiles] PUT tile");
 					
 					if (err){
-						console.log("[cache][mbtiles] ERR failed to set cache for '" + key + "'");
+						// console.log("[cache][mbtiles] ERR failed to set cache for '" + key + "'");
 						return cb(err);
 					}
 
@@ -129,7 +129,7 @@
 						// console.log("[cache][mbtiles] STOP writing");
 
 						if (err){
-							console.log("[cache][mbtiles] ERR failed to commit database writes");
+							// console.log("[cache][mbtiles] ERR failed to commit database writes");
 							return cb(err);
 						}
 
@@ -146,7 +146,7 @@
 			var m = key.match(/.*\/(\d+)\/(\d+)\/(\d+)\..*$/);
 
 			if (! m){
-				console.log("[cache][mbtiles] ERR failed to parse key '" + key + "'");
+				// console.log("[cache][mbtiles] ERR failed to parse key '" + key + "'");
 				return null;
 			}
 			
@@ -154,7 +154,7 @@
 			var x = parseInt(m[2]);
 			var y = parseInt(m[3]);
 
-			console.log("[cache][mbtiles] KEY '" + key + "' becomes Z: (" + z + ") X: (" + x + ") Y: (" + y + ")");
+			// console.log("[cache][mbtiles] KEY '" + key + "' becomes Z: (" + z + ") X: (" + x + ") Y: (" + y + ")");
 			return { Z: z, X: x, Y: y };
 		}
 	};
