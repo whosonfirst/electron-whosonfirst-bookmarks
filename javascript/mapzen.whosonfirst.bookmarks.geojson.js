@@ -219,7 +219,7 @@
 				// "z-index": 500
 			};
 			
-			var layer = self.add_latlon_to_map(map, lat, lon, 16, more);
+			var layer = self.add_latlon_to_map(map, lat, lon, 17, more);
 			layer.bringToFront();
 		},
 
@@ -242,7 +242,7 @@
 			}
 			
 			if (pt == "venue"){
-				var layer = self.add_latlon_to_map(map, lat, lon);
+				var layer = self.add_latlon_to_map(map, lat, lon, 17);
 				return layer;
 			}
 
@@ -255,7 +255,7 @@
 			var max_lon = bbox[2];
 
 			if ((min_lat == max_lat) && (min_lon == max_lon)){
-				var layer = self.add_latlon_to_map(map, lat, lon);
+				var layer = self.add_latlon_to_map(map, lat, lon, 17);
 				return layer
 			}
 
@@ -368,7 +368,7 @@
 				// "z-index": 200,
 			};
 			
-			return self.add_featurecollection_to_map(map, featurecollection, more);
+			return self.add_geojson_to_map(map, featurecollection, more);
 		},
 		
 		// add geojson-thing-to-map
@@ -428,7 +428,7 @@
 			};
 
 			if (zoom){
-				map.setView([lat, lon], 16);
+				map.setView([lat, lon], zoom);
 			}
 			
 			return self.add_geojson_to_map(map, feature, more);
