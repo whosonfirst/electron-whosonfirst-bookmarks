@@ -39,10 +39,8 @@ function createMainWindow () {
 
 		var proxy_endpoint = proxy_host + ":" + proxy_port;
 
+		// because we'll need `server` outside of cache.init
 		var server;
-		
-		// this is the actual proxy server and caching logic for handling tiles
-		// stuff - we handle intercepting requests below
 		
 		const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.mbtiles.js");
 		// const cache = require("./javascript/mapzen.whosonfirst.tiles.cache.fs.js");
@@ -109,6 +107,8 @@ function createMainWindow () {
 			
 			var req_url = details["url"];
 			console.log("[filter] REQUEST " + req_url);
+
+			// because the mapzen styleguide...
 			
 			if (req_url.match(/^https?\:\/\/.*\.gstatic\.com/)){
 				console.log("[filter] BLOCK " + req_url);

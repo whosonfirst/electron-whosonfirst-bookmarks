@@ -37,12 +37,11 @@
 			var map_id = el.getAttribute("id");
 
 			if (! map_id){
-				console.log("map element missing an 'id' attribute");
+				console.log("[map] ERR map element missing an 'id' attribute");
 				return false;
 			}
 
 			var api_key = document.body.getAttribute("data-api-key");
-
 			var map = L.map(map_id);
 
 			var tangram = Tangram.leafletLayer({
@@ -54,36 +53,24 @@
 				},
 				numWorkers: 2,
         			unloadInvisibleTiles: false,
-				updateWhenIdle: false,
+				updateWhenIdle: true,
 				attribution: "",
 			});
 
-			tangram.addTo(map);
-			
-			/*
-			L.Mapzen.apiKey = api_key;
+			tangram.on("load", function(e){
 
-			console.log(L.Mapzen.BasemapStyles.Refill);
-			
-			var map = L.Mapzen.map(map_id, {
-    				tangramOptions: {
-    					scene: L.Mapzen.BasemapStyles.Refill,
-    				}
-			});
-			
-			map.on("tangramloaded", function(e){
-
-				// https://mapzen.com/documentation/tangram/Javascript-API/#events
-				// https://mapzen.com/documentation/tangram/Javascript-API/#screenshot
+				// console.log("[tangram] LOAD");
 				
-				var tangram = e.tangramLayer;
-				var scene = tangram.scene;
+				var target = e.target;
+				var scene = target.scene;
 				
 				wtf = scene;	// hack: see notes in mapzen.whosonfirst.bookmarks.geojson.js
 				
 				scene.subscribe({
 					"view_complete": function(){
 
+						// console.log("[tangram][scene] VIEW COMPLETE");
+						
 						// NOT HAPPY ABOUT THIS BUT IT SEEMS TO BE
 						// THE ONLY WAY TO MAKE IT WORK...
 						
@@ -102,13 +89,14 @@
 						}
 
 						scene.screenshot().then(function(rsp){
+							console.log("[tangram][screenshot] SAVE " + wof_id);
 							screenshots.save(rsp, wof_id);
 						});
 					}
 				});
 			});
-			*/
 			
+			tangram.addTo(map);			
 			return map;
 		},
 
