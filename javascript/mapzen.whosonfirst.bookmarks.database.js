@@ -60,6 +60,11 @@
 				return cb(null);
 			}
 
+			// sudo make me a generic function that can apply to a filepath
+			// like main.sql or alters/*.sql - and then wrap in logic to loop
+			// through the available *.sql files and apply (in order) anything
+			// we don't have a record of (20170731/thisisaaronland)
+			
 			var app_path = app.getAppPath();
 			var root = path.join(app_path, "schema");
 			var schema = path.join(root, "main.sql");
@@ -93,19 +98,67 @@
 					return cb(e);
 				}
 
-				console.log("[database][schema] SETUP complete");
-				return cb(null);
+				var dt = new Date;
+				dt = dt.toISOString();
+
+				var schema_name = path.basename(schema);
+				
+				var sql = "INSERT INTO db (schema, lastmodified) VALUES (?, ?)";
+				var params = [ schema_name, dt ];
+
+				// console.log(sql, params);
+				
+				db.run(sql, params, function(e){
+
+					if (e){
+						console.log("[database][schema] ERR failed to update 'db' table");
+						console.log(e);
+						return cb(e);
+					}
+					
+					console.log("[database][schema] SETUP complete");
+					return cb(null);
+				});
 			});
+
+			// end of sudo make me a generic function
 		},
 		
 		'conn': function(){
 			return db;
 		},
 
+		'close': function(cb){
+			db.close(cb);
+		},
+		
 		'export': function(cb){
 			// please write me - export each table as a CSV file like:
 			// bookmarks-{TABLE}.csv (20170731/thisisaaronland)
 			cb(null);
+		},
+
+		'backup': function(cb){
+
+			var backup = bookmarks + ".bak";
+			
+			var rd = fs.createReadStream(bookmarks);
+			
+			rd.on("error", function(err){
+				cb(err, null);
+			});
+
+			var wr = fs.createWriteStream(backup);
+			
+			wr.on("error", function(err) {
+				cb(err, null);
+			});
+
+			wr.on("close", function(){
+				cb(null, backup);
+			});
+			
+			rd.pipe(wr);
 		},
 		
 		// TO DO - replace and remove all of these functions...

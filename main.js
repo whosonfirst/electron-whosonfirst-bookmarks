@@ -264,8 +264,27 @@ app.on('activate', function (){
 });
 
 app.on('quit', function(){
-	console.log("[app] QUIT");
+
+	// console.log("[app] QUIT");
+
+	// still needs to be written...
 	// db.export();
+	
+	db.close(function(err){
+
+		if (err){
+			console.log("[app][quit] ERR closing database");
+		}
+
+		db.backup(function(err, path){
+
+			if (err){
+				console.log("[app][quit] ERR backing up database");
+			}
+
+			console.log("[app][quit] OK database backup created at " + path);
+		});
+	});
 });
 
 ipcMain.on('renderer', (event, arg) => {

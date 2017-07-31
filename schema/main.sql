@@ -71,3 +71,8 @@ CREATE TABLE list_items (
 );
 
 CREATE UNIQUE INDEX `by_list_item` ON list_items (`list_id`, `wof_id`);
+
+CREATE TABLE db (
+	schema TEXT PRIMARY KEY,
+	lastmodified INTEGER
+);
