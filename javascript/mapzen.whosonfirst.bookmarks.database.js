@@ -39,25 +39,27 @@
 	const app = electron.app || electron.remote.app;
 	const udata = app.getPath("userData");
 
+	// this pattern could probably use some finessing but works for now...
+	// (20170731/thisisaaronland)
+	
 	const bookmarks = path.join(udata, "bookmarks.db");
+	const exists = fs.existsSync(bookmarks);
+	
 	const db = new sqlite3.Database(bookmarks);
 
 	var self = {
 
+		// this gets invoked in main.js
+		
 		'init': function(cb){
 
 			console.log("[database][schema] INIT");
 			
-			var debug = path.join(udata, "bookmarks-debug.db");
-			var exists = fs.existsSync(debug);
-			
-			const db2 = new sqlite3.Database(debug);
-
 			if (exists){
-				console.log("[database][schema] SKIP");				
+				// console.log("[database][schema] SKIP");				
 				return cb(null);
 			}
-			
+
 			var app_path = app.getAppPath();
 			var root = path.join(app_path, "schema");
 			var schema = path.join(root, "main.sql");
@@ -65,6 +67,9 @@
 			var fh = fs.openSync(schema, "r");
 
 			if (! fh){
+				console.log("[database][schema] ERR failed to load schema");
+				console.log(e);				
+
 				return cb("Failed to open schema file for reading");
 			}
 
@@ -74,15 +79,16 @@
 			}
 
 			catch (e) {
-				console.log("[database][schema] ERR failed to setup");
-				console.log(e);				
+				console.log("[database][schema] ERR failed to read schema");
+				console.log(e);
+				
 				return cb(e);
 			}
 			
-			db2.exec(sql, function(e){
+			db.exec(sql, function(e){
 
 				if (e){
-					console.log("[database][schema] ERR failed to setup");
+					console.log("[database][schema] ERR failed to load schema");
 					console.log(e);
 					return cb(e);
 				}
@@ -96,9 +102,7 @@
 			return db;
 		},
 		
-		'add_place': function(pl){
-
-		},
+		// TO DO - replace and remove all of these functions...
 		
 		'get_visits': function(cb){
 
@@ -138,7 +142,7 @@
 
 			db.all(sql, params, cb);
 		}
-	}
+	};
 
 	return self;
 }));

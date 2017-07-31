@@ -11,11 +11,25 @@ const ipcMain = require('electron').ipcMain;
 const path = require('path')
 const url = require('url')
 
+const db = require("./javascript/mapzen.whosonfirst.bookmarks.database.js");
+
 let mainWindow
 let settingsWindow
 
 function createMainWindow () {
 
+	console.log("[app] MAIN WINDOW");
+
+	db.init(function(err){
+		
+		if (err){
+			const {dialog} = require('electron')
+			dialog.showErrorBox("Error", "Database setup failed. That's not right...");
+
+			app.quit();
+		}
+	});
+	
 	mainWindow = new BrowserWindow({width: 1024, height: 800})
 	
 	mainWindow.loadURL(url.format({
@@ -31,11 +45,6 @@ function createMainWindow () {
 	});
 	
 	mainWindow.webContents.once("did-finish-load", function (){
-
-		const db = require("./javascript/mapzen.whosonfirst.bookmarks.database.js");
-		db.init(function(e){
-			console.log("db INIT " + e);
-		});
 		
 		var tiles_endpoint = 'https://tile.mapzen.com';
 
@@ -243,14 +252,20 @@ app.on('window-all-closed', function (){
 	if (process.platform !== 'darwin'){
 		app.quit();
 	}
+
+	console.log("[app][ready] ACTIVATE");	
 })
 
 app.on('activate', function (){
 	
-	if (mainWindow === null){
+	if (mainWindow === null){		
 		createMainWindow();
 	}
-})
+});
+
+app.on('quit', function(){
+	console.log("[app] QUIT");
+});
 
 ipcMain.on('renderer', (event, arg) => {
 
@@ -258,4 +273,4 @@ ipcMain.on('renderer', (event, arg) => {
 		createSettingsWindow();
 		return;
 	}
-})
+});
