@@ -4,7 +4,7 @@ Bookmarks for Who's On First places.
 
 ## Important
 
-Too soon. Move along.
+This is wetter-than-wet paint. If you don't have the time or the inclination for a lot of unknown-unknowns and a measure of bad craziness then it's probably still "too soon". If you're up for some adventure then welcome!
 
 ## Install
 
@@ -28,50 +28,11 @@ npm start
 
 ## Database schema
 
-_This will change. Be prepared..._
+Take a look at [schema/main.sql](schema/main.sql).
 
-```
-CREATE TABLE visits (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			latitude NUMERIC,
-			longitude NUMERIC,
-			wof_id INTEGER,
-			neighbourhood_id INTEGER,
-			macrohood_id INTEGER,
-			locality_id INTEGER,
-			metroarea_id INTEGER,			
-			region_id INTEGER,
-			country_id INTEGER,
-			status_id INTEGER,
-			date TEXT,
-			name TEXT);
+### Important
 
-CREATE TABLE places (wof_id INTEGER PRIMARY KEY, body TEXT,	created TEXT);
-
-CREATE TABLE tags (id INTEGER PRIMARY KEY AUTOINCREMENT, tag TEXT);
-
-CREATE TABLE places_tags (wof_id INTEGER, tag_id INTEGER);
-
-CREATE TABLE trips (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, arrival TEXT, departure TEXT, wof_id INTEGER, status_id INTEGER, notes TEXT);
-CREATE INDEX `trips_by_date` ON trips (`arrival`, `departure`);
-CREATE INDEX `trips_by_wofid` ON trips (`wof_id`);
-
-CREATE INDEX `by_date` ON visits (`date`);
-CREATE INDEX `by_locality` ON visits (`locality_id`, `neighbourhood_id`);
-CREATE INDEX `by_neighbourhood` ON visits (`neighbourhood_id`);
-
-CREATE INDEX `by_macrohood` ON VISITS (`macrohood_id`);
-CREATE INDEX `by_metroarea` ON VISITS (`metroarea_id`);
-CREATE INDEX `by_locality_macro` ON VISITS (`locality_id`, `macrohood_id`);
-
-CREATE UNIQUE INDEX `by_tag` ON tags (`tag`);
-CREATE UNIQUE INDEX `by_tagid` ON places_tags (`wof_id`, `tag_id`);
-
-CREATE TABLE list_items (list_id INTEGER, wof_id INTEGER, order INTEGER);
-CREATE TABLE list_items (list_id INTEGER, wof_id INTEGER, idx INTEGER);
-CREATE UNIQUE INDEX `by_list` ON `lists` (`name`);
-CREATE UNIQUE INDEX `by_list_item` ON list_items (`list_id`, `wof_id`);
-```
+It is very likely that the database schema _will change_ and it may change without a handy facility for updating itself automatically (yet). Any subsequent database alters will be included with the source code but you may have to apply them manually, at least in the short-term.
 
 ## See also
 
