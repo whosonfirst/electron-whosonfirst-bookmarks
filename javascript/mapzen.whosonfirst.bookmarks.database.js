@@ -101,6 +101,12 @@
 		'conn': function(){
 			return db;
 		},
+
+		'export': function(cb){
+			// please write me - export each table as a CSV file like:
+			// bookmarks-{TABLE}.csv (20170731/thisisaaronland)
+			cb(null);
+		},
 		
 		// TO DO - replace and remove all of these functions...
 		

@@ -265,6 +265,7 @@ app.on('activate', function (){
 
 app.on('quit', function(){
 	console.log("[app] QUIT");
+	// db.export();
 });
 
 ipcMain.on('renderer', (event, arg) => {
