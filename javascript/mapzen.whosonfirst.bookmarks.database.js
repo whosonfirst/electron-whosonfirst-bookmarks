@@ -40,53 +40,58 @@
 	const udata = app.getPath("userData");
 
 	const bookmarks = path.join(udata, "bookmarks.db");
-	const exists = fs.existsSync(bookmarks);
-
-	fb.debug(bookmarks);
-	
 	const db = new sqlite3.Database(bookmarks);
-	
-	if (! exists){
-
-		var visits_sql = `CREATE TABLE visits (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			latitude NUMERIC,
-			longitude NUMERIC,
-			wof_id INTEGER,
-			neighbourhood_id INTEGER,
-			locality_id INTEGER,
-			region_id INTEGER,
-			country_id INTEGER,
-			status_id INTEGER,
-			date TEXT
-		)`;
-
-		var places_sql = `CREATE TABLE places (
-			wof_id INTEGER,
-			body TEXT,
-			created TEXT
-		)`;
-
-		db.exec(visits_sql, function(e){
-
-			if (e){
-				console.log("OH NO VISITS");
-				console.log(e);				
-			}			
-		});
-
-		db.exec(places_sql, function(e){
-
-			if (e){
-				console.log("OH NO PLACES");
-				console.log(e);				
-			}			
-		});
-				
-	}
 
 	var self = {
 
+		'init': function(cb){
+
+			console.log("[database][schema] INIT");
+			
+			var debug = path.join(udata, "bookmarks-debug.db");
+			var exists = fs.existsSync(debug);
+			
+			const db2 = new sqlite3.Database(debug);
+
+			if (exists){
+				console.log("[database][schema] SKIP");				
+				return cb(null);
+			}
+			
+			var app_path = app.getAppPath();
+			var root = path.join(app_path, "schema");
+			var schema = path.join(root, "main.sql");
+
+			var fh = fs.openSync(schema, "r");
+
+			if (! fh){
+				return cb("Failed to open schema file for reading");
+			}
+
+			try {
+				var buf = fs.readFileSync(fh);
+				var sql = buf.toString();
+			}
+
+			catch (e) {
+				console.log("[database][schema] ERR failed to setup");
+				console.log(e);				
+				return cb(e);
+			}
+			
+			db2.exec(sql, function(e){
+
+				if (e){
+					console.log("[database][schema] ERR failed to setup");
+					console.log(e);
+					return cb(e);
+				}
+
+				console.log("[database][schema] SETUP complete");
+				return cb(null);
+			});
+		},
+		
 		'conn': function(){
 			return db;
 		},

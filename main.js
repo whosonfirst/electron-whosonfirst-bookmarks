@@ -32,6 +32,11 @@ function createMainWindow () {
 	
 	mainWindow.webContents.once("did-finish-load", function (){
 
+		const db = require("./javascript/mapzen.whosonfirst.bookmarks.database.js");
+		db.init(function(e){
+			console.log("db INIT " + e);
+		});
+		
 		var tiles_endpoint = 'https://tile.mapzen.com';
 
 		var proxy_host = "http://localhost";
