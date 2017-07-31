@@ -32,7 +32,7 @@ Take a look at [schema/main.sql](schema/main.sql).
 
 ### Important
 
-It is very likely that the database schema _will change_ and it may change without a handy facility for updating itself automatically (yet). Any subsequent database alters will be included with the source code but you may have to apply them manually, at least in the short-term.
+It is very likely that the database schema _will change_ and it may change [without a handy facility](https://github.com/whosonfirst/electron-whosonfirst-bookmarks/blob/master/javascript/mapzen.whosonfirst.bookmarks.database.js#L63-L124) for updating itself automatically (yet). Any subsequent database alters will be included with the source code but you may have to apply them manually, at least in the short-term.
 
 ## See also
 
