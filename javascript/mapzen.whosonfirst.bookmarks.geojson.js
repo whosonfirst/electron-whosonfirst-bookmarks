@@ -61,7 +61,6 @@
 			"fillColor": "#FFA500",
 			"fillOpacity": 1
 		}
-		
 	};
 			
 	const handlers = {
@@ -69,16 +68,16 @@
 			
 			return function(feature, latlon){
 
-				// console.log(feature);
-				
 				var m = L.circleMarker(latlon, style);
 
 				try {
 					var props = feature['properties'];
 					var label = props['wof:name'];
+
+					// http://leafletjs.com/reference-1.1.0.html#tooltip-option
 					
 					if (label){
-						m.bindLabel(label, { noHide: false });
+						m.bindTooltip(label);
 					}
 				}
 
@@ -179,7 +178,7 @@
 					"coordinates": coords,
 				};
 
-				var props = {};
+				var props = row;
 				
 				var feature = {
 					"type": "Feature",

@@ -61,22 +61,21 @@
 
 			left_panel.appendChild(map_el);
 
-			
 			canvas.reset();
 			canvas.append(left_panel);
 			canvas.append(right_panel);			
 
 			var map = maps.new_map(map_el);
-
-			var lat = 29.817632;
-			var lon = -95.462296
-			var zoom = 16;
-			
-			map.setView([lat, lon], zoom);
+			var nearby_layer;
 			
 			var fetch_nearby = function(e){
 
-				var m = e.target;				
+				var m = e.target;
+
+				if (m.getZoom() < 14){
+					return;
+				}
+
 				var ll = m.getCenter();
 
 				var method = "whosonfirst.places.getNearby";
@@ -84,6 +83,8 @@
 				var args = {
 					"latitude": ll.lat,
 					"longitude": ll.lng,
+					"radius": 2000,
+					"placetype": "venue",
 					"extras": "addr:,edtf:,geom:,lbl:,mz:,wof:hierarchy,wof:superseded_by,wof:tags"
 				};
 				
@@ -100,9 +101,14 @@
 
 				var on_success = function(rsp){
 
-					console.log(rsp);					
+					if (nearby_layer){
+						nearby_layer.remove();
+					}
+					
 					var places = rsp["places"];
-					geojson.add_spr_to_map(map, places);				
+					var layer = geojson.add_spr_to_map(map, places);
+
+					nearby_layer = layer;
 				};
 
 				var on_error = function(rsp){
@@ -113,6 +119,12 @@
 			};
 			
 			map.on("moveend", fetch_nearby);
+			
+			var lat = 29.817632;
+			var lon = -95.462296
+			var zoom = 16;
+			
+			map.setView([lat, lon], zoom);
 		}
 	}
 
