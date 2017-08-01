@@ -25,7 +25,8 @@
 
 }(function(){
 	
-	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");	
+	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");
+	const utils = require("./mapzen.whosonfirst.utils.js");	
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
 
 	const styles = {
@@ -68,21 +69,34 @@
 			
 			return function(feature, latlon){
 
-				var m = L.circleMarker(latlon, style);
+				var props = feature['properties'];
+				console.log("[geojson][point]", props);
 
-				try {
-					var props = feature['properties'];
-					var label = props['wof:name'];
+				var label = props["xx:label"];
+				
+				if (props["xx:type"] == "place"){
 
-					// http://leafletjs.com/reference-1.1.0.html#tooltip-option
+					var fill = utils.dopplr_colour(label);
+					style["fillColor"] = fill;
+				}
+				
+				if (props["xx:type"] == "visit"){
+
+					var status = props["xx:status"];
 					
-					if (label){
-						m.bindTooltip(label);
+					if (status){
+						var fill = utils.dopplr_colour(status);
+						style["fillColor"] = fill;
 					}
 				}
+				
+				var m = L.circleMarker(latlon, style);
 
-				catch (e){
-					console.log("failed to bind label because " + e);
+				// http://leafletjs.com/reference-1.1.0.html#tooltip-option					
+				var label = props['xx:label'];
+				
+				if (label){
+					m.bindTooltip(label);
 				}
 				
 				return m;
@@ -133,9 +147,14 @@
 				};
 
 				var props = {
-					"wof:name": row["wof:name"]
+					"wof:id": pl["wof:id"],					
+					"wof:name": pl["wof:name"],
+					"xx:label": pl["wof:name"],
+					"xx:type": "place",
 				};
 
+				// console.log("[geojson][places]", row, props);
+				
 				var feature = {
 					"type": "Feature",
 					"geometry": geom,
@@ -178,7 +197,14 @@
 					"coordinates": coords,
 				};
 
-				var props = row;
+				var props = {
+					"wof:id": row["wof:id"],
+					"wof:name": row["wof:name"],
+					"xx:label": row["wof:name"],
+					"xx:type": "spr",
+				};
+
+				// console.log("[geojson][spr]", row, props);
 				
 				var feature = {
 					"type": "Feature",
@@ -206,10 +232,11 @@
 			for (var i=0; i < count_rows; i++){
 
 				var row = rows[i];
-
 				var geom = row["geometry"];
 
 				var props = {};
+
+				console.log("[geojson][transit]", row, props);
 
 				var feature = {
 					"type": "Feature",
@@ -228,27 +255,41 @@
 			return featurecollection;			
 		},
 		
-		'visits_to_featurecollection': function(visits){
+		'visits_to_featurecollection': function(rows){
 
+			var desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
+			
 			var features = [];
 			
-			var count_visits = visits.length;
+			var count_visits = rows.length;
 
 			for (var i=0; i < count_visits; i++){
 
-				var visit = visits[i];
+				var row = rows[i];
 				
-				var lat = visit['latitude'];
-				var lon = visit['longitude'];
+				var lat = row['latitude'];
+				var lon = row['longitude'];
 
 				var coords = [ lon, lat ];
+
+				var status_id = row["status_id"];
+				var status = desires.id_to_label(status_id);
+				
+				var props = {
+					"wof:id": row["wof_id"],
+					"wof:name": row["name"],
+					"xx:status": status,
+					"xx:id": row["id"],
+					"xx:label": row["name"],
+					"xx:type": "visit",
+				};
+				
+				// console.log("[geojson][visits]", row, props);
 				
 				var geom = {
 					"type": "Point",
 					"coordinates": coords,
 				};
-
-				var props = {};
 
 				var feature = {
 					"type": "Feature",
@@ -459,7 +500,11 @@
 				"coordinates": coords
 			};
 
-			var props = {};
+			var label = [ min_lat, min_lon, max_lat, max_lon ].join(",");
+			
+			var props = {
+				"xx:label": label
+			};
 
 			var feature = {
 				"type": "Feature",
@@ -490,8 +535,12 @@
 				"coordinates": coords
 			};
 
-			var props = {};
+			var props = {
+				"xx:label": "PLEASE FIX ME (POINT)"
+			};
 
+			// console.log("[geojson][latlon]", null, props);
+			
 			var feature = {
 				"type": "Feature",
 				"geometry": geom,
@@ -579,8 +628,7 @@
 				"pointToLayer": handler
 			}
 
-			// console.log("[map][geojson] ADD TO MAP");
-			// console.log(map, geojson, args);
+			// console.log("[map][geojson] ADD", geojson, args);
 			
 			var layer = L.geoJSON(geojson, args);			
 			

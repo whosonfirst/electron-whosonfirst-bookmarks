@@ -24,7 +24,29 @@
 	
 }(function(){
 
+	const crypto = require('crypto');
+
+	var dopplr_cache = {};
+	
 	var self = {
+
+		'dopplr_colour': function(str){
+
+			if (dopplr_cache[str]){
+				return dopplr_cache[str];
+			}
+			
+			var md5 = crypto.createHash('md5');
+			md5.update(str);
+			var hex = md5.digest('hex');
+			var short_hex = hex.substr(0,6);
+
+			console.log("[utils][dopplr]", str, hex, short_hex);
+			var colour = "#" + short_hex;
+
+			dopplr_cache[str] = colour;
+			return colour;
+		},
 		
 		'append_class': function(el, class_name){
 

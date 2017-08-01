@@ -103,14 +103,6 @@
 				configure_scene(scene);
 			});
 
-			map.on("load", function(){
-				console.log("[map] LOAD");
-			});
-
-			map.on("zoomend", function(){
-				console.log("[map] ZOOM END");
-			});
-			
 			/*
 			var map = L.map(map_id);
 
