@@ -72,6 +72,20 @@
 				// console.log(feature);
 				
 				var m = L.circleMarker(latlon, style);
+
+				try {
+					var props = feature['properties'];
+					var label = props['wof:name'];
+					
+					if (label){
+						m.bindLabel(label, { noHide: false });
+					}
+				}
+
+				catch (e){
+					console.log("failed to bind label because " + e);
+				}
+				
 				return m;
 			};
 		},
@@ -119,7 +133,9 @@
 					"coordinates": coords,
 				};
 
-				var props = {};
+				var props = {
+					"wof:name": row["wof:name"]
+				};
 
 				var feature = {
 					"type": "Feature",

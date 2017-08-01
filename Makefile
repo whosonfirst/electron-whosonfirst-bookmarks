@@ -18,6 +18,10 @@ mapzenjs:
 	curl -s -o css/mapzen.js.css https://mapzen.com/js/mapzen.css
 	curl -s -o javascript/mapzen.js https://mapzen.com/js/mapzen.min.js
 
+leaflet-label:
+	curl -s -o javascript/leaflet.label.js https://raw.githubusercontent.com/Leaflet/Leaflet.label/master/dist/leaflet.label.js
+	curl -s -o css/leaflet.label.css https://raw.githubusercontent.com/Leaflet/Leaflet.label/master/dist/leaflet.label.css
+
 localforage:
 	curl -s -o javascript/localforage.js https://raw.githubusercontent.com/localForage/localForage/master/dist/localforage.js
 	curl -s -o javascript/localforage.min.js https://raw.githubusercontent.com/localForage/localForage/master/dist/localforage.min.js
