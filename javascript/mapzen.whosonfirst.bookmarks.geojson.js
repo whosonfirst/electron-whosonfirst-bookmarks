@@ -137,6 +137,50 @@
 
 			return feature_collection;
 		},
+
+		'spr_to_featurecollection': function(rows){
+
+			var features = [];
+			
+			var count_rows = rows.length;
+
+			for (var i=0; i < count_rows; i++){
+
+				var row = rows[i];
+
+				var lat = row["geom:latitude"];
+				var lon = row["geom:longitude"];
+				
+				if ((row["lbl:latitude"]) && (row["lbl:longitude"])){				
+					lat = row["lbl:latitude"];
+					lon = row["lbl:longitude"];				
+				}
+
+				var coords = [ lon, lat ];
+				
+				var geom = {
+					"type": "Point",
+					"coordinates": coords,
+				};
+
+				var props = {};
+				
+				var feature = {
+					"type": "Feature",
+					"geometry": geom,
+					"properties": props,
+				};
+
+				features.push(feature);				
+			}
+
+			var featurecollection = {
+				"type": "FeatureCollection",
+				"features": features,
+			};
+
+			return featurecollection;	
+		},
 		
 		'transit_stops_to_featurecollection': function(rows){
 
@@ -209,6 +253,18 @@
 		},
 		
 		// add-bookmarks-thing-to-map
+
+		'add_spr_to_map': function(map, rows){
+
+			var count_rows = rows.length;
+			
+			if (! count_rows){
+				return;
+			};
+
+			var featurecollection = self.spr_to_featurecollection(rows);
+			return self.add_geojson_to_map(map, featurecollection);
+		},
 		
 		'add_visit_to_map': function(map, visit){
 
