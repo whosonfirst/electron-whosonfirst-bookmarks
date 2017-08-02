@@ -28,6 +28,7 @@
 	const db = require("./mapzen.whosonfirst.bookmarks.database.js");
 	const conn = db.conn();
 
+	const geo = require("./mapzen.whosonfirst.bookmarks.geolocate.js");	
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
@@ -165,6 +166,23 @@
 			
 			map.on("moveend", fetch_nearby);
 
+			var on_geolocate = function(data){
+
+				var loc = data["location"];
+				var acc = data["accuracy"];
+				
+				var lat = loc["lat"];
+				var lon = loc["lng"];
+
+				console.log("[geolocated]", lat, lon, acc);
+				
+				map.setView([lat, lon], 12);	// mmmmmaybe?
+			};
+
+			var on_geolocate_error = function(){
+
+			};		
+			
 			// sudo put me in a function... ?
 
 			var sql = "SELECT DISTINCT(locality_id) AS locality_id FROM visits WHERE locality_id != 0 ORDER BY date DESC LIMIT 1";
@@ -173,13 +191,13 @@
 			conn.get(sql, params, function(err, row){
 
 				if (err){
-					return false;
+					return geo.geolocate(on_geolocate, on_geolocate_error);
 				}
 
 				var locality_id = row["locality_id"];
 
 				if (! locality_id){
-					return false;
+					return geo.geolocate(on_geolocate, on_geolocate_error);					
 				}
 				
 				var places = require("./mapzen.whosonfirst.bookmarks.places.js");
@@ -187,17 +205,23 @@
 				places.get_place(locality_id, function(err, row){
 
 					if (err){
-						return false;
+						return geo.geolocate(on_geolocate, on_geolocate_error);
 					}
 
-					var pl = JSON.parse(row["body"]);
-					var bbox = pl["geom:bbox"];
-					bbox = bbox.split(",");
+					try {
+						var pl = JSON.parse(row["body"]);
+						var bbox = pl["geom:bbox"];
+						bbox = bbox.split(",");
+						
+						var min_lat = bbox[1];
+						var min_lon = bbox[0];
+						var max_lat = bbox[3];
+						var max_lon = bbox[2];
+					}
 
-					var min_lat = bbox[1];
-					var min_lon = bbox[0];
-					var max_lat = bbox[3];
-					var max_lon = bbox[2];
+					catch (e){
+						return geo.geolocate(on_geolocate, on_geolocate_error);
+					}
 					
 					var sw = L.latLng(min_lat, min_lon);
 					var ne = L.latLng(max_lat, max_lon);

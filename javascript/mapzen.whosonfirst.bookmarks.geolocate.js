@@ -25,6 +25,50 @@
 
 }(function(){
 
-	// https://location.services.mozilla.com/v1/geolocate?key=test
+	// https://location.services.mozilla.com/api
 
+	// sudo make these configurable
+	
+	const endpoint = "https://location.services.mozilla.com/v1/geolocate";
+	const key = "test";
+
+	var self = {
+
+		'geolocate': function(on_locate, on_error){
+
+			var onload = function(rsp){
+
+				var target = rsp.target;
+
+				if (target.readyState != 4){
+					return;
+				}
+
+				try {
+					var body = target.response;
+					var data = JSON.parse(body);
+				}
+
+				catch (e) {
+					console.log("[geolocate]", rsp, e);
+					return on_error(e);
+				}
+				
+				return on_locate(data);
+			};
+
+			var req = new XMLHttpRequest();
+			
+			req.addEventListener("load", onload);
+			req.addEventListener("error", on_error);
+			req.addEventListener("abort", on_error);
+
+			var url = endpoint + "?key=" + encodeURIComponent(key);
+			
+			req.open("GET", url, true);
+			req.send();
+		}
+	};
+
+	return self;
 }));
