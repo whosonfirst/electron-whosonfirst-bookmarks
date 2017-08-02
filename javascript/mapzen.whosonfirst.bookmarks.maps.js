@@ -70,6 +70,8 @@
 							console.log("[tangram][screenshot] SKIP not a 'place'");
 							return;
 						}
+
+						// https://mapzen.com/documentation/tangram/Javascript-API/#screenshot
 						
 						scene.screenshot().then(function(rsp){
 							console.log("[tangram][screenshot] SAVE " + wof_id);
@@ -88,16 +90,14 @@
 				// https://github.com/mapzen/mapzen.js/blob/master/src/js/components/tangram.js
 				
     				tangramOptions: {
-					//scene: L.Mapzen.BasemapStyles.Refill,
+					// scene: L.Mapzen.BasemapStyles.Refill,
 					scene: "tangram/refill-style.zip",
 					tangramURL: "javascript/tangram.min.js"
     				}
 			});
 			
 			map.on("tangramloaded", function(e){
-
 				// https://mapzen.com/documentation/tangram/Javascript-API/#events
-				// https://mapzen.com/documentation/tangram/Javascript-API/#screenshot
 				var tangram = e.tangramLayer;
 				var scene = tangram.scene;
 				configure_scene(scene);

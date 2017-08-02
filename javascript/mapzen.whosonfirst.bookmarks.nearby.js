@@ -117,14 +117,97 @@
 
 				api.execute_method(method, args, on_success, on_error);				
 			};
+
+			// add a geocoder
+			
+			var layers = [
+				"locality",
+				"country"
+			];
+
+			var params = {
+				"sources": "wof"
+			};
+			
+			var opts = {
+				// "layers": layers,
+				// "params": params,
+				"focus": false,
+				"panToPoint": false,
+			};
+
+			var geocoder = L.Mapzen.geocoder(opts);
+			geocoder.addTo(map);
+
+			// https://github.com/mapzen/leaflet-geocoder#events
+			
+			geocoder.on('select', function(e) {
+
+				var feature = e.feature;
+				
+				if (! feature){
+					return;
+				}
+
+				var geom = feature["geometry"];
+
+				if (geom["type"] != "Point"){
+					return;
+				}
+
+				var coords = geom["coordinates"];
+				var lat = coords[1];
+				var lon = coords[0];
+				var zoom = 15;
+				
+				map.setView([lat, lon], zoom);				
+			});
 			
 			map.on("moveend", fetch_nearby);
+
+			// sudo put me in a function... ?
+
+			var sql = "SELECT DISTINCT(locality_id) AS locality_id FROM visits WHERE locality_id != 0 ORDER BY date DESC LIMIT 1";
+			var params = [];
 			
-			var lat = 29.817632;
-			var lon = -95.462296
-			var zoom = 16;
-			
-			map.setView([lat, lon], zoom);
+			conn.get(sql, params, function(err, row){
+
+				if (err){
+					return false;
+				}
+
+				var locality_id = row["locality_id"];
+
+				if (! locality_id){
+					return false;
+				}
+				
+				var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+				
+				places.get_place(locality_id, function(err, row){
+
+					if (err){
+						return false;
+					}
+
+					var pl = JSON.parse(row["body"]);
+					var bbox = pl["geom:bbox"];
+					bbox = bbox.split(",");
+
+					var min_lat = bbox[1];
+					var min_lon = bbox[0];
+					var max_lat = bbox[3];
+					var max_lon = bbox[2];
+					
+					var sw = L.latLng(min_lat, min_lon);
+					var ne = L.latLng(max_lat, max_lon);
+					
+					var bounds = L.latLngBounds(sw, ne);
+					var opts = {  };
+					
+					map.fitBounds(bounds, opts);
+				});
+			});
 		}
 	}
 
