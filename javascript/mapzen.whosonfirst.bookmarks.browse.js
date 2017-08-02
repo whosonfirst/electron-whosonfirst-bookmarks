@@ -28,7 +28,7 @@
 	const db = require("./mapzen.whosonfirst.bookmarks.database.js");
 	const conn = db.conn();
 
-	const geo = require("./mapzen.whosonfirst.bookmarks.geolocate.js");	
+	const geo = require("./mapzen.whosonfirst.bookmarks.geolocation.js");	
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
