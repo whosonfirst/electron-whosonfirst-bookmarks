@@ -30,7 +30,7 @@
 	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
 	const lists = require("./mapzen.whosonfirst.bookmarks.lists.js");	
 	const trips = require("./mapzen.whosonfirst.bookmarks.trips.js");
-	const nearby = require("./mapzen.whosonfirst.bookmarks.nearby.js");	
+	const browse = require("./mapzen.whosonfirst.bookmarks.browse.js");	
 	
 	var self = {
 		
@@ -54,8 +54,8 @@
 			var show_t = document.getElementById("show-trips");
 			show_t.onclick = function(){ trips.show_trips(); };
 
-			var show_nb = document.getElementById("show-nearby");
-			show_nb.onclick = function(){ nearby.show_nearby(); };
+			var show_nb = document.getElementById("show-browse");
+			show_nb.onclick = function(){ browse.show_browse(); };
 			
 			if (navigator.onLine){
 				self.network_notice(true);

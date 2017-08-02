@@ -48,7 +48,7 @@
 
 		},
 
-		'show_nearby': function(){
+		'show_browse': function(){
 
 			var map_el = document.createElement("div");
 			map_el.setAttribute("id", "map");
