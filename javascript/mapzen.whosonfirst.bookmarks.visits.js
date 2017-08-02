@@ -410,7 +410,8 @@
 
 				var row = {
 					"latitude": lat,
-					"longitude": lon
+					"longitude": lon,
+					"name": name
 				};
 
 				visit_rows.push(row);

@@ -79,8 +79,12 @@
 					var fill = utils.dopplr_colour(label);
 					style["fillColor"] = fill;
 				}
+
+				else if (props["xx:type"] == "spr"){
+
+				}
 				
-				if (props["xx:type"] == "visit"){
+				else if (props["xx:type"] == "visit"){
 
 					var status = props["xx:status"];
 					
@@ -88,6 +92,20 @@
 						var fill = utils.dopplr_colour(status);
 						style["fillColor"] = fill;
 					}
+				}
+
+				else {}
+
+				if ((props["xx:type"] == "spr") || (props["xx:type"] == "visit")){
+
+					var is_current = props["mz:is_current"];
+
+					if (! is_current){
+						is_current = -1;
+					}
+					
+					var fill = utils.dopplr_colour(is_current.toString());
+					style["color"] = fill;
 				}
 				
 				var m = L.circleMarker(latlon, style);
@@ -197,12 +215,10 @@
 					"coordinates": coords,
 				};
 
-				var props = {
-					"wof:id": row["wof:id"],
-					"wof:name": row["wof:name"],
-					"xx:label": row["wof:name"],
-					"xx:type": "spr",
-				};
+				var props = row;
+				
+				props["xx:label"] = row["wof:name"];
+				props["xx:type"] = "spr";
 
 				// console.log("[geojson][spr]", row, props);
 				

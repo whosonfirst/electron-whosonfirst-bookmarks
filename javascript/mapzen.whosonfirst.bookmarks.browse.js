@@ -62,6 +62,11 @@
 
 			left_panel.appendChild(map_el);
 
+			var places_wrapper = document.createElement("div");
+			places_wrapper.setAttribute("id", "places-list-wrapper");
+
+			right_panel.appendChild(places_wrapper);
+			
 			canvas.reset();
 			canvas.append(left_panel);
 			canvas.append(right_panel);			
@@ -84,9 +89,10 @@
 				var args = {
 					"latitude": ll.lat,
 					"longitude": ll.lng,
-					"radius": 2000,
+					"radius": 100,
 					"placetype": "venue",
-					"extras": "addr:,edtf:,geom:,lbl:,mz:,wof:hierarchy,wof:superseded_by,wof:tags"
+					"extras": "addr:,edtf:,geom:,lbl:,mz:,wof:hierarchy,wof:superseded_by,wof:tags",
+					"per_page": 500,
 				};
 				
 				var api_key = document.body.getAttribute("data-api-key");
@@ -104,12 +110,17 @@
 
 					if (nearby_layer){
 						nearby_layer.remove();
+
+						places_wrapper.innerHTML = "";
 					}
 					
 					var places = rsp["places"];
 					var layer = geojson.add_spr_to_map(map, places);
 
 					nearby_layer = layer;
+
+					var places_list = self.render_places_list(places);
+					places_wrapper.appendChild(places_list);
 				};
 
 				var on_error = function(rsp){
@@ -232,6 +243,31 @@
 					map.fitBounds(bounds, opts);
 				});
 			});
+		},
+
+		'render_places_list': function(rows){
+
+			var count = rows.length;
+
+			var list = document.createElement("ul");
+			list.setAttribute("class", "list");
+
+			for (var i=0; i < count; i++){
+
+				var row = rows[i];
+				
+				var item = document.createElement("li");
+
+				var span = document.createElement("span");
+				span.setAttribute("class", "hey-look");
+
+				span.appendChild(document.createTextNode(row["wof:name"]));
+
+				item.appendChild(span);
+				list.appendChild(item);
+			}
+
+			return list;
 		}
 	}
 
