@@ -54,6 +54,9 @@
 			var map_el = document.createElement("div");
 			map_el.setAttribute("id", "map");
 
+			var map_feedback = document.createElement("div");
+			map_feedback.setAttribute("id", "map-feedback");
+
 			var left_panel = document.createElement("div");
 			left_panel.setAttribute("class", "col-md-6 panel");
 
@@ -61,6 +64,7 @@
 			right_panel.setAttribute("class", "col-md-6 panel");
 
 			left_panel.appendChild(map_el);
+			left_panel.appendChild(map_feedback);			
 
 			var places_wrapper = document.createElement("div");
 			places_wrapper.setAttribute("id", "places-list-wrapper");

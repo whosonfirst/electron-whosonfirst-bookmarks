@@ -103,6 +103,65 @@
 				configure_scene(scene);
 			});
 
+			map.on("move", function(){
+
+				var el = document.getElementById("map-feedback");
+
+				if (! el){
+					return;
+				}
+
+				var centroid = map.getCenter();
+				var zoom = map.getZoom();
+				var bounds = map.getBounds();
+
+				var lat = centroid["lat"].toFixed(6);
+				var lon = centroid["lng"].toFixed(6);				
+				zoom = parseInt(zoom);
+
+				var latlon = [ lat, lon ];
+				latlon = latlon.join(", ");
+				
+				var list = document.createElement("ul");
+				list.setAttribute("class", "list-inline map-feedback-list");
+
+				var lat_el = document.createElement("li");
+				lat_el.setAttribute("class", "map-feedback-latitude");
+				lat_el.appendChild(document.createTextNode(lat));
+				list.appendChild(lat_el);
+				
+				var lon_el = document.createElement("li");
+				lon_el.setAttribute("class", "map-feedback-longitude");
+				lon_el.appendChild(document.createTextNode(lon));
+				list.appendChild(lon_el);
+
+				var zoom_el = document.createElement("li");
+				zoom_el.setAttribute("class", "map-feedback-zoom");
+				zoom_el.appendChild(document.createTextNode(zoom));
+				list.appendChild(zoom_el);
+
+				var sw = bounds.getSouthWest();
+				var ne = bounds.getNorthEast();
+
+				var min_lat = sw["lat"].toFixed(6);
+				var min_lon = sw["lng"].toFixed(6);
+				var max_lat = ne["lat"].toFixed(6);
+				var max_lon = ne["lng"].toFixed(6);				
+
+				var bbox = [ min_lat, min_lon, max_lat, max_lon ];
+				bbox = bbox.join(", ");
+
+				var bbox_el = document.createElement("li");
+				bbox_el.setAttribute("class", "map-feedback-bbox");
+				bbox_el.appendChild(document.createTextNode(bbox));
+				// list.appendChild(bbox_el);
+				
+				el.innerHTML = "";
+				el.appendChild(list);
+				
+				console.log("MOVE END", centroid, zoom, bounds);
+			});
+			
 			/*
 			var map = L.map(map_id);
 

@@ -283,6 +283,12 @@ q {
     content: " this place is no longer \"a thing\"";
 }
 
+.map-feedback-list {
+    font-size:small !important;
+    text-align:center;
+    color:#666;
+}
+
 .nearby-transit-stops-list-item {
     text-transform: lowercase;
 }
