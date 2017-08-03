@@ -554,6 +554,14 @@
 			conn.all(sql, params, cb);
 		},
 
+		'get_visits_for_place': function(wof_id, cb){
+
+			var sql = "SELECT * FROM visits WHERE wof_id = ?";
+			var params = [ wof_id ];
+
+			conn.all(sql, params, cb);			
+		},
+		
 		'get_visits_for_desire_and_place': function(status_id, wof_id, cb){
 
 			var places = require("./mapzen.whosonfirst.bookmarks.places.js");

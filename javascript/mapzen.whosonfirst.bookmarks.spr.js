@@ -47,6 +47,7 @@
 			var header_el = self.render_spr_header(row);
 			var dates_el = self.render_spr_dates(row);
 			var details_el = self.render_spr_details(row);
+			var visits_el = self.render_spr_visits(row);
 			var status_el = self.render_spr_status(row);
 								
 			wrapper_el.appendChild(header_el);
@@ -54,6 +55,16 @@
 			wrapper_el.appendChild(details_el);
 			wrapper_el.appendChild(status_el);
 
+			var visits_trigger = self.render_spr_visits_trigger();
+
+			// PLEASE MAKE ME WORK... SOMEHOW...
+			// (20170803/thisisaaronland)
+			
+			wrapper_el.onload = function(){
+				console.log("spr wrapper onload for " + row["wof:id"]);
+				visits_trigger(row);
+			};
+		
 			return wrapper_el;
 		},
 
@@ -88,10 +99,9 @@
 				var wofid = el.getAttribute("data-wof-id");
 
 				var raw = document.getElementById("spr-raw-" + wofid);
-
-				console.log("click", wofid, raw, el);
 				
 				if (! raw){
+					console.log("[spr][header] ERR can't find #spr-raw-" + wofid);
 					return false;
 				}
 
@@ -194,6 +204,55 @@
 			return meta_el;
 		},
 
+		'render_spr_visits': function(row){
+
+			var wofid = row["wof:id"];
+
+			var visits_el = document.createElement("div");
+			visits_el.setAttribute("class", "spr-visits");
+			visits_el.setAttribute("id", "spr-visits-" + wofid);
+
+			return visits_el;
+		},
+
+		'render_spr_visits_trigger': function(){
+
+			var trigger = function(row){
+
+				var wofid = row["wof:id"];
+				console.log("[spr][visits] INFO invoke visits trigger for " + wofid);
+				
+				var visits_el = document.getElementById("spr-visits-" + wofid);
+
+				if (! visits_el){
+					console.log("[spr][visits] ERR can not find #spr-visits-" + wofid);
+					return;
+				}
+				
+				var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+			
+				visits.get_visits_for_place(wof_id, function(err, rows){
+					
+					if (err){
+						console.log("[spr][visits] ERR", err);
+						return false;
+					}
+					
+					if (rows.length == 0){
+						console.log("[spr][visits] INFO no visits for " + wofid);						
+						return true;
+					}
+					
+					var visits_more = {};
+					var visits_rows = visits.render_visits(rows, visits_more);
+
+					visits_el.appendChild(visits_rows);
+				});
+			};
+
+			return trigger;
+		},
+		
 		'render_spr_status': function(row){
 
 			var status_el = document.createElement("div");
