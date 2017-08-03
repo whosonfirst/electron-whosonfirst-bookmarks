@@ -62,12 +62,12 @@
 						wof_id = parseInt(wof_id);				
 						
 						if (wof_id < 0){
-							console.log("[tangram][screenshot] SKIP missing WOF IF");
+							// console.log("[tangram][screenshot] SKIP missing WOF IF");
 							return;
 						}
 						
 						if (screenshot != "place"){
-							console.log("[tangram][screenshot] SKIP not a 'place'");
+							// console.log("[tangram][screenshot] SKIP not a 'place'");
 							return;
 						}
 
@@ -159,7 +159,7 @@
 				el.innerHTML = "";
 				el.appendChild(list);
 				
-				console.log("MOVE END", centroid, zoom, bounds);
+				// console.log("MOVE END", centroid, zoom, bounds);
 			});
 			
 			/*

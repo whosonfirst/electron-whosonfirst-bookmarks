@@ -37,6 +37,7 @@
 	const api = require("./mapzen.whosonfirst.api.js");
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
 	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");
+	const spr = require("./mapzen.whosonfirst.bookmarks.spr.js");	
 
 	const screenshots = require("./mapzen.whosonfirst.bookmarks.screenshots.js");
 	
@@ -83,6 +84,25 @@
 				var m = e.target;
 
 				if (m.getZoom() < 14){
+
+					places_wrapper.innerHTML = "";
+
+					var notice = document.createElement("span");
+					notice.appendChild(document.createTextNode("Browsing starts at zoom level 14. "));
+
+					var jump = document.createElement("span");
+					jump.setAttribute("class", "hey-look click-me");
+					jump.appendChild(document.createTextNode("Make it so!"));
+
+					jump.onclick = function(){
+
+						var centroid = map.getCenter();
+						map.setView(centroid, 14);
+						return false;
+					};
+					
+					places_wrapper.appendChild(notice);
+					places_wrapper.appendChild(jump);					
 					return;
 				}
 
@@ -95,7 +115,7 @@
 					"longitude": ll.lng,
 					"radius": 100,
 					"placetype": "venue",
-					"extras": "addr:,edtf:,geom:,lbl:,mz:,wof:hierarchy,wof:superseded_by,wof:tags",
+					"extras": spr.extras(),
 					"per_page": 500,
 				};
 				
@@ -123,6 +143,8 @@
 
 					nearby_layer = layer;
 
+					places_wrapper.innerHTML = "";
+					
 					var places_list = self.render_places_list(places);
 					places_wrapper.appendChild(places_list);
 				};
@@ -251,23 +273,20 @@
 
 		'render_places_list': function(rows){
 
-			var count = rows.length;
+			var count_rows = rows.length;
 
 			var list = document.createElement("ul");
-			list.setAttribute("class", "list");
+			list.setAttribute("class", "list spr-list");
 
-			for (var i=0; i < count; i++){
+			for (var i=0; i < count_rows; i++){
 
 				var row = rows[i];
+				var spr_row = spr.render_spr(row);
 				
 				var item = document.createElement("li");
+				item.setAttribute("class", "spr-list-item");
 
-				var span = document.createElement("span");
-				span.setAttribute("class", "hey-look");
-
-				span.appendChild(document.createTextNode(row["wof:name"]));
-
-				item.appendChild(span);
+				item.appendChild(spr_row);
 				list.appendChild(item);
 			}
 

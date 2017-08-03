@@ -70,7 +70,7 @@
 			return function(feature, latlon){
 
 				var props = feature['properties'];
-				console.log("[geojson][point]", props);
+				// console.log("[geojson][point]", props);
 
 				var label = props["xx:label"];
 				
@@ -252,7 +252,7 @@
 
 				var props = {};
 
-				console.log("[geojson][transit]", row, props);
+				// console.log("[geojson][transit]", row, props);
 
 				var feature = {
 					"type": "Feature",

@@ -426,6 +426,67 @@ q {
     font-weight: 700;
 }
 
+.spr-list {
+    padding:0px;
+    margin:0px;
+}
+
+.spr-list-item {
+    list-style-type:none;
+    margin-bottom:1em;
+    padding:.5em;
+    border: 1px solid #999;
+}
+
+.spr-wrapper {
+
+}
+
+.spr-name {
+
+}
+
+.spr-meta {
+    font-size:small;
+}
+
+.spr-addr {
+
+}
+
+.spr-desire {
+    border-top: 1px dotted #ccc;
+    margin-top: .5em;
+    padding-top: .5em;
+    text-align:right;    
+}
+
+.spr-raw {
+    overflow:scroll;
+    margin-top:.5em;
+    margin-bottom:.5em;
+    display:none;
+}
+
+.spr-raw pre {
+    font-size:11px !important;
+}
+
+.spr-soundbox {
+    border-top: 1px dotted #ccc;
+    margin-top: .5em;
+    padding-top: .5em;
+    text-align:right;
+}
+
+.spr-status {
+    margin-top:.5em;
+}
+
+.spr-tags {
+    font-style:italic;
+}
+
 .trips-list {
     padding: 0px;
     margin: 0px;

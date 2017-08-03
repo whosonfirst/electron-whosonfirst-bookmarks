@@ -41,7 +41,7 @@
 			var hex = md5.digest('hex');
 			var short_hex = hex.substr(0,6);
 
-			console.log("[utils][dopplr]", str, hex, short_hex);
+			// console.log("[utils][dopplr]", str, hex, short_hex);
 			var colour = "#" + short_hex;
 
 			dopplr_cache[str] = colour;
