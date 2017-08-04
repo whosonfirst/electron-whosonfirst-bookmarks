@@ -371,6 +371,10 @@
 				status_el.appendChild(soundbox_wrapper);
 			}
 
+			else if (is_deprecated){
+				// pass
+			}
+			
 			else if ((is_current == -1) || (is_current == undefined)){
 
 				var property = "properties.mz:is_current";
