@@ -499,7 +499,7 @@
 					return false;
 				}
 				
-			})
+			});
 		},
 
 		'render_lists_menu': function(rows, cb){

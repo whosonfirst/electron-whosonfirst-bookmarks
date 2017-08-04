@@ -25,6 +25,8 @@
 
 }(function(){
 
+	const utils = require("./mapzen.whosonfirst.utils.js");
+	
 	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
 	const soundbox = require("./mapzen.whosonfirst.bookmarks.soundbox.js");	
 	
@@ -48,13 +50,17 @@
 			var dates_el = self.render_spr_dates(row);
 			var details_el = self.render_spr_details(row);
 			var visits_el = self.render_spr_visits(row);
+			var edit_el = self.render_spr_edit(row);
 			var status_el = self.render_spr_status(row);
-								
+			
+			var edit_exp = utils.render_expandable(edit_el, {"label": "edit"});
+			
 			wrapper_el.appendChild(header_el);
 			wrapper_el.appendChild(dates_el);			
 			wrapper_el.appendChild(details_el);
+			wrapper_el.appendChild(edit_exp);
 			wrapper_el.appendChild(status_el);
-
+			
 			var visits_trigger = self.render_spr_visits_trigger();
 
 			// PLEASE MAKE ME WORK... SOMEHOW...
@@ -142,8 +148,10 @@
 				stop = "uuuu";
 			}
 
+			var has_dates = true;
+			
 			if ((start == "uuuu") && (stop == "uuuu")){
-
+				has_dates = false;
 			}
 
 			else if (start == "uuuu"){
@@ -171,20 +179,104 @@
 			return dates_el;
 		},
 
+		'render_spr_status': function(row){
+
+			var is_current = row["mz:is_current"];
+			var is_ceased = row["mz:is_ceased"];
+			var is_deprecated = row["mz:is_deprecated"];
+			var is_superseded = row["mz:is_superseded"];				
+
+			var status_el = document.createElement("div");
+			status_el.setAttribute("class", "spr-status");
+			
+			if (is_deprecated){
+
+				utils.append_class(status_el, "spr-status-deprecated");
+				
+				status_el.appendChild(document.createTextNode("This place has been deprecated."));
+				
+				if (is_superseded){
+					status_el.appendChild(document.createTextNode("It has been superseded by [WOFID]."));
+				}					
+			}
+			
+			else if ((is_ceased) || (is_current == 0)){
+
+				utils.append_class(status_el, "spr-status-ceased");
+				
+				status_el.appendChild(document.createTextNode("This place is no longer \"current\"."));
+				
+				if (is_superseded){
+					status_el.appendChild(document.createTextNode("It has been superseded by [WOFID]."));
+				}					
+			}
+			
+			else if (is_superseded){
+
+				utils.append_class(status_el, "spr-status-superseded");
+				
+				status_el.appendChild(document.createTextNode("This place has been superseded by [WOFID]."));
+			}
+			
+			else if (is_current == 1){
+
+				utils.append_class(status_el, "spr-status-current");
+				
+				status_el.appendChild(document.createTextNode("We believe this place is \"current\""));
+			}
+			
+			else {
+
+				utils.append_class(status_el, "spr-status-unknown");
+				
+				status_el.appendChild(document.createTextNode("This place exists in a state of uncertainty."));				
+			}
+
+			return status_el;
+		},
+		
 		'render_spr_details': function(row){
 
 			var meta_el = document.createElement("div");
-			meta_el.setAttribute("class", "spr-meta");
+			meta_el.setAttribute("class", "spr-details");
 			
 			var addr_el = document.createElement("div");
+			addr_el.setAttribute("class", "spr-details-address");
 			addr_el.appendChild(document.createTextNode(row["addr:full"]));
+
+			var centroid_el = document.createElement("ul");
+			centroid_el.setAttribute("class", "list-inline spr-details-centroid");
+
+			var lat = row["geom:latitude"];
+			var lon = row["geom:longitude"];
+
+			if ((row["lbl:latitude"]) && (row["lbl:longitude"])){
+				lat = row["lbl:latitude"];
+				lon = row["lbl:longitude"];
+			}
+
+			lat = lat.toFixed(6);
+			lon = lon.toFixed(6);			
+
+			var lat_el = document.createElement("li");
+			lat_el.setAttribute("class", "spr-details-centroid-latitude");
+			lat_el.appendChild(document.createTextNode(lat));
+
+			var lon_el = document.createElement("li");
+			lon_el.setAttribute("class", "spr-details-centroid-longitude");			
+			lon_el.appendChild(document.createTextNode(lon));
+			
+			centroid_el.appendChild(lat_el);
+			centroid_el.appendChild(lon_el);
+
+			addr_el.appendChild(centroid_el);
 			
 			meta_el.appendChild(addr_el);
 			
 			if (row["wof:tags"]){
 				
 				var tags_el = document.createElement("ul");
-				tags_el.setAttribute("class", "list-inline spr-tags");
+				tags_el.setAttribute("class", "list-inline spr-details-tags");
 				
 				var tags = row["wof:tags"];
 				var count_tags = tags.length;
@@ -200,7 +292,7 @@
 				
 				meta_el.appendChild(tags_el);
 			}
-
+			
 			return meta_el;
 		},
 
@@ -253,48 +345,13 @@
 			return trigger;
 		},
 		
-		'render_spr_status': function(row){
+		'render_spr_edit': function(row){
 
 			var status_el = document.createElement("div");
-			status_el.setAttribute("class", "spr-status");
-			
+			status_el.setAttribute("class", "spr-edit");
+
 			var is_current = row["mz:is_current"];
-			var is_ceased = row["mz:is_ceased"];
-			var is_deprecated = row["mz:is_deprecated"];
-			var is_superseded = row["mz:is_superseded"];				
-
-			if (is_deprecated){
-				
-				status_el.appendChild(document.createTextNode("This place has been deprecated."));
-				
-				if (is_superseded){
-					status_el.appendChild(document.createTextNode("It has been superseded by [WOFID]."));
-				}					
-			}
 			
-			else if ((is_ceased) || (is_current == 0)){
-				
-				status_el.appendChild(document.createTextNode("This place is no longer \"current\"."));
-				
-				if (is_superseded){
-					status_el.appendChild(document.createTextNode("It has been superseded by [WOFID]."));
-				}					
-			}
-			
-			else if (is_superseded){
-				
-				status_el.appendChild(document.createTextNode("This place has been superseded by [WOFID]."));
-			}
-			
-			else if (is_current == 1){
-				
-				status_el.appendChild(document.createTextNode("We believe this place is \"current\""));
-			}
-			
-			else {
-				// is_current == -1
-			}
-
 			if (is_current == 1){
 
 				var property = "properties.mz:is_current";
@@ -308,7 +365,7 @@
 				var select_soundbox = soundbox.render_menu(row["wof:id"], property, options);
 
 				var soundbox_wrapper = document.createElement("div");
-				soundbox_wrapper.setAttribute("class", "spr-soundbox");
+				soundbox_wrapper.setAttribute("class", "spr-edit-soundbox spr-soundbox");
 				soundbox_wrapper.appendChild(select_soundbox);
 				
 				status_el.appendChild(soundbox_wrapper);
@@ -328,7 +385,7 @@
 				var select_soundbox = soundbox.render_menu(row["wof:id"], property, options);
 
 				var soundbox_wrapper = document.createElement("div");
-				soundbox_wrapper.setAttribute("class", "spr-soundbox");
+				soundbox_wrapper.setAttribute("class", "spr-edit-soundbox spr-soundbox");
 				soundbox_wrapper.appendChild(select_soundbox);
 				
 				status_el.appendChild(soundbox_wrapper);
@@ -337,7 +394,7 @@
 			else {}
 
 			var desire_wrapper = document.createElement("div");
-			desire_wrapper.setAttribute("class", "spr-desire");
+			desire_wrapper.setAttribute("class", "spr-edit-desires spr-desires");
 			
 			var select_desire = desires.render_menu(null, function(){
 
@@ -345,7 +402,34 @@
 
 			desire_wrapper.appendChild(select_desire);
 			status_el.appendChild(desire_wrapper);
+
+			/*
+
+			lists.get_lists(function(err, rows){
+
+				if (err){
+					return false;
+				}
+
+				var cb = function(){};
+				
+				var lists_menu = lists.render_lists_menu(rows, cb);
+
+				var els = document.getElementsByClassName("spr-lists");
+				var count_els = els.length;
+
+				for (var i=0; i < count_els; i++){
+					els[i].appendChild(lists_menu);
+				}
+				
+			});
+
+			*/
 			
+			var lists_wrapper = document.createElement("div");
+			lists_wrapper.setAttribute("class", "spr-edit-lists spr-lists");
+
+			status_el.appendChild(lists_wrapper);			
 			return status_el;
 		},
 

@@ -28,6 +28,7 @@
 	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");
 	const utils = require("./mapzen.whosonfirst.utils.js");	
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
+	const colours = require("./mapzen.whosonfirst.bookmarks.colours.js");	
 
 	const styles = {
 		"bbox": {
@@ -76,12 +77,13 @@
 				
 				if (props["xx:type"] == "place"){
 
-					var fill = utils.dopplr_colour(label);
-					style["fillColor"] = fill;
+					style["fillColor"] = colours.label_colour(label);
 				}
 
 				else if (props["xx:type"] == "spr"){
 
+					style["fillColor"] = colours.status_colour(props);					
+					console.log("SPR", props, style);
 				}
 				
 				else if (props["xx:type"] == "visit"){
@@ -95,18 +97,6 @@
 				}
 
 				else {}
-
-				if ((props["xx:type"] == "spr") || (props["xx:type"] == "visit")){
-
-					var is_current = props["mz:is_current"];
-
-					if (! is_current){
-						is_current = -1;
-					}
-					
-					var fill = utils.dopplr_colour(is_current.toString());
-					style["color"] = fill;
-				}
 				
 				var m = L.circleMarker(latlon, style);
 

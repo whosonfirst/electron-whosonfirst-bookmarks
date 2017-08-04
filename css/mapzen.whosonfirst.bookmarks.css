@@ -442,23 +442,43 @@ q {
 
 }
 
-.spr-name {
-
-}
-
-.spr-meta {
-    font-size:small;
-}
-
 .spr-addr {
 
 }
 
-.spr-desire {
+.spr-dates {
+    font-size:small;
+}
+
+.spr-details {
+    font-size:small;
+}
+
+.spr-details-tags {
+    font-style:italic;
+}
+
+.spr-edit {
+    margin-top:.5em;
+    margin-bottom:1em;    
+}
+
+.spr-edit-desires {
     border-top: 1px dotted #ccc;
     margin-top: .5em;
     padding-top: .5em;
     text-align:right;    
+}
+
+.spr-edit-soundbox {
+    border-top: 1px dotted #ccc;
+    margin-top: .5em;
+    padding-top: .5em;
+    text-align:right;
+}
+
+.spr-name {
+
 }
 
 .spr-raw {
@@ -472,19 +492,35 @@ q {
     font-size:11px !important;
 }
 
-.spr-soundbox {
-    border-top: 1px dotted #ccc;
-    margin-top: .5em;
-    padding-top: .5em;
-    text-align:right;
-}
-
 .spr-status {
-    margin-top:.5em;
+    font-size:small;
 }
 
-.spr-tags {
-    font-style:italic;
+/* please reconcile with mapzen.whosonfirst.bookmarks.colours.js */
+
+.spr-status-deprecated {
+    background-color:#dc143c !important;
+    color:#fff !important;
+}
+
+.spr-status-ceased {
+    background-color:#ffa500 !important;
+    color:#fff !important;
+}
+
+.spr-status-current {
+    background-color: #8fd400 !important;
+    color:#fff !important;    
+}
+
+.spr-status-superseded {
+    background-color:#1e90ff !important;
+    color:#fff !important;
+}
+
+.spr-status-unknown {
+    background-color:#f0e68c !important;
+    color:#fff !important;
 }
 
 .trips-list {

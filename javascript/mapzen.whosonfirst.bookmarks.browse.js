@@ -52,6 +52,88 @@
 
 		'show_browse': function(){
 
+			var map = self.show_browser();
+			
+			var on_geolocate = function(data){
+
+				var loc = data["location"];
+				var acc = data["accuracy"];
+				
+				var lat = loc["lat"];
+				var lon = loc["lng"];
+
+				console.log("[geolocated]", lat, lon, acc);
+
+				var map = document.getElementById("map");				
+				map.setView([lat, lon], 12);
+			};
+
+			var on_geolocate_error = function(){
+
+			};		
+			
+			var sql = "SELECT DISTINCT(locality_id) AS locality_id FROM visits WHERE locality_id != 0 ORDER BY date DESC LIMIT 1";
+			var params = [];
+			
+			conn.get(sql, params, function(err, row){
+
+				if (err){
+					return geo.geolocate(on_geolocate, on_geolocate_error);
+				}
+
+				var locality_id = row["locality_id"];
+
+				if (! locality_id){
+					return geo.geolocate(on_geolocate, on_geolocate_error);					
+				}
+				
+				var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+				
+				places.get_place(locality_id, function(err, row){
+
+					if (err){
+						return geo.geolocate(on_geolocate, on_geolocate_error);
+					}
+
+					try {
+						var pl = JSON.parse(row["body"]);
+						var bbox = pl["geom:bbox"];
+						bbox = bbox.split(",");
+						
+						var min_lat = bbox[1];
+						var min_lon = bbox[0];
+						var max_lat = bbox[3];
+						var max_lon = bbox[2];
+					}
+
+					catch (e){
+						return geo.geolocate(on_geolocate, on_geolocate_error);
+					}
+					
+					var sw = L.latLng(min_lat, min_lon);
+					var ne = L.latLng(max_lat, max_lon);
+					
+					var bounds = L.latLngBounds(sw, ne);
+					var opts = {  };
+
+					map.fitBounds(bounds, opts);
+				});
+			});			
+		},
+
+		'show_browse_nearby': function(lat, lon, zoom){
+
+			if (! zoom){
+				zoom = 15;
+			}
+			
+			var map = self.show_browser();
+			map.setView([lat, lon], zoom);
+			
+		},
+		
+		'show_browser': function(){	
+
 			var map_el = document.createElement("div");
 			map_el.setAttribute("id", "map");
 
@@ -95,7 +177,6 @@
 					jump.appendChild(document.createTextNode("Make it so!"));
 
 					jump.onclick = function(){
-
 						var centroid = map.getCenter();
 						map.setView(centroid, 14);
 						return false;
@@ -202,73 +283,7 @@
 			});
 			
 			map.on("moveend", fetch_nearby);
-
-			var on_geolocate = function(data){
-
-				var loc = data["location"];
-				var acc = data["accuracy"];
-				
-				var lat = loc["lat"];
-				var lon = loc["lng"];
-
-				console.log("[geolocated]", lat, lon, acc);
-				
-				map.setView([lat, lon], 12);	// mmmmmaybe?
-			};
-
-			var on_geolocate_error = function(){
-
-			};		
-			
-			// sudo put me in a function... ?
-
-			var sql = "SELECT DISTINCT(locality_id) AS locality_id FROM visits WHERE locality_id != 0 ORDER BY date DESC LIMIT 1";
-			var params = [];
-			
-			conn.get(sql, params, function(err, row){
-
-				if (err){
-					return geo.geolocate(on_geolocate, on_geolocate_error);
-				}
-
-				var locality_id = row["locality_id"];
-
-				if (! locality_id){
-					return geo.geolocate(on_geolocate, on_geolocate_error);					
-				}
-				
-				var places = require("./mapzen.whosonfirst.bookmarks.places.js");
-				
-				places.get_place(locality_id, function(err, row){
-
-					if (err){
-						return geo.geolocate(on_geolocate, on_geolocate_error);
-					}
-
-					try {
-						var pl = JSON.parse(row["body"]);
-						var bbox = pl["geom:bbox"];
-						bbox = bbox.split(",");
-						
-						var min_lat = bbox[1];
-						var min_lon = bbox[0];
-						var max_lat = bbox[3];
-						var max_lon = bbox[2];
-					}
-
-					catch (e){
-						return geo.geolocate(on_geolocate, on_geolocate_error);
-					}
-					
-					var sw = L.latLng(min_lat, min_lon);
-					var ne = L.latLng(max_lat, max_lon);
-					
-					var bounds = L.latLngBounds(sw, ne);
-					var opts = {  };
-					
-					map.fitBounds(bounds, opts);
-				});
-			});
+			return map;
 		},
 
 		'render_places_list': function(rows){

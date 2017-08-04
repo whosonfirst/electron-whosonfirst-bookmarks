@@ -28,6 +28,8 @@
 	const db = require("./mapzen.whosonfirst.bookmarks.database.js");
 	const conn = db.conn();
 
+	const browse = require("./mapzen.whosonfirst.bookmarks.browse.js");
+	
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
@@ -232,9 +234,28 @@
 			var visits_wrapper = document.createElement("div");
 			visits_wrapper.setAttribute("id", "visits");
 
-			var h2 = document.createElement("h2");
-			h2.appendChild(document.createTextNode(pl["wof:name"]));
+			var lat = pl["geom:latitude"];
+			var lon = pl["geom:longitude"];				
+			
+			var name = document.createElement("span");
+			name.setAttribute("data-latitude", lat);
+			name.setAttribute("data-longitude", lon);
+			name.appendChild(document.createTextNode(pl["wof:name"]));
 
+			name.onclick = function(e){
+				var el = e.target;
+				
+				var lat = el.getAttribute("data-latitude");
+				var lon = el.getAttribute("data-longitude");
+
+				console.log("BROWSE", lat, lon, el);
+				browse.show_browse_nearby(lat, lon);
+			};
+			
+			var h2 = document.createElement("h2");
+			h2.appendChild(name);
+
+			
 			var reload = document.createElement("small");
 			reload.setAttribute("class", "control");
 			reload.setAttribute("data-wof-id", pl["wof:id"]);

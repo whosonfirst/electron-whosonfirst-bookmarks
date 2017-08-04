@@ -112,7 +112,7 @@
 			wrapper.setAttribute("id", "expandable-" + eid);
 			wrapper.setAttribute("class", "expandable");			
 			
-			var header = document.createElement("h3");
+			var header = document.createElement("h4");
 			header.setAttribute("id", "expandable-header-" + eid);			
 			header.setAttribute("data-expandable-id", eid);
 			header.appendChild(document.createTextNode(label));
