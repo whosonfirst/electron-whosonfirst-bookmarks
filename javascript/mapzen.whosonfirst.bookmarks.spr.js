@@ -351,6 +351,7 @@
 			status_el.setAttribute("class", "spr-edit");
 
 			var is_current = row["mz:is_current"];
+			var is_deprecated = row["mz:is_deprecated"];			
 			
 			if (is_current == 1){
 
