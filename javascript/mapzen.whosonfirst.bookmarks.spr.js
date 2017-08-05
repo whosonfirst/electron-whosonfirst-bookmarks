@@ -354,42 +354,69 @@
 			var is_current = row["mz:is_current"];
 			var is_deprecated = row["mz:is_deprecated"];			
 			
-			if (is_current == 1){
-
-				var property = "properties.mz:is_current";
-				
-				var options = {
-					0: "this place is",
-					2: "closed",
-					3: "unknown",
-				};
-
-				var select_soundbox = soundbox.render_menu(row["wof:id"], property, options);
-
-				var soundbox_wrapper = document.createElement("div");
-				soundbox_wrapper.setAttribute("class", "spr-edit-soundbox spr-soundbox");
-				soundbox_wrapper.appendChild(select_soundbox);
-				
-				status_el.appendChild(soundbox_wrapper);
-			}
-
-			else if (is_deprecated){
+			if (is_deprecated){
 				// pass
 			}
 			
-			else if ((is_current == -1) || (is_current == undefined)){
+			else if ((is_current == 1) || (is_current == -1) || (is_current == undefined)){
 
 				var property = "properties.mz:is_current";
-				
-				var options = {
-					0: "this place is",
-					1: "open",
-					2: "closed",
-					3: "unknown",
+				var options = {};
+
+				if (is_current == 1){
+
+					options = {
+						"": "...",
+						"closed": "is closed now",
+						"moved": "has moved",						
+					};					
+				}
+
+				else {
+					
+					options = {
+						"": "...",
+						"open": "is open",
+						"closed": "is closed",
+						"moved": "has moved",
+					};
+				}
+
+				var cb = function(e){
+
+					var el = e.target;
+					var wofid = el.getAttribute("data-wof-id");
+
+					var status = document.getElementById("soundbox-report-select-" + wofid);					
+					var status_id = status.value;
+
+					if (status_id == ""){
+						return;
+					}
+					
+					var property = status.getAttribute("data-soundbox-property");
+
+					fb.info("SOUNDBOX " + wofid + " " + property + ":" + status_id);
 				};
+				
+				var select_soundbox = soundbox.render_menu(row["wof:id"], property, options, cb);
 
-				var select_soundbox = soundbox.render_menu(row["wof:id"], property, options);
+				var wofid = row["wof:id"];
+				
+				var s = select_soundbox.querySelector("#soundbox-report-select");
+				var b = select_soundbox.querySelector("#soundbox-report-button");
 
+				s.setAttribute("id", "soundbox-report-select-" + wofid);
+				s.setAttribute("data-soundbox-property", property);
+				
+				b.setAttribute("id", "soundbox-report-button-" + wofid);
+				b.setAttribute("data-wof-id", wofid);
+
+				var prefix = document.createElement("span");
+				prefix.appendChild(document.createTextNode("this place "));
+
+				select_soundbox.insertBefore(prefix, select_soundbox.firstChild);
+				
 				var soundbox_wrapper = document.createElement("div");
 				soundbox_wrapper.setAttribute("class", "spr-edit-soundbox spr-soundbox");
 				soundbox_wrapper.appendChild(select_soundbox);

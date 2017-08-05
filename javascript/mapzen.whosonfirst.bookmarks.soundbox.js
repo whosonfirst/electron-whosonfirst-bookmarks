@@ -30,12 +30,13 @@
 	
 	var self = {
 
-		'render_menu': function(wofid, property, options){
+		'render_menu': function(wofid, property, options, onclick){
 
 			var wrapper = document.createElement("div");
 			wrapper.setAttribute("class", "soundbox-wrapper");
 			
 			var select_el = document.createElement("select");
+			select_el.setAttribute("id", "soundbox-report-select");
 			select_el.setAttribute("class", "soundbox-select-menu");
 			select_el.setAttribute("data-wof-id", wofid);
 			select_el.setAttribute("data-soundbox-property", property);
@@ -55,7 +56,11 @@
 			report_button.setAttribute("id", "soundbox-report-button");
 			report_button.setAttribute("class", "btn btn-default");
 			report_button.appendChild(document.createTextNode("Report"));
-			
+
+			if (onclick){
+				report_button.onclick = onclick;
+			}
+
 			wrapper.appendChild(select_el);
 			wrapper.appendChild(report_button);
 
