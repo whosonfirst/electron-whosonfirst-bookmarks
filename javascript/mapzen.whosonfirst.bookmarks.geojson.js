@@ -76,14 +76,11 @@
 				var label = props["xx:label"];
 				
 				if (props["xx:type"] == "place"){
-
 					style["fillColor"] = colours.label_colour(label);
 				}
 
 				else if (props["xx:type"] == "spr"){
-
 					style["fillColor"] = colours.status_colour(props);					
-					console.log("SPR", props, style);
 				}
 				
 				else if (props["xx:type"] == "visit"){

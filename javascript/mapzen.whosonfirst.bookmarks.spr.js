@@ -29,6 +29,7 @@
 	
 	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
 	const soundbox = require("./mapzen.whosonfirst.bookmarks.soundbox.js");	
+	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
 	
 	var self = {
 
@@ -401,10 +402,44 @@
 			var desire_wrapper = document.createElement("div");
 			desire_wrapper.setAttribute("class", "spr-edit-desires spr-desires");
 			
-			var select_desire = desires.render_menu(null, function(){
+			var select_desire = desires.render_menu(null, function(e){
 
+				var el = e.target;
+				var wofid = el.getAttribute("data-wof-id");
+				
+				var status = document.getElementById("status-" + wofid);
+				var status_id = status.value;
+
+				var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+				var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+				
+				places.fetch_place(wofid, function(pl){
+
+					visits.add_visit(pl, status_id, function(err){
+						
+						if (err){
+							fb.error(err);
+							return false;
+						}
+
+						fb.info("Your #feelings about " + pl["wof:name"] + " have been noted.");
+						return true;
+					});
+				});
+				
+				return;
 			});
 
+			var wofid = row["wof:id"];
+			
+			var s = select_desire.querySelector("#status");
+			var b = select_desire.querySelector("#status-button");
+			
+			s.setAttribute("id", "status-" + wofid);
+			
+			b.setAttribute("id", "status-button-" + wofid);
+			b.setAttribute("data-wof-id", wofid);
+			
 			desire_wrapper.appendChild(select_desire);
 			status_el.appendChild(desire_wrapper);
 
