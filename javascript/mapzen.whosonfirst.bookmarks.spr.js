@@ -26,6 +26,7 @@
 }(function(){
 
 	const utils = require("./mapzen.whosonfirst.utils.js");
+	const browse = require("./mapzen.whosonfirst.bookmarks.browse.js");
 	
 	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
 	const soundbox = require("./mapzen.whosonfirst.bookmarks.soundbox.js");	
@@ -245,9 +246,6 @@
 			addr_el.setAttribute("class", "spr-details-address");
 			addr_el.appendChild(document.createTextNode(row["addr:full"]));
 
-			var centroid_el = document.createElement("ul");
-			centroid_el.setAttribute("class", "list-inline spr-details-centroid");
-
 			var lat = row["geom:latitude"];
 			var lon = row["geom:longitude"];
 
@@ -266,12 +264,31 @@
 			var lon_el = document.createElement("li");
 			lon_el.setAttribute("class", "spr-details-centroid-longitude");			
 			lon_el.appendChild(document.createTextNode(lon));
-			
+
+			var centroid_el = document.createElement("ul");
+			centroid_el.setAttribute("class", "list-inline spr-details-centroid click-me");
+			centroid_el.setAttribute("data-latitude", lat);
+			centroid_el.setAttribute("data-longitude", lon);			
+				
 			centroid_el.appendChild(lat_el);
 			centroid_el.appendChild(lon_el);
 
-			addr_el.appendChild(centroid_el);
+			// this doesn't work because blah blah blah event propagation...
 			
+			/*
+			centroid_el.onclick = function(e){
+				var el = e.target;
+				var lat = el.getAttribute("data-latitude");
+				var lon = el.getAttribute("data-longitude");
+				console.log("BROWSE", browse);
+				var br = require("./mapzen.whosonfirst.bookmarks.browse.js");
+				console.log("BROWSE", browse);				
+				br.show_browse_nearby(lat, lon, 15);
+				return;
+			};
+			*/
+			
+			addr_el.appendChild(centroid_el);
 			meta_el.appendChild(addr_el);
 			
 			if (row["wof:tags"]){

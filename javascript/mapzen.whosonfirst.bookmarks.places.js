@@ -243,12 +243,9 @@
 			name.appendChild(document.createTextNode(pl["wof:name"]));
 
 			name.onclick = function(e){
-				var el = e.target;
-				
+				var el = e.target;				
 				var lat = el.getAttribute("data-latitude");
 				var lon = el.getAttribute("data-longitude");
-
-				console.log("BROWSE", lat, lon, el);
 				browse.show_browse_nearby(lat, lon);
 			};
 			
