@@ -32,6 +32,7 @@
 	
 	const places = require("./mapzen.whosonfirst.bookmarks.places.js");
 	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+	const browse = require("./mapzen.whosonfirst.bookmarks.browse.js");	
 	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 	const utils = require("./mapzen.whosonfirst.utils.js");	
@@ -61,16 +62,28 @@
 
 		'parse_query': function(q, cb){
 
-			var re_wofid = /(?:wof)?id\:\s?(\d+)/;
+			var re_wofid = /(?:(?:wof|id)\:\s)?(\d+)/;
 			var m_wofid = q.match(re_wofid);
 			
 			if (m_wofid){
 
-				var wofid = m_wofid[1];
+				var wofid = parseInt(m_wofid[1]);
 				places.show_place(wofid);
 				return;
 			}
 
+			var re_latlon = /\s*(\-?\d{1,3}(?:\.\d+))\s*,\s*(\-?\d{1,3}(?:\.\d+))\s*/;
+			var m_latlon = q.match(re_latlon);
+			
+			if (m_latlon){
+
+				var lat = parseFloat(m_latlon[1]);
+				var lon = parseFloat(m_latlon[2]);
+
+				browse.show_browse_nearby(lat, lon, 14);
+				return;
+			}
+			
 			var params = { "names": q };
 			
 			var re_place = /(locality|loc|city|neighbourhood|neighborhood|hood)\:\s*(?:(\d+)|"([^"]+)")\s+(.*)/;
