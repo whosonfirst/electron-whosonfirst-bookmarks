@@ -49,7 +49,7 @@
 			show_l.onclick = function(){ lists.show_lists(); };
 			
 			var show_f = document.getElementById("show-feelings");
-			show_f.onclick = function(){ feelings.show_feelings(); };
+			show_f.onclick = function(){ feelings.show_feelings_all(); };
 
 			var show_t = document.getElementById("show-trips");
 			show_t.onclick = function(){ trips.show_trips(); };

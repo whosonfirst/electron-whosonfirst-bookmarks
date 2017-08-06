@@ -485,7 +485,7 @@
 				var feelings_id = row["feelings_id"];
 				var count_visits = parseInt(row["count_visits"]);
 
-				var feelings = feelings.id_to_label(feelings_id);
+				var feels = feelings.id_to_label(feelings_id);
 
 				var item = document.createElement("li");
 				item.setAttribute("class", "placetype-feelings-item");
@@ -494,7 +494,7 @@
 				q.setAttribute("data-wof-id", wof_id);				
 				q.setAttribute("data-feelings-id", feelings_id);
 				q.setAttribute("class", "feelings click-me");
-				q.appendChild(document.createTextNode(feelings));
+				q.appendChild(document.createTextNode(feels));
 
 				q.onclick = function(e){
 

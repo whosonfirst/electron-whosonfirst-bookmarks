@@ -220,13 +220,13 @@
 			var id = row["id"];
 
 			var feelings_id = row["feelings_id"];
-			var feelings = feelings.id_to_label(feelings_id);
+			var feels = feelings.id_to_label(feelings_id);
 
 			var q = document.createElement("q");
 			q.setAttribute("class", "click-me");
-			q.setAttribute("data-feelings-id", feelings_id);			
+			q.setAttribute("data-feelings-id", feelings_id);
 
-			q.appendChild(document.createTextNode(feelings));
+			q.appendChild(document.createTextNode(feels));
 
 			q.onclick = cb;
 		
@@ -323,10 +323,45 @@
 				var locality_id = row['locality_id'];
 				
 				var feelings_id = row['feelings_id'];
-				var feelings = feelings.id_to_label(feelings_id);
+				var feels = feelings.id_to_label(feelings_id);
 				
 				var q = document.createElement("q");
-				q.appendChild(document.createTextNode(feelings-label", feelings);
+				q.appendChild(document.createTextNode(feels));
+
+				var span = document.createElement("span");
+				span.setAttribute("class", "place-name click-me");
+				span.setAttribute("data-wof-id", row['wof_id']);	
+				span.appendChild(document.createTextNode(row['name']));
+				
+				span.onclick = function(e){
+					var el = e.target;
+					var wof_id = el.getAttribute("data-wof-id");
+					
+					places.show_place(wof_id);
+				};			
+
+				if (locality_id){
+					span.appendChild(document.createTextNode(", in "));
+
+					var loc = document.createElement("span");
+					loc.setAttribute("class", "place-name-locality namify click-me");
+					loc.setAttribute("id", "place-locality-" + locality_id);
+					loc.setAttribute("data-wof-id", locality_id);					
+					loc.appendChild(document.createTextNode(locality_id));
+
+					span.appendChild(loc);
+				}
+
+				var desc = self.render_visit_description(row);
+
+				var sm = document.createElement("small");				
+				sm.appendChild(desc);
+				
+				var item = document.createElement("li");
+				item.setAttribute("class", "visits-list-item");
+				item.setAttribute("data-latitude", lat);
+				item.setAttribute("data-longitude", lon);
+				item.setAttribute("data-feelins-label", feels);
 				item.setAttribute("data-name", row["name"]);				
 				
 				if (! skip_header){
@@ -481,7 +516,7 @@
 
 		'get_visits_for_neighbourhood': function(wof_id, cb){
 
-			var sql = "SELECT * FROM visits WHERE neighbourhood_id = ?";
+			var sql = "SELECT * FROM visits WHERE neighbourhood_id = ? ORDER BY date DESC";
 			var params = [ wof_id ];
 
 			conn.all(sql, params, cb);
@@ -489,7 +524,7 @@
 		
 		'get_visits_for_locality': function(wof_id, cb){
 
-			var sql = "SELECT * FROM visits WHERE locality_id = ?";
+			var sql = "SELECT * FROM visits WHERE locality_id = ? ORDER BY date DESC";
 			var params = [ wof_id ];
 
 			conn.all(sql, params, cb);
@@ -497,7 +532,7 @@
 
 		'get_visits_for_region': function(wof_id, cb){
 
-			var sql = "SELECT * FROM visits WHERE region_id = ?";
+			var sql = "SELECT * FROM visits WHERE region_id = ? ORDER BY date DESC";
 			var params = [ wof_id ];
 
 			conn.all(sql, params, cb);
@@ -505,7 +540,7 @@
 
 		'get_visits_for_country': function(wof_id, cb){
 
-			var sql = "SELECT * FROM visits WHERE country_id = ?";
+			var sql = "SELECT * FROM visits WHERE country_id = ? ORDER BY date DESC";
 			var params = [ wof_id ];
 
 			conn.all(sql, params, cb);
@@ -513,7 +548,7 @@
 
 		'get_visits_for_feelings': function(feelings_id, cb){
 
-			var sql = "SELECT * FROM visits WHERE feelings_id = ?";
+			var sql = "SELECT * FROM visits WHERE feelings_id = ? ORDER BY date DESC";
 			var params = [ feelings_id ];
 
 			conn.all(sql, params, cb);
@@ -521,7 +556,7 @@
 
 		'get_visits_for_place': function(wof_id, cb){
 
-			var sql = "SELECT * FROM visits WHERE wof_id = ?";
+			var sql = "SELECT * FROM visits WHERE wof_id = ? ORDER BY date DESC";
 			var params = [ wof_id ];
 
 			conn.all(sql, params, cb);			
@@ -550,7 +585,7 @@
 				
 				var col = pt + "_id";
 				
-				var sql = "SELECT * FROM visits WHERE feelings_id = ? AND " + col + " = ?";
+				var sql = "SELECT * FROM visits WHERE feelings_id = ? AND " + col + " = ? ORDER BY date DESC";
 				var params = [ feelings_id, wof_id ];
 				
 				conn.all(sql, params, cb);

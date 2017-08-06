@@ -71,6 +71,12 @@
 			return function(feature, latlon){
 
 				var props = feature['properties'];
+
+				if (! props){
+					var m = L.circleMarker(latlon, style);
+					return;
+				}
+				
 				// console.log("[geojson][point]", props);
 
 				var label = props["xx:label"];

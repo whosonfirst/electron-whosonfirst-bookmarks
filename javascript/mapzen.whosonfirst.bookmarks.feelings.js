@@ -52,7 +52,7 @@
 			return feelings[id];
 		},
 
-		'show_feelings': function(){
+		'show_feelings_all': function(){
 
 			var left_panel = document.createElement("div");
 			left_panel.setAttribute("class", "col-md-12 panel");
@@ -306,7 +306,7 @@
 				var row = rows[i];
 				
 				var wof_id = row["locality_id"];	// PLEASE FIX ME...
-				var count_visits = row["count_visits"];
+				var count_visits = parseInt(row["count_visits"]);
 
 				if (! by_count[ count_visits ]){
 					by_count[ count_visits ] = [ wof_id ];					
@@ -318,8 +318,8 @@
 				}
 			}
 
-			counts.sort();
-			counts.reverse();
+			// counts.sort();
+			// counts.reverse();
 			
 			var counts_unq = counts.length;
 			
@@ -395,7 +395,7 @@
 			wrapper.setAttribute("class", "feelings-wrapper");
 			
 			var status_select = document.createElement("select");
-			status_select.setAttribute("id", "status");
+			status_select.setAttribute("id", "feelings");
 
 			var all_feelings = self.get_list();
 
@@ -413,7 +413,7 @@
 			}
 			
 			var status_button = document.createElement("button");
-			status_button.setAttribute("id", "status-button");			
+			status_button.setAttribute("id", "feelings-button");			
 			status_button.setAttribute("class", "btn btn-default");
 			status_button.appendChild(document.createTextNode("Save"));
 
