@@ -397,6 +397,8 @@
 			};
 			
 			var opts = {
+				// this doesn't work well enough to use yet...
+				// "url": "https://whosonfirst-api.mapzen.com/pelias/v1",
 				"layers": layers,
 				"params": params,
 				"focus": false,
