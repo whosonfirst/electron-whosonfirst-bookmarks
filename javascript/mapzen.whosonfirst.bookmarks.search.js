@@ -32,7 +32,8 @@
 	
 	const places = require("./mapzen.whosonfirst.bookmarks.places.js");
 	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
-	const browse = require("./mapzen.whosonfirst.bookmarks.browse.js");	
+	const browse = require("./mapzen.whosonfirst.bookmarks.browse.js");
+	const spr = require("./mapzen.whosonfirst.bookmarks.spr.js");		
 	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 	const utils = require("./mapzen.whosonfirst.utils.js");	
@@ -252,7 +253,7 @@
 
 			var method = "whosonfirst.places.search";
 
-			args["extras"] = "addr:,edtf:,geom:,lbl:,mz:,wof:hierarchy,wof:tags";
+			args["extras"] = spr.extras();
 			args["per_page"] = 15;
 
 			var on_success = function(rsp){

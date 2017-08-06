@@ -38,6 +38,7 @@
 	const api = require("./mapzen.whosonfirst.api.js");
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
 	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");
+	const spr = require("./mapzen.whosonfirst.bookmarks.spr.js");	
 
 	const transit = require("./mapzen.whosonfirst.bookmarks.transit.js");	
 
@@ -58,7 +59,7 @@
 			
 			var args = {
 				"id": id,
-				"extras": "addr:,edtf:,geom:,lbl:,mz:,wof:hierarchy,wof:superseded_by,wof:tags"
+				"extras": spr.extras()
 			};
 
 			var api_key = document.body.getAttribute("data-api-key");
