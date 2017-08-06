@@ -197,55 +197,55 @@ q {
     font-weight: 700;
 }
 
-.desires-list-item {
+.feelings-list-item {
     list-style-type: none;
 }
 
-.desire-stats {
+.feelings-stats {
     font-size: small;
     display:inline;
 }
 
-.desire-stats-item {
+.feelings-stats-item {
 }
 
-.desire-stats-item:after {
+.feelings-stats-item:after {
 }
 
-.desire-stats-item-count {
+.feelings-stats-item-count {
     color:#666;
 }
 
-.desire-stats-item-count:before {
+.feelings-stats-item-count:before {
     content: "( ";
 }
 
-.desire-stats-item-count:after {
+.feelings-stats-item-count:after {
     content: " )";
 }
 
-.desire-stats-places {
+.feelings-stats-places {
     display:inline;
 }
 
-.desire-stats-places-item {
+.feelings-stats-places-item {
     word-break: break-all !important;
 }
 
-.desire-stats-places-item:after {
+.feelings-stats-places-item:after {
     content: " & ";
     color:#666;    
 }
 
-.desire-stats-places-item:last-child:after {
+.feelings-stats-places-item:last-child:after {
     content: "" !important;
 }
 
-.desire-wrapper-header-location {
+.feelings-wrapper-header-location {
     margin-top: .5em;
 }
 
-.desire-wrapper-header-location:before {
+.feelings-wrapper-header-location:before {
     content: "in ";
 }
 
@@ -373,28 +373,28 @@ q {
     font-weight: 700;
 }
 
-.placetype-desires {
+.placetype-feelings {
     font-size: small;
     color: #666;
     margin-top:.5em;
     margin-left:.1em;
 }
 
-.placetype-desires:before {
+.placetype-feelings:before {
     content: "you said ";
     font-style:italic;    
 }
 
-.placetype-desires li:after {
+.placetype-feelings li:after {
     content: " and ";
     font-style:italic;
 }
 
-.placetype-desires li:last-child:after {
+.placetype-feelings li:last-child:after {
     content: "";
 }
 
-.placetype-desires q {
+.placetype-feelings q {
     color: #000;
 }
 
@@ -463,7 +463,7 @@ q {
     margin-bottom:1em;    
 }
 
-.spr-edit-desires {
+.spr-edit-feelings {
     border-top: 1px dotted #ccc;
     margin-top: .5em;
     padding-top: .5em;

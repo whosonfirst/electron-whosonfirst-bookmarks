@@ -33,7 +33,7 @@
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
-	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
+	const feelings = require("./mapzen.whosonfirst.bookmarks.feelings.js");
 
 	const api = require("./mapzen.whosonfirst.api.js");
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
@@ -149,13 +149,13 @@
 			var status_select = document.createElement("select");
 			status_select.setAttribute("id", "status");
 
-			var all_desires = desires.get_list();
+			var all_feelings = feelings.get_list();
 
-			for (var id in all_desires){
+			for (var id in all_feelings){
 
 				var option = document.createElement("option");
 				option.setAttribute("value", id);
-				option.appendChild(document.createTextNode(all_desires[id]));
+				option.appendChild(document.createTextNode(all_feelings[id]));
 				
 				status_select.appendChild(option);
 			}
@@ -281,8 +281,8 @@
 
 			h2.appendChild(reload);
 
-			var desires_wrapper = document.createElement("div");
-			desires_wrapper.setAttribute("id", "desires");
+			var feelings_wrapper = document.createElement("div");
+			feelings_wrapper.setAttribute("id", "feelings");
 
 			var lists_wrapper = document.createElement("div");
 			lists_wrapper.setAttribute("id", "lists-wrapper");
@@ -317,7 +317,7 @@
 			right_panel.appendChild(address);
 			right_panel.appendChild(dates);
 			right_panel.appendChild(mentions_wrapper);
-			right_panel.appendChild(desires_wrapper);			
+			right_panel.appendChild(feelings_wrapper);			
 			right_panel.appendChild(visits_wrapper);
 			right_panel.appendChild(lists_wrapper);
 			right_panel.appendChild(transit_wrapper);			
@@ -367,16 +367,16 @@
 				
 				var placetypes = require("./mapzen.whosonfirst.bookmarks.placetypes.js");
 			
-				placetypes.get_desires_for_placetype(pl["wof:placetype"], pl["wof:id"], function(err, rows){
+				placetypes.get_feelings_for_placetype(pl["wof:placetype"], pl["wof:id"], function(err, rows){
 					
 					if (err){
 						fb.error(err);
 						return;
 					}
 					
-					var desires_list = placetypes.render_desires_for_placetype(rows);
-					var desires_wrapper = document.getElementById("desires");
-					desires_wrapper.appendChild(desires_list);
+					var feelings_list = placetypes.render_feelings_for_placetype(rows);
+					var feelings_wrapper = document.getElementById("feelings");
+					feelings_wrapper.appendChild(feelings_list);
 				});
 			}
 

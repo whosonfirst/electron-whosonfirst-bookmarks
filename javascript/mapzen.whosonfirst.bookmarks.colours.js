@@ -33,44 +33,44 @@
 			return utils.dopplr_colour(label);
 		},
 		
-		'desire_colour': function(desire){
+		'feelings_colour': function(feelings){
 
-			var dopplr_colour = utils.dopplr_colour(desire);
+			var dopplr_colour = utils.dopplr_colour(feelings);
 			return dopplr_colour;
 			
-			if (desire == "i've been there"){
+			if (feelings == "i've been there"){
 
 			}
 
-			else if (desire == "i was there"){
+			else if (feelings == "i was there"){
 
 			}
 
-			else if (desire == "i want to go there"){
+			else if (feelings == "i want to go there"){
 
 			}
 
-			else if (desire == "again again"){
+			else if (feelings == "again again"){
 
 			}
 
-			else if (desire == "again"){
+			else if (feelings == "again"){
 
 			}
 
-			else if (desire == "again maybe"){
+			else if (feelings == "again maybe"){
 
 			}
 
-			else if (desire == "again never"){
+			else if (feelings == "again never"){
 
 			}
 
-			else if (desire == "meh"){
+			else if (feelings == "meh"){
 
 			}
 
-			else if (desire == "i would try this"){
+			else if (feelings == "i would try this"){
 
 			}
 

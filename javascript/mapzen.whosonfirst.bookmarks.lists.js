@@ -37,14 +37,7 @@
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
 	
 	const dialogs = require("dialogs");		// https://www.npmjs.com/package/dialogs
-	
-	/*
-	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
-	const places = require("./mapzen.whosonfirst.bookmarks.places.js");
-
-	const utils = require("./mapzen.whosonfirst.utils.js");
-	*/
-	
+		
 	var self = {
 		
 		'init': function(){

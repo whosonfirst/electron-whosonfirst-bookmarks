@@ -32,7 +32,7 @@
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
-	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
+	// const feelings = require("./mapzen.whosonfirst.bookmarks.feelings.js");
 
 	const api = require("./mapzen.whosonfirst.api.js");
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");

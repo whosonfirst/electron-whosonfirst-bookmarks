@@ -29,7 +29,7 @@
 	const conn = db.conn();
 	
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
-	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
+	const feelings = require("./mapzen.whosonfirst.bookmarks.feelings.js");	
 
 	const places = require("./mapzen.whosonfirst.bookmarks.places.js");
 	
@@ -137,12 +137,12 @@
 			dt.setAttribute("class", "datetime");
 			dt.appendChild(document.createTextNode(row["date"]));
 
-			var status_id = row["status_id"];
-			var desire = desires.id_to_label(status_id);
+			var feelings_id = row["feelings_id"];
+			var feelings = feelings.id_to_label(feelings_id);
 
 			var q = document.createElement("q");
 			q.setAttribute("class", "click-me");
-			q.appendChild(document.createTextNode(desire));
+			q.appendChild(document.createTextNode(feelings));
 
 			var desc = self.render_visit_description(row, function(e){
 
@@ -175,14 +175,14 @@
 
 			var cb = function(e){
 
-				var status = document.getElementById("status");
-				var status_id = status.value;
+				var feels = document.getElementById("feelings");
+				var feelings_id = feels.value;
 
 				var dt = new Date;
 				dt = dt.toISOString();
 				
 				var update = {
-					"status_id" : status_id,
+					"feelings_id" : feelings_id,
 					"date": dt
 				};
 
@@ -191,7 +191,7 @@
 				});
 			};
 			
-			var select = desires.render_menu(status_id, cb);
+			var select = feelings.render_menu(feelings_id, cb);
 
 			update_wrapper.appendChild(update_header);			
 			update_wrapper.appendChild(select);
@@ -212,21 +212,21 @@
 				
 				cb = function(e){
 					var el = e.target;
-					var status_id = el.getAttribute("data-status-id");
-					desires.show_desire(status_id);
+					var feelings_id = el.getAttribute("data-feelings-id");
+					feelings.show_feelings(feelings_id);
 				};
 			}
 			
 			var id = row["id"];
 
-			var status_id = row["status_id"];
-			var desire = desires.id_to_label(status_id);
+			var feelings_id = row["feelings_id"];
+			var feelings = feelings.id_to_label(feelings_id);
 
 			var q = document.createElement("q");
 			q.setAttribute("class", "click-me");
-			q.setAttribute("data-status-id", status_id);			
+			q.setAttribute("data-feelings-id", feelings_id);			
 
-			q.appendChild(document.createTextNode(desire));
+			q.appendChild(document.createTextNode(feelings));
 
 			q.onclick = cb;
 		
@@ -322,46 +322,11 @@
 				
 				var locality_id = row['locality_id'];
 				
-				var status_id = row['status_id'];
-				var desire = desires.id_to_label(status_id);
+				var feelings_id = row['feelings_id'];
+				var feelings = feelings.id_to_label(feelings_id);
 				
 				var q = document.createElement("q");
-				q.appendChild(document.createTextNode(desire));			
-
-				var span = document.createElement("span");
-				span.setAttribute("class", "place-name click-me");
-				span.setAttribute("data-wof-id", row['wof_id']);	
-				span.appendChild(document.createTextNode(row['name']));
-				
-				span.onclick = function(e){
-					var el = e.target;
-					var wof_id = el.getAttribute("data-wof-id");
-					
-					places.show_place(wof_id);
-				};			
-
-				if (locality_id){
-					span.appendChild(document.createTextNode(", in "));
-
-					var loc = document.createElement("span");
-					loc.setAttribute("class", "place-name-locality namify click-me");
-					loc.setAttribute("id", "place-locality-" + locality_id);
-					loc.setAttribute("data-wof-id", locality_id);					
-					loc.appendChild(document.createTextNode(locality_id));
-
-					span.appendChild(loc);
-				}
-
-				var desc = self.render_visit_description(row);
-
-				var sm = document.createElement("small");				
-				sm.appendChild(desc);
-				
-				var item = document.createElement("li");
-				item.setAttribute("class", "visits-list-item");
-				item.setAttribute("data-latitude", lat);
-				item.setAttribute("data-longitude", lon);
-				item.setAttribute("data-desire-label", desire);
+				q.appendChild(document.createTextNode(feelings-label", feelings);
 				item.setAttribute("data-name", row["name"]);				
 				
 				if (! skip_header){
@@ -406,7 +371,7 @@
 				lon = parseFloat(lon);				
 				
 				var name = el.getAttribute("data-name");
-				var desire = el.getAttribute("desire");
+				// var feelings = el.getAttribute("feelings");
 
 				var row = {
 					"latitude": lat,
@@ -440,7 +405,7 @@
 			namify.translate();
 		},
 
-		'add_visit': function(pl, status_id, cb){
+		'add_visit': function(pl, feelings_id, cb){
 
 			var on_save = function(err){
 
@@ -450,7 +415,7 @@
 				cb(err);
 			};
 
-			self.save_visit(pl, status_id, on_save);
+			self.save_visit(pl, feelings_id, on_save);
 		},
 
 		'update_visit': function(visit, update, cb){
@@ -471,7 +436,7 @@
 			conn.run(sql, params, cb);
 		},
 		
-		'save_visit': function(pl, status_id, cb){
+		'save_visit': function(pl, feelings_id, cb){
 
 			var wof_id = pl['wof:id'];
 			var name = pl['wof:name'];			
@@ -499,9 +464,9 @@
 			var dt = new Date;
 			dt = dt.toISOString();
 
-			var sql = "INSERT INTO visits (wof_id, name, latitude, longitude, neighbourhood_id, macrohood_id, locality_id, metroarea_id, region_id, country_id, status_id, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			var sql = "INSERT INTO visits (wof_id, name, latitude, longitude, neighbourhood_id, macrohood_id, locality_id, metroarea_id, region_id, country_id, feelings_id, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
-			var params = [wof_id, name, lat, lon, neighbourhood_id, macrohood_id, locality_id, metroarea_id, region_id, country_id, status_id, dt];
+			var params = [wof_id, name, lat, lon, neighbourhood_id, macrohood_id, locality_id, metroarea_id, region_id, country_id, feelings_id, dt];
 
 			conn.run(sql, params, cb);
 		},
@@ -546,10 +511,10 @@
 			conn.all(sql, params, cb);
 		},
 
-		'get_visits_for_desire': function(status_id, cb){
+		'get_visits_for_feelings': function(feelings_id, cb){
 
-			var sql = "SELECT * FROM visits WHERE status_id = ?";
-			var params = [ status_id ];
+			var sql = "SELECT * FROM visits WHERE feelings_id = ?";
+			var params = [ feelings_id ];
 
 			conn.all(sql, params, cb);
 		},
@@ -562,7 +527,7 @@
 			conn.all(sql, params, cb);			
 		},
 		
-		'get_visits_for_desire_and_place': function(status_id, wof_id, cb){
+		'get_visits_for_feelings_and_place': function(feelings_id, wof_id, cb){
 
 			var places = require("./mapzen.whosonfirst.bookmarks.places.js");
 			
@@ -585,25 +550,25 @@
 				
 				var col = pt + "_id";
 				
-				var sql = "SELECT * FROM visits WHERE status_id = ? AND " + col + " = ?";
-				var params = [ status_id, wof_id ];
+				var sql = "SELECT * FROM visits WHERE feelings_id = ? AND " + col + " = ?";
+				var params = [ feelings_id, wof_id ];
 				
 				conn.all(sql, params, cb);
 			});
 		},
 
-		'get_count_for_desire': function(status_id, cb){
+		'get_count_for_feelings': function(feelings_id, cb){
 
-			var sql = "SELECT COUNT(DISTINCT(locality_id)) AS count_desires FROM visits WHERE status_id = ?";
-			var params = [ status_id ];
+			var sql = "SELECT COUNT(DISTINCT(locality_id)) AS count_feelings FROM visits WHERE feelings_id = ?";
+			var params = [ feelings_id ];
 
 			conn.get(sql, params, cb);
 		},
 		
-		'get_localities_for_desire': function(status_id, cb){
+		'get_localities_for_feelings': function(feelings_id, cb){
 
-			var sql = "SELECT locality_id, status_id, COUNT(id) AS count_visits FROM visits WHERE status_id = ? GROUP BY locality_id ORDER BY count_visits DESC";
-			var params = [ status_id ];
+			var sql = "SELECT locality_id, feelings_id, COUNT(id) AS count_visits FROM visits WHERE feelings_id = ? GROUP BY locality_id ORDER BY count_visits DESC";
+			var params = [ feelings_id ];
 
 			conn.all(sql, params, cb);
 		},

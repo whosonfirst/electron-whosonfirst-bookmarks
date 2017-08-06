@@ -28,7 +28,7 @@
 	const utils = require("./mapzen.whosonfirst.utils.js");
 	const browse = require("./mapzen.whosonfirst.bookmarks.browse.js");
 	
-	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
+	const feelings = require("./mapzen.whosonfirst.bookmarks.feelings.js");
 	const soundbox = require("./mapzen.whosonfirst.bookmarks.soundbox.js");	
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");
 	
@@ -405,15 +405,15 @@
 					var wofid = el.getAttribute("data-wof-id");
 
 					var status = document.getElementById("soundbox-report-select-" + wofid);					
-					var status_id = status.value;
+					var feelings_id = status.value;
 
-					if (status_id == ""){
+					if (feelings_id == ""){
 						return;
 					}
 					
 					var property = status.getAttribute("data-soundbox-property");
 
-					fb.info("SOUNDBOX " + wofid + " " + property + ":" + status_id);
+					fb.info("SOUNDBOX " + wofid + " " + property + ":" + feelings_id);
 				};
 				
 				var select_soundbox = soundbox.render_menu(row["wof:id"], property, options, cb);
@@ -443,23 +443,23 @@
 
 			else {}
 
-			var desire_wrapper = document.createElement("div");
-			desire_wrapper.setAttribute("class", "spr-edit-desires spr-desires");
+			var feelings_wrapper = document.createElement("div");
+			feelings_wrapper.setAttribute("class", "spr-edit-feelings spr-feelings");
 			
-			var select_desire = desires.render_menu(null, function(e){
+			var select_feelings = feelings.render_menu(null, function(e){
 
 				var el = e.target;
 				var wofid = el.getAttribute("data-wof-id");
 				
-				var status = document.getElementById("status-" + wofid);
-				var status_id = status.value;
+				var status = document.getElementById("feelings-" + wofid);
+				var feelings_id = status.value;
 
 				var places = require("./mapzen.whosonfirst.bookmarks.places.js");
 				var visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
 				
 				places.fetch_place(wofid, function(pl){
 
-					visits.add_visit(pl, status_id, function(err){
+					visits.add_visit(pl, feelings_id, function(err){
 						
 						if (err){
 							fb.error(err);
@@ -476,16 +476,16 @@
 
 			var wofid = row["wof:id"];
 			
-			var s = select_desire.querySelector("#status");
-			var b = select_desire.querySelector("#status-button");
+			var s = select_feelings.querySelector("#feelings");
+			var b = select_feelings.querySelector("#feelings-button");
 			
-			s.setAttribute("id", "status-" + wofid);
+			s.setAttribute("id", "feelings-" + wofid);
 			
-			b.setAttribute("id", "status-button-" + wofid);
+			b.setAttribute("id", "feelings-button-" + wofid);
 			b.setAttribute("data-wof-id", wofid);
 			
-			desire_wrapper.appendChild(select_desire);
-			status_el.appendChild(desire_wrapper);
+			feelings_wrapper.appendChild(select_feelings);
+			status_el.appendChild(feelings_wrapper);
 
 			/*
 

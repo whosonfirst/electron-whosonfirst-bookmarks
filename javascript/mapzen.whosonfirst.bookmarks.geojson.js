@@ -260,7 +260,7 @@
 		
 		'visits_to_featurecollection': function(rows){
 
-			var desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
+			var feelings = require("./mapzen.whosonfirst.bookmarks.feelings.js");
 			
 			var features = [];
 			
@@ -275,8 +275,8 @@
 
 				var coords = [ lon, lat ];
 
-				var status_id = row["status_id"];
-				var status = desires.id_to_label(status_id);
+				var feelings_id = row["feelings_id"];
+				var status = feelings.id_to_label(feelings_id);
 				
 				var props = {
 					"wof:id": row["wof_id"],

@@ -30,7 +30,7 @@
 
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 
-	const desires = require("./mapzen.whosonfirst.bookmarks.desires.js");	
+	const feelings = require("./mapzen.whosonfirst.bookmarks.feelings.js");	
 	const namify = require("./mapzen.whosonfirst.bookmarks.namify.js");
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
 	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");	
@@ -338,7 +338,7 @@
 
 				for (var i=0; i < count_ids; i++){
 
-					self.get_desires_for_placetype(pt, ids[i], self.draw_desires_for_placetype);
+					self.get_feelings_for_placetype(pt, ids[i], self.draw_feelings_for_placetype);
 					
 					if ((pt == "locality") && (counts[ids[i]] > 1)){
 						self.get_neighbourhood_count_for_locality(ids[i], self.draw_neighbourhood_count_for_locality);
@@ -418,11 +418,11 @@
 		
 		// maybe put this in a different package... (20170620/thisisaaronland)
 		
-		'get_desires_for_placetype': function(pt, wof_id, cb){
+		'get_feelings_for_placetype': function(pt, wof_id, cb){
 
 			var col = pt + "_id";
 			
-			var sql = "SELECT status_id, COUNT(id) AS count_visits FROM visits WHERE " + col + " = ? GROUP BY status_id ORDER BY count_visits DESC";
+			var sql = "SELECT feelings_id, COUNT(id) AS count_visits FROM visits WHERE " + col + " = ? GROUP BY feelings_id ORDER BY count_visits DESC";
 			var params = [ wof_id ];
 
 			console.log(sql, params);
@@ -442,7 +442,7 @@
 			});
 		},
 		
-		'draw_desires_for_placetype': function(err, rows){
+		'draw_feelings_for_placetype': function(err, rows){
 
 			if (err){
 				fb.error(err);
@@ -458,22 +458,22 @@
 			var first = rows[0];
 			var wof_id = first["wof_id"];
 			
-			var desires_list = self.render_desires_for_placetype(rows);
+			var feelings_list = self.render_feelings_for_placetype(rows);
 
 			var place = document.getElementById("placetype-list-item-" + wof_id);
-			place.appendChild(desires_list);
+			place.appendChild(feelings_list);
 		},
 
-		'render_desires_for_placetype': function(rows){
+		'render_feelings_for_placetype': function(rows){
 
-			// TO DO: group desires by count in a single list item
+			// TO DO: group feelings by count in a single list item
 			// as in "<q>again</a> and <q>meh</q> twice" rather than
 			// "<q>again</a> twice and <q>meh</q> twice"
 			
 			var wof_id;
 
-			var desires_list = document.createElement("ul");
-			desires_list.setAttribute("class", "list-inline placetype-desires");
+			var feelings_list = document.createElement("ul");
+			feelings_list.setAttribute("class", "list-inline placetype-feelings");
 
 			var count_rows = rows.length;
 
@@ -482,28 +482,28 @@
 				var row = rows[i];
 				wof_id = row["wof_id"];
 
-				var status_id = row["status_id"];
-				var count_visits = row["count_visits"];
+				var feelings_id = row["feelings_id"];
+				var count_visits = parseInt(row["count_visits"]);
 
-				var desire = desires.id_to_label(status_id);
+				var feelings = feelings.id_to_label(feelings_id);
 
 				var item = document.createElement("li");
-				item.setAttribute("class", "placetype-desires-item");
+				item.setAttribute("class", "placetype-feelings-item");
 				
 				var q = document.createElement("q");
 				q.setAttribute("data-wof-id", wof_id);				
-				q.setAttribute("data-status-id", status_id);
-				q.setAttribute("class", "desire click-me");
-				q.appendChild(document.createTextNode(desire));
+				q.setAttribute("data-feelings-id", feelings_id);
+				q.setAttribute("class", "feelings click-me");
+				q.appendChild(document.createTextNode(feelings));
 
 				q.onclick = function(e){
 
 					var el = e.target;
 					var wof_id = el.getAttribute("data-wof-id");					
-					var status_id = el.getAttribute("data-status-id");
+					var feelings_id = el.getAttribute("data-feelings-id");
 					
-					var desires = require("./mapzen.whosonfirst.bookmarks.desires.js");
-					desires.show_desires_for_place(status_id, wof_id);
+					var feelings = require("./mapzen.whosonfirst.bookmarks.feelings.js");
+					feelings.show_feelings_for_place(feelings_id, wof_id);
 				};
 				
 				item.append(q);				
@@ -523,10 +523,10 @@
 					item.appendChild(document.createTextNode(" " + count_visits + " times"));
 				}
 
-				desires_list.appendChild(item);
+				feelings_list.appendChild(item);
 			}
 
-			return desires_list;
+			return feelings_list;
 		},
 
 		'get_neighbourhoods_for_locality': function(wof_id, cb){

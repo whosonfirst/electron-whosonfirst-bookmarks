@@ -9,7 +9,7 @@ CREATE TABLE visits (
 	metroarea_id INTEGER,			
 	region_id INTEGER,
 	country_id INTEGER,
-	status_id INTEGER,
+	feelings_id INTEGER,
 	date TEXT,
 	name TEXT
 );
