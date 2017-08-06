@@ -48,10 +48,10 @@ function createMainWindow () {
 		
 		var tiles_endpoint = 'https://tile.mapzen.com';
 
-		var proxy_host = "http://localhost";
+		var proxy_host = "localhost";
 		var proxy_port = 9229;
 
-		var proxy_endpoint = proxy_host + ":" + proxy_port;
+		var proxy_endpoint = "http://" + proxy_host + ":" + proxy_port;
 
 		// because we'll need `server` outside of cache.init
 		var server;
@@ -75,7 +75,7 @@ function createMainWindow () {
 			}
 			
 			try {
-				server.listen(proxy_port);
+				server.listen(proxy_port, proxy_host);
 			}
 			
 			catch (e) {
@@ -166,7 +166,8 @@ function createMainWindow () {
 			var url = details["url"];				
 			var err = details["error"];
 			
-			console.log("[filter] ERROR proxying " + url +", because " + err);				
+			console.log("[filter] ERROR proxying " + url +", because " + err);
+			
 			// console.log("[proxy] ERR stop listening because " + err);
 			// server.close();
 		});
