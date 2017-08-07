@@ -57,7 +57,9 @@
 			
 			if (exists){
 				// console.log("[database][schema] SKIP");				
-				return cb(null);
+				// return cb(null);
+
+				return self.process_alters(cb);
 			}
 
 			// sudo make me a generic function that can apply to a filepath
@@ -122,6 +124,71 @@
 			});
 
 			// end of sudo make me a generic function
+		},
+
+		'process_alters': function(cb){
+
+			var sql = "SELECT schema, lastmodified FROM db";
+			var params = [ ];
+
+			db.all(sql, params, function(err, rows){
+
+				if (err){
+					console.log("[database][schema] ERR failed to query for previous alters");
+					return cb(err);
+				}
+				
+				var processed = {};
+
+				var count_rows = rows.length;
+
+				for (var i=0; i < count_rows; i++){
+					var row = rows[i];
+					processed[row["schema"]] = row["lastmodified"];
+				}
+
+				// console.log("[database][schema] PROCESSED", processed);
+				
+				var app_path = app.getAppPath();
+				var root = path.join(app_path, "schema");
+				var alters = path.join(root, "alters");
+
+				fs.readdir(alters, function(err, files){
+
+					// console.log("[database][schema] FILES", files);
+					
+					if (err){
+						console.log("[database][schema] ERR failed to read " + alters, err);
+						return cb(err);
+					}
+
+					var count_files = files.length;
+
+					var re_alter = /^(\d+)\.main\.sql/;
+					
+					for (var i=0; i < count_files; i++){
+						
+						var fname = files[i];
+						var m = fname.match(re_alter);
+						
+						if (! m){
+							continue;
+						}
+
+						if (processed[fname]){
+							console.log("[database][schema] SKIP", fname);
+							continue;
+						}
+						
+						var alter_path = path.join(alters, fname);
+						console.log("[database][schema] PROCESS", alter_path);
+
+						// TO DO: PLEASE APPLY ALTER HERE
+					}
+				});
+			});
+
+			return cb(null);
 		},
 		
 		'conn': function(){
