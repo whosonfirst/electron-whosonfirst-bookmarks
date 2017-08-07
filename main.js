@@ -150,6 +150,7 @@ function createMainWindow () {
 				var redir_url = req_url.replace(tiles_endpoint, proxy_endpoint);
 				
 				// console.log("[filter] REDIRECT " + tiles_endpoint + " TO " + proxy_endpoint);
+
 				return callback({'redirectURL': redir_url});
 			}
 			

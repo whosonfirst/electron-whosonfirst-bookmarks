@@ -27,6 +27,7 @@
 
 	const http = require("http");
 	const https = require("https");
+	const dns = require("dns");	
 	
 	const crypto = require("crypto");
 	const u = require("url");
@@ -109,8 +110,32 @@
 
 					console.log("[proxy][cache] MISS " + rel_path);				
 					console.log("[proxy] FETCH " + mz_url);
-				
-					https.get(mz_url, on_fetch);
+
+					// we need to do this in order to prevent these
+					// errors when we are offline and trying to fetch
+					// a cache MISS and because since proxy.js is
+					// invoked as part of main.js we don't have access
+					// to navigator.onLine - maybe there is a better
+					// way to signal that DNS will fail by IPC messaging
+					// but today we aren't doing that... (20170807/thisisaaronland)
+					// 
+					// Uncaught Exception:
+					// Error: getaddrinfo ENOTFOUND tile.mapzen.com tile.mapzen.com:443
+					// at errnoException (dns.js:28:10)
+					// at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:76:26)
+					
+					dns.lookup("tile.mapzen.com", function(err){
+
+						if (err){
+							console.log("[proxy] ERR unable to proxy tile because DNS lookup failed", err.code);
+							res.writeHead(503);
+							res.end();
+							return;						
+						}
+						
+						https.get(mz_url, on_fetch);
+					});
+
 				};
 				
 				cache.get(rel_path, on_get);
