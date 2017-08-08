@@ -56,20 +56,24 @@
 			console.log("[database][schema] INIT");
 			
 			if (exists){
-				// console.log("[database][schema] SKIP");				
-				// return cb(null);
-
 				return self.process_alters(cb);
 			}
 
-			// sudo make me a generic function that can apply to a filepath
-			// like main.sql or alters/*.sql - and then wrap in logic to loop
-			// through the available *.sql files and apply (in order) anything
-			// we don't have a record of (20170731/thisisaaronland)
-			
 			var app_path = app.getAppPath();
 			var root = path.join(app_path, "schema");
 			var schema = path.join(root, "main.sql");
+
+			self.import_schema(schema, function(err){
+
+				if (err){
+					return cb(err);
+				}
+
+				return self.process_alters(cb);
+			});
+		},
+
+		'import_schema': function(schema, cb){
 
 			var fh = fs.openSync(schema, "r");
 
@@ -91,6 +95,8 @@
 				
 				return cb(e);
 			}
+
+			console.log("[database][schema] IMPORT " + schema);
 			
 			db.exec(sql, function(e){
 
@@ -118,12 +124,10 @@
 						return cb(e);
 					}
 					
-					console.log("[database][schema] SETUP complete");
 					return cb(null);
 				});
 			});
-
-			// end of sudo make me a generic function
+			
 		},
 
 		'process_alters': function(cb){
@@ -162,9 +166,10 @@
 						return cb(err);
 					}
 
-					var count_files = files.length;
-
-					var re_alter = /^(\d+)\.main\.sql/;
+					var re_alter = /^(\d+)\.main\.sql$/;
+					var to_process = [];
+					
+					var count_files = files.length;					
 					
 					for (var i=0; i < count_files; i++){
 						
@@ -181,16 +186,40 @@
 						}
 						
 						var alter_path = path.join(alters, fname);
-						console.log("[database][schema] PROCESS", alter_path);
-
-						// TO DO: PLEASE APPLY ALTER HERE
+						to_process.push(alter_path);
 					}
+
+					var count_process = to_process.length;
+					// console.log("[database][schema] PROCESS", count_process, to_process);
+					
+					if (! count_process){
+						return cb();
+					}				
+
+					return self.process_alters_list(to_process, cb);
 				});
 			});
 
 			return cb(null);
 		},
-		
+
+		'process_alters_list': function(files, cb){
+
+			self.import_schema(files[0], function(err){
+
+				if (err){
+					return cb(err);
+				}
+
+				if (files.length == 1){
+					return cb();
+				}
+
+				var remaining = files.slice(1);
+				return self.process_alters_list(remaining, cb);
+			});
+		},
+				
 		'conn': function(){
 			return db;
 		},
