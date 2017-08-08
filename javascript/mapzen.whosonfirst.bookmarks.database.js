@@ -181,7 +181,7 @@
 						}
 
 						if (processed[fname]){
-							console.log("[database][schema] SKIP", fname);
+							// console.log("[database][schema] SKIP", fname);
 							continue;
 						}
 						
@@ -229,11 +229,67 @@
 		},
 		
 		'export': function(cb){
+
+			console.log("EXPORT...");
 			// please write me - export each table as a CSV file like:
 			// bookmarks-{TABLE}.csv (20170731/thisisaaronland)
-			cb(null);
+
+			var sql = ".tables";
+			var params = [];
+
+			conn.all(sql, params, function(err, rows){
+
+				if (err){
+					console.log("[database][export] ERR", err);					
+					cb(err);
+				}
+
+				console.log("[database][export]", rows);
+				cb(null);
+			});
 		},
 
+		'export_tables': function(tables, cb){
+
+			var t = tables[0];
+
+			const app = electron.app || electron.remote.app;
+			const udata = app.getPath("userData");
+			
+			var fname = "bookmarks-" + t + ".csv";
+			var path = path.join(udata, fname);
+
+			var fh = fs.openSync(path, "w");
+
+			if (! fh){
+				console.log("[database][export] ERR failed to load open " + path + " for writing");
+				return cb("Failed to open CSV file for writing");
+			}
+
+			var sql = "SELECT * FROM " + t;	// PLEASE ESCAPE ME OR SOMETHING...
+			var params = [];
+			
+			conn.all(sql, params, function(err, rows){
+
+				if (err){
+					return cb(err);
+				}
+
+				console.log(t, rows[0]);
+
+				fh.close();
+				
+				if (t.length > 1){
+
+					tables = tables.slice(1);
+					return self.export_tables(tables, cb);
+				}
+
+				return cb();
+
+			});
+		},
+		
 		'backup': function(cb){
 
 			var backup = bookmarks + ".bak";
