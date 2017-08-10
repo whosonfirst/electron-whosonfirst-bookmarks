@@ -230,35 +230,44 @@
 		
 		'export': function(cb){
 
-			console.log("EXPORT...");
-			// please write me - export each table as a CSV file like:
-			// bookmarks-{TABLE}.csv (20170731/thisisaaronland)
+			console.log("[database][export] BEGIN");
 
-			var sql = ".tables";
+			var sql = "SELECT name FROM sqlite_master WHERE type='table'";
 			var params = [];
 
-			conn.all(sql, params, function(err, rows){
+			db.all(sql, params, function(err, rows){
 
 				if (err){
 					console.log("[database][export] ERR", err);					
-					cb(err);
+					return cb(err);
 				}
 
-				console.log("[database][export]", rows);
-				cb(null);
+				if (rows.length == 0){
+					console.log("[database][export] ERR", "No tables to export");	
+					return cb(null);
+				}
+				
+				console.log("[database][export] TABLES", rows);
+				
+				return self.export_tables(rows, cb);
 			});
 		},
 
-		'export_tables': function(tables, cb){
+		'export_tables': function(rows, cb){
 
-			var t = tables[0];
-
+			console.log("[database][export_tables] ", rows.length);
+			
+			var row = rows[0];
+			var table = row["name"];
+			
 			const app = electron.app || electron.remote.app;
 			const udata = app.getPath("userData");
 			
-			var fname = "bookmarks-" + t + ".csv";
+			var fname = "bookmarks-" + table + ".csv";
 			var path = path.join(udata, fname);
 
+			console.log("[database][export] TABLE", fname);
+			
 			var fh = fs.openSync(path, "w");
 
 			if (! fh){
@@ -266,12 +275,13 @@
 				return cb("Failed to open CSV file for writing");
 			}
 
-			var sql = "SELECT * FROM " + t;	// PLEASE ESCAPE ME OR SOMETHING...
+			var sql = "SELECT * FROM " + table;	// PLEASE ESCAPE ME OR SOMETHING...
 			var params = [];
 			
-			conn.all(sql, params, function(err, rows){
+			db.all(sql, params, function(err, rows){
 
 				if (err){
+					console.log("[database][export] ERR fetching rows for " + table);
 					return cb(err);
 				}
 
@@ -281,8 +291,8 @@
 				
 				if (t.length > 1){
 
-					tables = tables.slice(1);
-					return self.export_tables(tables, cb);
+					rows = rows.slice(1);
+					return self.export_tables(rows, cb);
 				}
 
 				return cb();
