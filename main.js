@@ -267,26 +267,46 @@ app.on('activate', function (){
 
 app.on('quit', function(){
 
-	// console.log("[app] QUIT");
+	console.log("[app][quit] START");
 
 	// still needs to be written...
 	// db.export();
+
+	waiting = true;
+	
+	var wait = function(){
+
+		if (waiting){
+			console.log("[app][quit] WAIT");			
+			setTimeout(10, wait);
+			return;
+		}
+
+		console.log("[app][quit] DONE");
+	};
 	
 	db.close(function(err){
 
 		if (err){
 			console.log("[app][quit] ERR closing database");
+			waiting = false;
+			return;
 		}
 
 		db.backup(function(err, path){
 
 			if (err){
 				console.log("[app][quit] ERR backing up database");
+				waiting = false;
+				return;				
 			}
 
 			console.log("[app][quit] OK database backup created at " + path);
+			waiting = false;
 		});
 	});
+
+	wait();
 });
 
 ipcMain.on('renderer', (event, arg) => {
