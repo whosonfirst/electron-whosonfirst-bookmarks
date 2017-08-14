@@ -235,41 +235,76 @@
 			var sql = "SELECT name FROM sqlite_master WHERE type='table'";
 			var params = [];
 
+			var waiting = true;
+	
+			var wait = function(){
+
+				if (waiting){
+					console.log("[database][export] WAIT");			
+					setTimeout(wait, 10);
+					return;
+				}
+
+				console.log("[database][export] DONE");
+			};
+			
 			db.all(sql, params, function(err, rows){
 
 				if (err){
-					console.log("[database][export] ERR", err);					
+					console.log("[database][export] ERR", err);
+					waiting = false;					
 					return cb(err);
 				}
 
 				if (rows.length == 0){
-					console.log("[database][export] ERR", "No tables to export");	
+					console.log("[database][export] ERR", "No tables to export");
+					waiting = false;					
 					return cb(null);
 				}
 				
 				console.log("[database][export] TABLES", rows);
+
+				try {
+					self.export_tables(rows, cb);
+				} catch(e) {
+					console.log("[database][export] ERR", e);					
+				}
 				
-				return self.export_tables(rows, cb);
+				waiting = false;
 			});
+
+			console.log("[database][export] WAIT");			
+			wait();
 		},
 
 		'export_tables': function(rows, cb){
 
-			console.log("[database][export_tables] ", rows.length);
-			
 			var row = rows[0];
 			var table = row["name"];
+
+			console.log("[database][export_tables] TABLE", table);
+
+			var re_table = /^(places|lists|visits|tags|trips).*?/;
 			
-			const app = electron.app || electron.remote.app;
-			const udata = app.getPath("userData");
+			if (! table.match(re_table)){
+				
+				console.log("[database][export_tables] SKIP", table);
+
+				if (rows.length > 1){
+					console.log("[database][export_tables] NEXT table", rows.length);
+					
+					rows = rows.slice(1);
+					return self.export_tables(rows, cb);
+				}				
+			}
 			
 			var fname = "bookmarks-" + table + ".csv";
-			var path = path.join(udata, fname);
+			var export_path = path.join(udata, fname);
 
-			console.log("[database][export] TABLE", fname);
+			console.log("[database][export_tables] EXPORT", export_path);
 			
-			var fh = fs.openSync(path, "w");
-
+			var fh = fs.openSync(export_path, "w");
+			
 			if (! fh){
 				console.log("[database][export] ERR failed to load open " + path + " for writing");
 				return cb("Failed to open CSV file for writing");
@@ -277,27 +312,44 @@
 
 			var sql = "SELECT * FROM " + table;	// PLEASE ESCAPE ME OR SOMETHING...
 			var params = [];
-			
-			db.all(sql, params, function(err, rows){
 
-				if (err){
-					console.log("[database][export] ERR fetching rows for " + table);
-					return cb(err);
+			console.log("[database][export_tables] QUERY", sql, params);
+			
+			var waiting = true;
+	
+			var wait = function(){
+
+				if (waiting){
+					console.log("[database][export_tables] WAIT");			
+					setTimeout(wait, 10);
+					return;
 				}
 
-				console.log(t, rows[0]);
+				console.log("[database][export_tables] DONE");
+			};
+			
+			db.all(sql, params, function(err, trows){
 
-				fh.close();
+				console.log("[database][export_tables]", table, trows[0]);
 				
-				if (t.length > 1){
+				if (err){
+					console.log("[database][export_tables] ERR fetching rows for " + table);
+					waiting = false;
+					return;
+				}
 
+				if (rows.length > 1){
+					console.log("[database][export_tables] NEXT table", rows.length);
+					
 					rows = rows.slice(1);
 					return self.export_tables(rows, cb);
 				}
 
-				return cb();
-
+				waiting = false;
 			});
+
+			console.log("[database][export_tables] WAIT");
+			wait();
 		},
 		
 		'backup': function(cb){
