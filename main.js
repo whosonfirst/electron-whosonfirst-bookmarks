@@ -275,7 +275,7 @@ app.on('quit', function(){
 
 		if (waiting){
 			console.log("[app][quit] WAIT");			
-			setTimeout(10, wait);
+			setTimeout(wait, 10);
 			return;
 		}
 
