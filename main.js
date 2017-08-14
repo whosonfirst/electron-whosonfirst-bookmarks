@@ -250,12 +250,11 @@ app.on('ready', function(){
 });
 
 app.on('window-all-closed', function (){
-	
+
+	console.log("[app][window-all-closed] CLOSE");
 	if (process.platform !== 'darwin'){
 		app.quit();
 	}
-
-	console.log("[app][ready] ACTIVATE");	
 })
 
 app.on('activate', function (){
@@ -266,59 +265,79 @@ app.on('activate', function (){
 });
 
 app.on('quit', function(){
+	console.log("[app][quit] EXIT");
+});
 
-	console.log("[app][quit] START");
+app.on('before-quit', function(event){
 
-	waiting = true;
+	console.log("[app][before-quit] START");
+
+	var waiting = true;
 	
 	var wait = function(){
 
-		if (waiting){
-			console.log("[app][quit] WAIT");			
+		console.log("[app][before-quit] EXPORTING", db.is_exporting());
+
+		if (db.is_exporting()){
 			setTimeout(wait, 10);
 			return;
 		}
 
-		console.log("[app][quit] DONE");
-	};
-
-	try {
-	db.export(function(err, path){
+		// TODO - update to use db.is_backingup()
 		
-		if (err){
-			console.log("[app][quit] ERR backing up database");
+		console.log("[app][before-quit] WAITING", waiting);
+
+		if (waiting){
+			setTimeout(wait, 10);
+			return;
 		}
-		
-		db.close(function(err){
 
+		process.exit(0);
+	};
+	
+	try {
+		db.export(function(err, path){
+		
 			if (err){
-				console.log("[app][quit] ERR closing database");
-				waiting = false;
-				return;
+				console.log("[app][before-quit] ERR backing up database");
 			}
 
-			db.backup(function(err, path){
+			console.log("[app][before-quit] CLOSE database");
+			
+			db.close(function(err){
 				
 				if (err){
-					console.log("[app][quit] ERR backing up database");
+					console.log("[app][before-quit] ERR closing database");
 					waiting = false;
-					return;				
-				}	
+					return;
+				}
 
-				console.log("[app][quit] OK database backup created at " + path);
-				waiting = false;
-				return;
+				console.log("[app][before-quit] BACKUP database");
 				
-			});	// db.backup
-		}); 		// db.close
-	}); 			// db.export
+				db.backup(function(err, path){
 
+					if (err){
+						console.log("[app][before-quit] ERR backing up database");
+						waiting = false;
+						return;				
+					}	
+					
+					console.log("[app][before-quit] OK database backup created at " + path);
+					waiting = false;
+					return;
+					
+				});	// db.backup
+			}); 		// db.close
+		}); 			// db.export
+
+		wait();
+		
 	} catch (e) {
-		console.log("[app][quit] SNFU", e);
-		waiting = false;
+		console.log("[app][before-quit] SNFU", e);
+		process.exit(1);
 	}
-	
-	wait();
+
+	event.preventDefault();		
 });
 
 ipcMain.on('renderer', (event, arg) => {
