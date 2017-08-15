@@ -52,6 +52,8 @@
 					return cb(err);
 				}
 
+				fs.chmodSync(tile_cache, 0o600);
+				
 				dbconn = conn;
 				return cb(null);
 			});

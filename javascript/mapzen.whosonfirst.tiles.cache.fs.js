@@ -82,13 +82,13 @@
 			
 			if (! fs.existsSync(tile_root)){
 				
-				if (! mkdirp.sync(tile_root)){
+				if (! mkdirp.sync(tile_root, 0700)){
 					console.log("[cache][fs][" + key + "] ERR failed to mkdir");
 					return cb("mkdir error");
 				}
 			}
 
-			var fh = fs.openSync(tile_path, "w", 0o644);
+			var fh = fs.openSync(tile_path, "w", 0o600);
 					
 			if (! fh){
 				console.log("[cache][fs][" + key + "] ERR failed to open '" + tile_path + "' for writing");

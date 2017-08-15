@@ -45,7 +45,15 @@
 	const bookmarks = path.join(udata, "bookmarks.db");
 	const exists = fs.existsSync(bookmarks);
 	
-	const db = new sqlite3.Database(bookmarks);
+	const db = new sqlite3.Database(bookmarks, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, function(err){
+
+		if (err){
+			console.log("[database][setup] ERR", err);
+			return false;
+		}
+
+		fs.chmodSync(bookmarks, 0o600);
+	});
 
 	var EXPORTING = 0;
 	var BACKINGUP = 0;
@@ -338,7 +346,7 @@
 					headers.push(k);
 				}
 
-				var fh = fs.createWriteStream(export_path);
+				var fh = fs.createWriteStream(export_path, {"mode": 0o600});
 				
 				if (! fh){
 					EXPORTING -= 1;
@@ -383,7 +391,7 @@
 				cb(err, null);
 			});
 
-			var wr = fs.createWriteStream(backup);
+			var wr = fs.createWriteStream(backup, {"mode": 0o600});
 			
 			wr.on("error", function(err) {
 				BACKINGUP -= 1;
