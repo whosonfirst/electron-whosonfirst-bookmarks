@@ -253,12 +253,10 @@
 				}
 
 				if (rows.length == 0){
-					console.log("[database][export] ERR", "No tables to export");
+					// console.log("[database][export] ERR", "No tables to export");
 					EXPORTING -= 1;					
 					return cb(null);
 				}
-				
-				// console.log("[database][export] TABLES", rows);
 
 				try {
 					self.export_tables(rows, cb);
@@ -277,39 +275,46 @@
 			var row = rows[0];
 			var table = row["name"];
 
-			console.log("[database][export_tables] TABLE", table, EXPORTING);
-
+			// so we don't export things like the sqlite_sequence table
+			
 			var re_table = /^(places|lists|visits|tags|trips).*?/;
 			
 			if (! table.match(re_table)){
 				
-				console.log("[database][export_tables] SKIP", table);
+				// console.log("[database][export_tables] SKIP", table);
 				EXPORTING -= 1;
 				
 				if (rows.length > 1){
-					
-					console.log("[database][export_tables] NEXT table", rows.length);
-					
 					rows = rows.slice(1);
 					return self.export_tables(rows, cb);
 				}
 
 				return cb();
 			}
+
+			console.log("[database][export_tables] EXPORT", table);
+		
+			var export_root = path.join(udata, "export");
+
+			if (! fs.existsSync(export_root)){
+
+				if (! fs.mkdirSync(export_root, 0700)){
+					console.log("[database][export] ERR failed to create " + export_root);
+					return cb(err)
+				}
+			}
 			
-			var fname = "bookmarks-" + table + ".csv";
-			var export_path = path.join(udata, fname);
+			var fname = "bookmarks-" + table + ".csv";			
+			var export_path = path.join(export_root, fname);
 
 			console.log("[database][export_tables] EXPORT", table, export_path);
 
 			var sql = "SELECT * FROM " + table;	// PLEASE ESCAPE ME OR SOMETHING...
 			var params = [];
 
-			console.log("[database][export_tables] QUERY", sql, params);
-			
 			db.all(sql, params, function(err, trows){
 
-				console.log("[database][export_tables] RESULTS", table, trows.length);
+				// console.log("[database][export_tables] RESULTS", table, trows.length);
 				
 				if (err){
 					console.log("[database][export_tables] ERR fetching rows for " + table);
@@ -319,7 +324,7 @@
 				}
 
 				if (trows.length < 1){
-					console.log("[database][export_tables] SKIP", table, "no rows");
+					// console.log("[database][export_tables] SKIP", table, "no rows");
 					EXPORTING -= 1;
 					
 					rows = rows.slice(1);
@@ -353,12 +358,12 @@
 
 				writer.end();
 				
-				console.log("[database][export] CSV complete", table, rows.length);
+				console.log("[database][export] COMPLETED", table);
 				EXPORTING -= 1;
 				
 				if (rows.length > 1){
-					console.log("[database][export] NEXT");					
 					rows = rows.slice(1);
+					console.log("[database][export] REMAINING", rows.length);					
 					return self.export_tables(rows, cb);
 				}
 
@@ -368,6 +373,8 @@
 		
 		'backup': function(cb){
 
+			BACKINGUP += 1;
+			
 			var backup = bookmarks + ".bak";
 			
 			var rd = fs.createReadStream(bookmarks);
@@ -379,14 +386,20 @@
 			var wr = fs.createWriteStream(backup);
 			
 			wr.on("error", function(err) {
+				BACKINGUP -= 1;
 				cb(err, null);
 			});
 
 			wr.on("close", function(){
+				BACKINGUP -= 1;				
 				cb(null, backup);
 			});
 			
 			rd.pipe(wr);
+		},
+
+		'is_backingup': function(){
+			return (BACKINGUP > 0) ? true : false;
 		},
 		
 		// TO DO - replace and remove all of these functions...

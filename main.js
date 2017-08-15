@@ -272,22 +272,18 @@ app.on('before-quit', function(event){
 
 	console.log("[app][before-quit] START");
 
-	var waiting = true;
-	
 	var wait = function(){
 
-		console.log("[app][before-quit] EXPORTING", db.is_exporting());
+		// console.log("[app][before-quit] EXPORTING", db.is_exporting());
 
 		if (db.is_exporting()){
 			setTimeout(wait, 10);
 			return;
 		}
 
-		// TODO - update to use db.is_backingup()
-		
-		console.log("[app][before-quit] WAITING", waiting);
+		// console.log("[app][before-quit] BACKING UP", db.is_backingup());
 
-		if (waiting){
+		if (db.is_backingup()){
 			setTimeout(wait, 10);
 			return;
 		}
@@ -318,12 +314,10 @@ app.on('before-quit', function(event){
 
 					if (err){
 						console.log("[app][before-quit] ERR backing up database");
-						waiting = false;
 						return;				
 					}	
 					
 					console.log("[app][before-quit] OK database backup created at " + path);
-					waiting = false;
 					return;
 					
 				});	// db.backup
