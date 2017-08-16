@@ -127,6 +127,28 @@
 		
 		'show_placetype': function(pt){
 
+			/*
+			const url = require('url');
+			
+			const electron = require('electron');			
+			const bw = electron.BrowserWindow || electron.remote.BrowserWindow;	
+			var w = bw.getFocusedWindow();
+
+			const path = require('path');			
+			var pathname = window.location.pathname;
+			var root = path.dirname(pathname);
+
+			pathname = path.join(root, "foo.html");
+			
+			w.loadURL(url.format({
+				pathname: pathname,
+				protocol: "file:",
+				slashes: true,
+			}));
+			
+			return;
+			*/
+			
 			var pt_col = pt + "_id";
 			
 			var sql = "SELECT " + pt_col + " AS wof_id, COUNT(id) AS count_visits FROM visits GROUP BY " + pt_col + " ORDER BY count_visits DESC";
