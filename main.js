@@ -16,16 +16,34 @@ const db = require("./javascript/mapzen.whosonfirst.bookmarks.database.js");
 let mainWindow
 let settingsWindow
 
+const isSecondInstance = app.makeSingleInstance((commandLine, workingDirectory) => {
+
+	if (mainWindow) {
+		
+		if (mainWindow.isMinimized()){
+			mainWindow.restore();
+		}
+		
+		mainWindow.focus();
+	}
+});
+
+if (isSecondInstance) {
+	console.log("[app] ALREADY RUNNING");
+	app.quit();
+}
+
 function createMainWindow () {
 
-	console.log("[app] MAIN WINDOW");
-
+	if (isSecondInstance) {
+		return;
+	}
+	
 	db.init(function(err){
 		
 		if (err){
 			const {dialog} = require('electron')
 			dialog.showErrorBox("Error", "Database setup failed. That's not right...");
-
 			app.quit();
 		}
 	});
