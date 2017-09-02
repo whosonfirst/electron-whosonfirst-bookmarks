@@ -138,11 +138,11 @@
 			dt.appendChild(document.createTextNode(row["date"]));
 
 			var feelings_id = row["feelings_id"];
-			var feelings = feelings.id_to_label(feelings_id);
+			var feelings_label = feelings.id_to_label(feelings_id);
 
 			var q = document.createElement("q");
 			q.setAttribute("class", "click-me");
-			q.appendChild(document.createTextNode(feelings));
+			q.appendChild(document.createTextNode(feelings_label));
 
 			var desc = self.render_visit_description(row, function(e){
 
