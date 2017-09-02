@@ -459,9 +459,9 @@
 			dest_group.appendChild(dest_input);			
 
 			// arrival, departure
-			
+
 			var arrival_group = document.createElement("div");
-			arrival_group.setAttribute("class", "form-group");
+			arrival_group.setAttribute("class", "form-group form-group-calendar form-group-calendar-arrival");
 
 			var arrival_label = document.createElement("label");
 			arrival_label.setAttribute("for", "calendar-arrival");
@@ -479,7 +479,7 @@
 			arrival_group.appendChild(arrival_input);			
 
 			var departure_group = document.createElement("div");
-			departure_group.setAttribute("class", "form-group");
+			departure_group.setAttribute("class", "form-group form-group-calendar form-group-calendar-departure");
 			
 			var departure_label = document.createElement("label");
 			departure_label.setAttribute("for", "calendar-departure");
@@ -496,14 +496,16 @@
 			departure_group.appendChild(departure_label);
 			departure_group.appendChild(departure_input);			
 			
-			var calendar_group = document.createElement("div");			
+			var calendar_group = document.createElement("div");
+			calendar_group.setAttribute("class", "calendar-group");
 			calendar_group.appendChild(arrival_group);
 			calendar_group.appendChild(departure_group);			
 
 			// status
 
 			var status_group = document.createElement("div");
-			status_group.setAttribute("class", "form-group");
+			status_group.setAttribute("clear", "all");
+			status_group.setAttribute("class", "form-group form-group-status");
 
 			var status_label = document.createElement("label");
 			status_label.setAttribute("for", "calendar-status");
