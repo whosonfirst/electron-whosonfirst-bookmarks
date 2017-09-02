@@ -217,6 +217,7 @@
 				dest.setAttribute("data-wof-id", trip["wof_id"]);
 				dest.setAttribute("data-trip-id", trip["id"]);				
 				dest.setAttribute("class", "trips-list-item-destination hey-look click-me");
+				dest.setAttribute("title", "edit this trip");
 				dest.appendChild(document.createTextNode(trip["name"]));
 
 				dest.onclick = function(e){
@@ -229,7 +230,7 @@
 				};
 
 				var dest_all = document.createElement("span");
-				dest_all.setAttribute("class", "trips-list-item-destination-all");
+				dest_all.setAttribute("class", "trips-list-item-destination-all click-me");
 				dest_all.setAttribute("title", "only show trips to this destination");
 				dest_all.setAttribute("data-wof-id", trip["wof_id"]);				
 				dest_all.appendChild(document.createTextNode("🌐"));
@@ -260,6 +261,7 @@
 
 				var remove = document.createElement("button");
 				remove.setAttribute("class", "btn btn-sm remove");
+				remove.setAttribute("title", "remove this trip");
 				remove.setAttribute("data-trip-id", trip["id"]);
 				
 				remove.appendChild(document.createTextNode("⃠"));
@@ -295,6 +297,7 @@
 				var status_el = document.createElement("li");
 				status_el.setAttribute("data-status-id", trip["status_id"]);
 				status_el.setAttribute("class", "trips-list-item-status trips-list-item-status-" + status_label + " click-me");
+				status_el.setAttribute("title", "only show trips that are " + status_label);
 				status_el.appendChild(document.createTextNode(status_label));
 
 				status_el.onclick = function(e){
