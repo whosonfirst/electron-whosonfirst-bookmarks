@@ -73,6 +73,7 @@
 					return false;
 				}
 
+				console.log("TRIPS", rows);
 				self.draw_trips(rows);
 			});
 		},
@@ -153,11 +154,27 @@
 				var wof_id = trip["wof_id"];
 				tmp[ wof_id ] = 1;
 			}
-			
+
 			var places = [];
 
 			for (var wof_id in tmp){
 				places.push(wof_id);
+			}
+
+			if (places.length == 1){
+
+				var wof_id = places[0];
+
+				// see the way we're redeclaring the places variable? we probably
+				// shouldn't do this but today we are... (20170902/thisisaaronland)
+				
+				var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+				
+				places.fetch_place(wof_id, function(pl){
+					geojson.add_place_to_map(map, pl);
+				});
+
+				return;
 			}
 			
 			var sql = "SELECT * FROM places WHERE wof_id in (" + places.join(",") + ")";
@@ -347,6 +364,18 @@
 			canvas.append(right_panel);			
 
 			var map = maps.new_map(map_el);
+			
+			if (trip){
+
+				var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+				var wof_id = trip["wof_id"];
+				
+				places.fetch_place(wof_id, function(pl){
+					geojson.add_place_to_map(map, pl);
+				});
+				
+				return;
+			}
 
 			// please do something smarter...
 			
@@ -357,12 +386,6 @@
 			var opts = { "padding": [100, 100] };
 			
 			map.fitBounds(bounds, opts);
-
-			// maybe?
-			
-			if (trip){
-				return;
-			}
 			
 			// please get API key...
 
@@ -419,7 +442,7 @@
 			// destination
 
 			var dest_group = document.createElement("div");
-			dest_group.setAttribute("class", "form-group");
+			dest_group.setAttribute("class", "form-group form-group-trip");
 			dest_group.setAttribute("id", "trip-form");			
 
 			var dest_label = document.createElement("label");
@@ -440,7 +463,7 @@
 			// arrival, departure
 
 			var arrival_group = document.createElement("div");
-			arrival_group.setAttribute("class", "form-group form-group-calendar form-group-calendar-arrival");
+			arrival_group.setAttribute("class", "form-group form-group-trip form-group-calendar form-group-calendar-arrival");
 
 			var arrival_label = document.createElement("label");
 			arrival_label.setAttribute("for", "calendar-arrival");
@@ -458,7 +481,7 @@
 			arrival_group.appendChild(arrival_input);			
 
 			var departure_group = document.createElement("div");
-			departure_group.setAttribute("class", "form-group form-group-calendar form-group-calendar-departure");
+			departure_group.setAttribute("class", "form-group form-group-trip form-group-calendar form-group-calendar-departure");
 			
 			var departure_label = document.createElement("label");
 			departure_label.setAttribute("for", "calendar-departure");
@@ -484,7 +507,7 @@
 
 			var status_group = document.createElement("div");
 			status_group.setAttribute("clear", "all");
-			status_group.setAttribute("class", "form-group form-group-status");
+			status_group.setAttribute("class", "form-group form-group-trip form-group-status");
 
 			var status_label = document.createElement("label");
 			status_label.setAttribute("for", "calendar-status");
@@ -516,7 +539,7 @@
 			// notes
 
 			var notes_group = document.createElement("div");
-			notes_group.setAttribute("class", "form-group");
+			notes_group.setAttribute("class", "form-group form-group-trip");
 
 			var notes_label = document.createElement("label");
 			notes_label.setAttribute("for", "calendar-notes");
@@ -649,12 +672,12 @@
 				var wof_id = trip["wof_id"];
 
 				setTimeout(function(){
+					
 					var places = require("./mapzen.whosonfirst.bookmarks.places.js");
 					
 					places.fetch_place(wof_id, function(pl){
-						console.log("FETCH PLACE");
+
 						places.save_place(pl, function(e){
-							console.log("SAVE PLACE");
 							console.log(e);
 						});
 					});

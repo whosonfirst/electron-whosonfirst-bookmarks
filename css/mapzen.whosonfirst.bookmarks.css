@@ -280,7 +280,7 @@ q {
 }
 
 .form-group-calendar-arrival {
-    margin-right: 2em;
+    margin-right: 5%;
 }
 
 .form-group-calendar-departure {
@@ -289,6 +289,10 @@ q {
 
 .form-group-status {
     clear: left !important;
+}
+
+.form-group-trip {
+    width: 85%;
 }
 
 .hey-look {
