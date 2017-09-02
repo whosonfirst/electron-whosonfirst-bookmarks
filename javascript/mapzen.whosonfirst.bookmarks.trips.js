@@ -552,9 +552,9 @@
 			
 			// save button (onclick defined below)
 
-			var button = document.createElement("button");
-			button.setAttribute("class", "btn btn-primary");
-			button.appendChild(document.createTextNode("Save trip"));
+			var save_button = document.createElement("button");
+			save_button.setAttribute("class", "btn btn-primary");
+			save_button.appendChild(document.createTextNode("Save trip"));
 			
 			// form
 
@@ -566,7 +566,7 @@
 			trip_form.appendChild(calendar_group);
 			trip_form.appendChild(status_group);
 			trip_form.appendChild(notes_group);			
-			trip_form.appendChild(button);			
+			trip_form.appendChild(save_button);			
 
 			if (trip){
 
@@ -581,12 +581,35 @@
 				// status_id is updated above because I am not sure
 				// how to do that here... (20170709/thisisaaronland)
 				
-				notes_input.value = trip["notes"];				
+				notes_input.value = trip["notes"];
+
+				var delete_button = document.createElement("button");
+				delete_button.setAttribute("class", "btn");
+				delete_button.appendChild(document.createTextNode("Delete trip"));
+				delete_button.setAttribute("data-trip-id", trip["id"]);
+
+				trip_form.appendChild(delete_button);
+				
+				delete_button.onclick = function(e){
+
+					var el = e.target;
+					var id = el.getAttribute("data-trip-id");
+				
+					if (! confirm("Are you sure you want to delete this trip?")){
+						return false;
+					}
+
+					self.remove_trip(id, function(){
+						self.show_trips();
+					});
+					
+					return false;					
+				}
 			}
 
 			// onclick
 
-			button.onclick = function(e){
+			save_button.onclick = function(e){
 
 				try {
 
