@@ -151,19 +151,17 @@
 			for (var i=0; i < count; i++){
 				var trip = rows[i];
 				var wof_id = trip["wof_id"];
-				tmp[ wof_id ] ++;
+				tmp[ wof_id ] = 1;
 			}
-
+			
 			var places = [];
 
 			for (var wof_id in tmp){
 				places.push(wof_id);
 			}
-
+			
 			var sql = "SELECT * FROM places WHERE wof_id in (" + places.join(",") + ")";
 			var params = [];
-
-			console.log(sql);
 			
 			conn.all(sql, params, function(err, rows){
 
@@ -172,32 +170,13 @@
 					return;
 				}
 
-				var features = [];
+				// TO CHECK THAT rows.length == places.length
+				// and do... something if not
+				// console.log("WTF", rows.length);
 				
-				var count = rows.length;
-
-				for (var i = 0; i < count; i++){
-
-					var row = rows[i];
-					var body = row["body"];
-
-					var data = JSON.parse(body);
-
-					var lat = data["geom:latitude"];
-					var lon = data["geom:longitude"];
-
-					var coords = [ lon, lat ];
-					var geom = { "type": "Point", "coordinates": coords };
-
-					var feature = { "type": "Feature", "geometry": geom };
-					features.push(feature);
-				}
-
-				var featurecollection = { "type": "FeatureCollection", "features": features };
+				var featurecollection = geojson.trips_to_featurecollection(rows);
 				geojson.add_featurecollection_to_map(map, featurecollection);
 			});
-			
-			console.log(places);
 		},
 		
 		'render_trips_list': function(rows){
