@@ -31,6 +31,10 @@
 	const canvas = require("./mapzen.whosonfirst.bookmarks.canvas.js");
 	const maps = require("./mapzen.whosonfirst.bookmarks.maps.js");
 	const geojson = require("./mapzen.whosonfirst.bookmarks.geojson.js");
+
+	const utils = require("./mapzen.whosonfirst.utils.js");	
+	const feelings = require("./mapzen.whosonfirst.bookmarks.feelings.js");
+	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");		
 	
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");		
 
@@ -343,8 +347,8 @@
 			});
 		},
 		
-		'draw_trip': function(trip){			
-
+		'draw_trip': function(trip, edit){			
+			
 			var left_panel = document.createElement("div");
 			left_panel.setAttribute("class", "col-md-6 panel panel-left");
 
@@ -353,12 +357,19 @@
 
 			var map_el = document.createElement("div");
 			map_el.setAttribute("id", "map");
-
-			var edit_form = self.render_edit_trip(trip);
 			
 			left_panel.appendChild(map_el);
-			right_panel.appendChild(edit_form);
 
+			if ((! trip) || (edit)){
+				var edit_form = self.render_edit_trip(trip);			
+				right_panel.appendChild(edit_form);
+			}
+
+			else {
+				var details = self.render_trip(trip);
+				right_panel.appendChild(details);				
+			}
+			
 			canvas.reset();			
 			canvas.append(left_panel);
 			canvas.append(right_panel);			
@@ -437,6 +448,154 @@
 			});
 		},
 
+		'render_trip': function(trip){
+
+			var dest_label = document.createElement("span");
+			dest_label.setAttribute("class", "click-me");			
+			dest_label.setAttribute("data-wof-id", trip["wof_id"]);
+			dest_label.appendChild(document.createTextNode(trip["name"]));
+
+			dest_label.onclick = function(e){
+				var el = e.target;
+				var wof_id = el.getAttribute("data-wof-id");
+				
+				var places = require("./mapzen.whosonfirst.bookmarks.places.js");				
+				places.show_place(wof_id);
+			};
+			
+			var dest_all = document.createElement("small");
+			dest_all.setAttribute("class", "trip-details-all click-me");
+			dest_all.setAttribute("title", "show all trips to this destination");
+			dest_all.setAttribute("data-wof-id", trip["wof_id"]);
+			dest_all.appendChild(document.createTextNode("🌐"));
+			
+			dest_all.onclick = function(e){
+				var el = e.target;
+				var wof_id = el.getAttribute("data-wof-id");
+				self.show_trips_for_place(wof_id);
+			};
+
+			var status_label = document.createElement("div");
+			status_label.setAttribute("class", "trip-details-status");
+			status_label.appendChild(document.createTextNode(status[trip["status_id"]]));
+			
+			var header = document.createElement("h3");
+			header.setAttribute("class", "trip-details-header");
+			header.appendChild(dest_label);
+			header.appendChild(dest_all);
+			header.appendChild(status_label);			
+			
+			var arrival = document.createElement("li");
+			arrival.setAttribute("class", "trip-details-arrival");
+			arrival.appendChild(document.createTextNode(trip["arrival"]));
+
+			var departure = document.createElement("li");
+			departure.setAttribute("class", "trip-details-departure");			
+			departure.appendChild(document.createTextNode(trip["departure"]));
+
+			var dates = document.createElement("ul");
+			dates.setAttribute("class", "list-inline trip-details-dates");
+			dates.appendChild(arrival);
+			dates.appendChild(departure);			
+			
+			var notes = document.createElement("div");
+			notes.setAttribute("class", "trip-details-notes");
+			notes.appendChild(document.createTextNode(trip["notes"]));
+
+			var feelings_wrapper = document.createElement("div");
+			feelings_wrapper.setAttribute("class", "trip-details-feelings");
+			feelings_wrapper.setAttribute("data-wof-id", trip["wof_id"]);
+
+			var show_feelings = [
+				2,	// I want to go there
+				8,	// I would try this
+			];
+
+			for (var idx in show_feelings){
+
+				var feelings_id = show_feelings[idx];
+				
+				visits.get_visits_for_feelings_and_place(feelings_id, trip["wof_id"], function(err, rows){
+
+					if (err){
+						return false;
+					}
+
+					var feelings_list = document.createElement("ul");
+					feelings_list.setAttribute("class", "list trip-details-visits-list");
+
+					var count_rows = rows.length;
+
+					if (! count_rows){
+						return;
+					}
+					
+					for (var i = 0; i < count_rows; i++){
+
+						var visit = rows[i];
+						console.log("VISIT", visit);
+						
+						var name = visit["name"];
+						var desc = visits.render_visit_description(visit);
+						
+						var name_wrapper = document.createElement("div");
+						name_wrapper.setAttribute("class", "hey-look click-me trip-details-visits-item-name");
+						name_wrapper.setAttribute("data-wof-id", visit["wof_id"]);
+						name_wrapper.appendChild(document.createTextNode(name))
+
+						name_wrapper.onclick = function(e){
+
+							var el = e.target;
+							var wof_id = el.getAttribute("data-wof-id");
+
+							var places = require("./mapzen.whosonfirst.bookmarks.places.js");
+							places.show_place(wof_id);							
+						};
+						
+						var desc_wrapper = document.createElement("div");
+						desc_wrapper.setAttribute("class", "trip-details-visits-item-description");
+						desc_wrapper.appendChild(desc);
+						
+						var item = document.createElement("li");
+						item.setAttribute("class", "trip-details-visits-item");
+						item.appendChild(name_wrapper);
+						item.appendChild(desc_wrapper);						
+
+						feelings_list.appendChild(item);
+					}
+
+					var feelings_label = feelings.id_to_label(rows[0]["feelings_id"]);
+					var args = { "label": feelings_label };
+					
+					var expandable_wrapper = utils.render_expandable(feelings_list, args);		
+					feelings_wrapper.appendChild(expandable_wrapper);
+				});
+
+			}
+						
+			var edit_button = document.createElement("button");
+			edit_button.setAttribute("style", "float:right;");
+			edit_button.setAttribute("class", "btn");
+			edit_button.setAttribute("data-trip-id", trip["id"]);
+			edit_button.appendChild(document.createTextNode("Edit this trip"));
+
+			edit_button.onclick = function(e){
+				self.draw_trip(trip, true);
+			};
+			
+			var wrapper = document.createElement("div");
+			wrapper.setAttribute("class", "trip-details");
+			wrapper.setAttribute("data-trip-id", trip["id"]);
+			
+			wrapper.appendChild(edit_button);			
+			wrapper.appendChild(header);
+			wrapper.appendChild(dates);
+			wrapper.appendChild(notes);
+			wrapper.appendChild(feelings_wrapper);
+			
+			return wrapper;
+		},
+		
 		'render_edit_trip': function(trip){
 
 			// destination
@@ -643,8 +802,14 @@
 						'notes': notes,
 					};
 
+					var cb = function(err, rsp){
+
+						console.log("UPDATE", err, rsp);
+						self.show_trips();
+					};
+					
 					if (trip_id){
-						self.update_trip({"id": trip_id}, tr, self.show_trips);
+						self.update_trip({"id": trip_id}, tr, cb);
 					} else {
 						self.save_trip(tr);
 					}
@@ -684,7 +849,10 @@
 				}, 10);
 				
 				var trip_id = this.lastID;
-				self.show_trips();
+				trip["id"] = trip_id;
+				
+				// self.show_trips();
+				self.draw_trip(trip);
 			});
 			
 		},

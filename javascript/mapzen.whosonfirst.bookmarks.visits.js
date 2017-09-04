@@ -573,6 +573,12 @@
 					return false;
 				}
 
+				if (! row){
+					console.log("PLACE", "ERR", wof_id);
+					cb("Missing place row");
+					return false;
+				}
+				
 				var pl = JSON.parse(row["body"]);
 				var pt = pl["wof:placetype"];
 
