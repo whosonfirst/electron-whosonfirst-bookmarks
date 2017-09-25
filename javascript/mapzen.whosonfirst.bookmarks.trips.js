@@ -546,7 +546,7 @@
 					for (var i = 0; i < count_rows; i++){
 
 						var visit = rows[i];
-						console.log("VISIT", visit);
+						// console.log("VISIT", visit);
 						
 						var name = visit["name"];
 						var desc = visits.render_visit_description(visit);
@@ -744,12 +744,16 @@
 
 			if (trip){
 
+				// console.log("DRAW TRIP", trip);
+				
 				trip_form.setAttribute("data-trip-id", trip["id"]);
 				
 				dest_input.value = trip["name"];
 				dest_input.setAttribute("data-wof-id", trip["wof_id"]);
 
-				arrival_input.value = trip["arrival"];
+				// we need to pull in timezone data for the locality here...
+				
+				arrival_input.value = trip["arrival"];			// + " 12:00:00 PDT";
 				departure_input.value = trip["departure"];
 
 				// status_id is updated above because I am not sure
@@ -826,6 +830,8 @@
 						'notes': notes,
 					};
 
+					// console.log("TRIP", tr);
+						    
 					var cb = function(err, rsp){
 
 						console.log("UPDATE", err, rsp);
@@ -914,6 +920,8 @@
 			changes = changes.join(",");
 
 			var sql = "UPDATE trips SET " + changes + " WHERE id = ?";
+
+			console.log("TRIP", sql, params);
 			
 			conn.run(sql, params, cb);
 		},
