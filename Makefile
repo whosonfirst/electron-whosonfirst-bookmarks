@@ -19,6 +19,10 @@ mapzenjs:
 	curl -s -o javascript/mapzen.js https://mapzen.com/js/mapzen.js
 	curl -s -o javascript/mapzen.min.js https://mapzen.com/js/mapzen.min.js
 
+pikaday:
+	curl -s -o javascript/pikaday.js https://raw.githubusercontent.com/dbushell/Pikaday/master/pikaday.js
+	curl -s -o css/pikaday.css https://raw.githubusercontent.com/dbushell/Pikaday/master/css/pikaday.css
+
 localforage:
 	curl -s -o javascript/localforage.js https://raw.githubusercontent.com/localForage/localForage/master/dist/localforage.js
 	curl -s -o javascript/localforage.min.js https://raw.githubusercontent.com/localForage/localForage/master/dist/localforage.min.js

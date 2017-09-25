@@ -374,6 +374,18 @@
 			canvas.append(left_panel);
 			canvas.append(right_panel);			
 
+			var arrival_picker = new Pikaday({
+				field: document.getElementById('calendar-arrival'),
+				onSelect: function(e) {
+				}
+			});
+
+			var departure_picker = new Pikaday({
+				field: document.getElementById('calendar-departure'),
+				onSelect: function(e) {
+				}
+			});
+			
 			var map = maps.new_map(map_el);
 			
 			if (trip){
@@ -486,6 +498,7 @@
 			header.appendChild(status_label);			
 			
 			var arrival = document.createElement("li");
+			arrival.setAttribute("id", "trip-arrival");			
 			arrival.setAttribute("class", "trip-details-arrival");
 			arrival.appendChild(document.createTextNode(trip["arrival"]));
 
@@ -772,6 +785,17 @@
 
 			save_button.onclick = function(e){
 
+				var pikaday_to_ymd = function(el){
+
+					var date = el.value;
+
+					var dt = new Date(date);
+					var iso = dt.toISOString();
+
+					iso = iso.split("T");
+					return iso[0];
+				};
+				
 				try {
 
 					var form = document.getElementById("trip-form");
@@ -782,10 +806,10 @@
 					var wof_id = dest_el.getAttribute("data-wof-id");
 
 					var arrival_el = document.getElementById("calendar-arrival");
-					var arrival = arrival_el.value;
-					
 					var departure_el = document.getElementById("calendar-departure");
-					var departure = departure_el.value;
+
+					var arrival = pikaday_to_ymd(arrival_el);
+					var departure = pikaday_to_ymd(departure_el);					
 					
 					var status_el = document.getElementById("calendar-status");
 					var status_id = status_el.value;
