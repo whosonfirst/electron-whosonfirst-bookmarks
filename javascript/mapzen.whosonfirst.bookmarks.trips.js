@@ -452,6 +452,8 @@
 
 		'render_trip': function(trip){
 
+			var trip_visits = {};	// set up a variable we can pass to the print thingy
+			
 			var dest_label = document.createElement("span");
 			dest_label.setAttribute("class", "click-me");			
 			dest_label.setAttribute("data-wof-id", trip["wof_id"]);
@@ -511,6 +513,8 @@
 			var show_feelings = [
 				2,	// I want to go there
 				8,	// I would try this
+				3,	// again again
+				4,	// again
 			];
 
 			for (var idx in show_feelings){
@@ -522,7 +526,7 @@
 					if (err){
 						return false;
 					}
-
+					
 					var feelings_list = document.createElement("ul");
 					feelings_list.setAttribute("class", "list trip-details-visits-list");
 
@@ -531,11 +535,19 @@
 					if (! count_rows){
 						return;
 					}
+
+					var feelings_label = feelings.id_to_label(rows[0]["feelings_id"]);
 					
 					for (var i = 0; i < count_rows; i++){
 
 						var visit = rows[i];
-						console.log("VISIT", visit);
+						visit["feelings_label"] = feelings_label;
+
+						if (! trip_visits[feelings_label]){
+							trip_visits[feelings_label] = [];
+						}
+						
+						trip_visits[feelings_label].push(visit);	// remember 'trip_visits' above?
 						
 						var name = visit["name"];
 						var desc = visits.render_visit_description(visit);
@@ -566,7 +578,6 @@
 						feelings_list.appendChild(item);
 					}
 
-					var feelings_label = feelings.id_to_label(rows[0]["feelings_id"]);
 					var args = { "label": feelings_label };
 					
 					var expandable_wrapper = utils.render_expandable(feelings_list, args);		
@@ -594,7 +605,7 @@
 			print_button.appendChild(document.createTextNode("🖨️"));
 
 			print_button.onclick = function(e){
-				print.print_trip(trip);
+				print.print_trip(trip, { 'visits': trip_visits });
 			};
 			
 			var wrapper = document.createElement("div");

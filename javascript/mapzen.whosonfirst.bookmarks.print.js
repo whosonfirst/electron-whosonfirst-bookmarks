@@ -38,7 +38,11 @@
 
 		},
 
-		'print_trip': function(trip){
+		'print_trip': function(trip, more){
+
+			if (! more){
+				more = {};
+			}
 
 			var path = dialog.showSaveDialog();			
 
@@ -76,9 +80,34 @@
 			doc.moveDown();
 			
 			if (trip["notes"]){
-				doc.moveDown();
 				doc.text(trip["notes"]);
 				doc.moveDown();				
+			}
+
+			if (more["visits"]) {
+
+				var visits = more["visits"];
+				console.log("VISITS", visits);
+				
+				for (var label in visits){
+
+					console.log("LABEL", label);
+					
+					doc.text(label, { stroke: true })
+					doc.moveDown();
+
+					var places = visits[label];
+					var count_places = places.length;
+
+					for (var i=0; i < count_places; i++){
+
+						var visit = places[i];
+						doc.text(visit["name"]);				
+						doc.moveDown();
+					}
+
+					doc.moveDown();
+				}
 			}
 			
 			doc.end()
