@@ -34,7 +34,9 @@
 
 	const utils = require("./mapzen.whosonfirst.utils.js");	
 	const feelings = require("./mapzen.whosonfirst.bookmarks.feelings.js");
-	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");		
+	const visits = require("./mapzen.whosonfirst.bookmarks.visits.js");
+
+	const print = require("./mapzen.whosonfirst.bookmarks.print.js");	
 	
 	const fb = require("./mapzen.whosonfirst.bookmarks.feedback.js");		
 
@@ -575,19 +577,32 @@
 						
 			var edit_button = document.createElement("button");
 			edit_button.setAttribute("style", "float:right;");
-			edit_button.setAttribute("class", "btn");
+			edit_button.setAttribute("title", "edit this trip");
+			edit_button.setAttribute("class", "btn btn-sm");
 			edit_button.setAttribute("data-trip-id", trip["id"]);
-			edit_button.appendChild(document.createTextNode("Edit this trip"));
+			edit_button.appendChild(document.createTextNode("✍🏽"));
 
 			edit_button.onclick = function(e){
 				self.draw_trip(trip, true);
+			};
+
+			var print_button = document.createElement("button");
+			print_button.setAttribute("title", "print this trip");
+			print_button.setAttribute("style", "float:right;");
+			print_button.setAttribute("class", "btn btn-sm");
+			print_button.setAttribute("data-trip-id", trip["id"]);
+			print_button.appendChild(document.createTextNode("🖨️"));
+
+			print_button.onclick = function(e){
+				print.print_trip(trip);
 			};
 			
 			var wrapper = document.createElement("div");
 			wrapper.setAttribute("class", "trip-details");
 			wrapper.setAttribute("data-trip-id", trip["id"]);
-			
-			wrapper.appendChild(edit_button);			
+
+			wrapper.appendChild(print_button);			
+			wrapper.appendChild(edit_button);
 			wrapper.appendChild(header);
 			wrapper.appendChild(dates);
 			wrapper.appendChild(notes);
