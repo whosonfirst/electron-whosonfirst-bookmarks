@@ -100,9 +100,9 @@
 			var sql = "SELECT * FROM places WHERE wof_id = ?";
 			var params = [ id ];
 
-			// console.log(sql, params);
+			// console.log("PLACE", sql, params);
 			
-			conn.get(sql, params, cb);			
+			conn.get(sql, params, cb);	
 		},
 		
 		'show_place': function(id){

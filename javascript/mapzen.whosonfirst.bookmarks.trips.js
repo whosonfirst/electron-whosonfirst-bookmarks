@@ -537,6 +537,8 @@
 					}
 
 					var feelings_label = feelings.id_to_label(rows[0]["feelings_id"]);
+
+					var places = require("./mapzen.whosonfirst.bookmarks.places.js");
 					
 					for (var i = 0; i < count_rows; i++){
 
@@ -546,8 +548,33 @@
 						if (! trip_visits[feelings_label]){
 							trip_visits[feelings_label] = [];
 						}
+
+						var inflate = function(visit){
+
+							var wof_id = visit["wof_id"];
+
+							// basically we're going to hope that all get completed
+							// before a user hits the print button - maybe we'll set
+							// up a counter and disable the print button until it
+							// hits its target... (20170929/thisisaaronland)
+							
+							places.get_place(wof_id, function(err, pl){								
+
+								if (err){
+									console.log("ERROR", "failed to get place for ID", wof_id, err);
+									return;
+								}
+
+								// inflate "neighbourhood" (or equivalent) here?
+								
+								visit["place"] = pl;
+								trip_visits[feelings_label].push(visit);	// remember 'trip_visits' above?
+							});
+						};
+
+						// fetch place details for this visit (for printing)
 						
-						trip_visits[feelings_label].push(visit);	// remember 'trip_visits' above?
+						inflate(visit);
 						
 						var name = visit["name"];
 						var desc = visits.render_visit_description(visit);

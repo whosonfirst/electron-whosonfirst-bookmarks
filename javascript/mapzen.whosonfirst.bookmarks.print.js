@@ -86,13 +86,13 @@
 
 			if (more["visits"]) {
 
+				// please make less confusing variable names...
+				// (20170929/thisisaaronland)
+				
 				var visits = more["visits"];
-				console.log("VISITS", visits);
 				
 				for (var label in visits){
 
-					console.log("LABEL", label);
-					
 					doc.text(label, { stroke: true })
 					doc.moveDown();
 
@@ -102,7 +102,39 @@
 					for (var i=0; i < count_places; i++){
 
 						var visit = places[i];
-						doc.text(visit["name"]);				
+						var place = visit["place"];
+
+						var text = [
+							visit["name"]
+						];					
+
+						var tags = [];
+						
+						if (place){
+
+							var body = place["body"];
+							var data = JSON.parse(body);
+
+							if (data["addr:full"]){
+								text.push(data["addr:full"])
+							}
+
+							if (data["addr:phone"]){
+								text.push(data["addr:phone"])
+							}
+
+							if ((data["wof:tags"]) && (data["wof:tags"].length)){
+								tags = data["wof:tags"];
+							}
+						}
+
+						doc.text(text.join(" / "));
+
+						if (tags.length){
+							tags = tags.join(", ");
+							doc.text(tags);
+						}
+						
 						doc.moveDown();
 					}
 
@@ -111,7 +143,6 @@
 			}
 			
 			doc.end()
-			console.log("OK");
 		}
 	}
 
