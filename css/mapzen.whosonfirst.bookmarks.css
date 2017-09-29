@@ -158,6 +158,10 @@ q {
 
 }
 
+.calendar-group {
+
+}
+
 .click-me:hover {
     color:blue;
     font-weight:700;
@@ -270,6 +274,27 @@ q {
     content: "⚠" !important;
 }
 
+.form-group-calendar {
+    width: 40% !important;
+    float: left;        
+}
+
+.form-group-calendar-arrival {
+    margin-right: 5%;
+}
+
+.form-group-calendar-departure {
+
+}
+
+.form-group-status {
+    clear: left !important;
+}
+
+.form-group-trip {
+    width: 85%;
+}
+
 .hey-look {
     font-weight: 700;
 }
@@ -337,6 +362,7 @@ q {
     min-height:500px !important;    
     max-height:500px !important;
     width:50%;
+    padding-right:5%;
 }
 
 .col-md-6 {
@@ -521,6 +547,44 @@ q {
 .spr-status-unknown {
     background-color:#f0e68c !important;
     color:#fff !important;
+}
+
+.trip-details {
+
+}
+
+.trip-details-all:before {
+    content: " ";
+}
+
+.trip-details-dates li:after {
+
+}
+
+.trip-details-dates li:last-child:after {
+    content: "" !important;
+}
+
+.trip-details-notes {
+    font-style:italic;
+}
+
+.trip-details-status {
+    font-size: small;
+}
+
+.trip-details-visits-list {
+    padding: 0px;
+    margin: 0px;
+}
+
+.trip-details-visits-item {
+    list-style-type: none;
+    margin-bottom: 1em;
+}
+
+.trip-details-visits-item-description {
+
 }
 
 .trips-list {

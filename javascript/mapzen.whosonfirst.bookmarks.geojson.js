@@ -263,6 +263,44 @@
 
 			return featurecollection;			
 		},
+
+		'trips_to_featurecollection': function(rows){
+
+			var features = [];
+				
+			var count = rows.length;
+
+			for (var i = 0; i < count; i++){
+				
+				var row = rows[i];
+				var body = row["body"];
+				
+				var props = JSON.parse(body);
+				
+				var lat = props["geom:latitude"];
+				var lon = props["geom:longitude"];
+				
+				var coords = [ lon, lat ];
+				var geom = { "type": "Point", "coordinates": coords };
+
+				props["xx:label"] = props["wof:name"]
+				
+				var feature = {
+					"type": "Feature",
+					"geometry": geom,
+					"properties": props,
+				};
+				
+				features.push(feature);
+			}
+
+			var featurecollection = {
+				"type": "FeatureCollection",
+				"features": features
+			};
+			
+			return featurecollection;
+		},
 		
 		'visits_to_featurecollection': function(rows){
 
