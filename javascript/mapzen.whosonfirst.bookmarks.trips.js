@@ -453,6 +453,7 @@
 		'render_trip': function(trip){
 
 			var trip_visits = {};	// set up a variable we can pass to the print thingy
+			var trip_parents = {};
 			
 			var dest_label = document.createElement("span");
 			dest_label.setAttribute("class", "click-me");			
@@ -549,6 +550,12 @@
 							trip_visits[feelings_label] = [];
 						}
 
+						// if this works for printing (meaning we can more-better group
+						// things by "parent" (which really means a suitable container,
+						// like borough instead of neighbourhood)) then we should make
+						// this abstract and modular enough to use across the app
+						// (20171002/thisisaaronland)
+						
 						var inflate = function(visit){
 
 							var wof_id = visit["wof_id"];
@@ -565,10 +572,48 @@
 									return;
 								}
 
-								// inflate "neighbourhood" (or equivalent) here?
-								
 								visit["place"] = pl;
 								trip_visits[feelings_label].push(visit);	// remember 'trip_visits' above?
+
+								// please for a more-smarter wrapper function to
+								// choose a suitable container place for example
+								// borough over neighbourhood (20171002/thisisaaronland)
+								
+								var data = JSON.parse(pl["body"]);
+								var placetype = data["wof:placetype"];
+								var parent_id = data["wof:parent_id"];
+
+								// is it easier / better / less confusing just to do a
+								// complicated cross-table JOIN query here because all
+								// we really care about is the name of the parent so we
+								// can group results... (20171002/thisisaaronland)
+								
+								if (trip_parents[parent_id]){
+									return;
+								}
+								
+								places.get_place(parent_id, function(err, parent){
+									
+									if (err){
+										console.log("FAILED TO GET PARENT", parent_id, err);
+										return;
+									}
+
+									if (parent){
+										trip_parents[parent_id] = parent;
+										return;
+									}
+									
+									places.fetch_place(parent_id, function(parent){
+
+										if (! parent){
+											console.log("FAILED TO FETCH PARENT", parent_id);
+											return;
+										}
+
+										trip_parents[parent_id] = parent;
+									});
+								});
 							});
 						};
 
@@ -632,7 +677,7 @@
 			print_button.appendChild(document.createTextNode("🖨️"));
 
 			print_button.onclick = function(e){
-				print.print_trip(trip, { 'visits': trip_visits });
+				print.print_trip(trip, { 'visits': trip_visits, 'parents': trip_parents });
 			};
 			
 			var wrapper = document.createElement("div");

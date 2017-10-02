@@ -84,61 +84,129 @@
 				doc.moveDown();				
 			}
 
+			// console.log("MORE", more);
+			
 			if (more["visits"]) {
 
 				// please make less confusing variable names...
 				// (20170929/thisisaaronland)
 				
 				var visits = more["visits"];
-				
+				var buckets = {};
+
 				for (var label in visits){
 
-					doc.text(label, { stroke: true })
-					doc.moveDown();
+					// group #feelings by neighbourhood but really maybe we
+					// should be grouping neighbourhoods by #feelings...
+					// (20171002/thisisaaronland)
+					
+					if (! buckets[label]){
+						buckets[label] = {};
+					}
 
 					var places = visits[label];
 					var count_places = places.length;
 
 					for (var i=0; i < count_places; i++){
 
+						var container = "a place with no name";
 						var visit = places[i];
-						var place = visit["place"];
 
-						var text = [
-							visit["name"]
-						];					
+						if (more["parents"]){
+						    
+							var place = visit["place"];
+							
+							if (place){
+								
+								var body = place["body"];
+								var data = JSON.parse(body);
+								var parent_id = data["wof:parent_id"];
 
-						var tags = [];
-						
-						if (place){
-
-							var body = place["body"];
-							var data = JSON.parse(body);
-
-							if (data["addr:full"]){
-								text.push(data["addr:full"])
-							}
-
-							if (data["addr:phone"]){
-								text.push(data["addr:phone"])
-							}
-
-							if ((data["wof:tags"]) && (data["wof:tags"].length)){
-								tags = data["wof:tags"];
+								if (more["parents"][parent_id]){
+									var parent_data = more["parents"][parent_id];
+									
+									if (parent_data["body"]){
+										parent_data = JSON.parse(parent_data["body"]);
+									}
+									
+									var parent_name = parent_data["wof:name"];
+									
+									if (parent_name){
+										container = parent_name;
+									} else {
+										console.log("FAILED TO DETERMINE PARENT NAME", parent_id, parent_data);
+									}
+								}
 							}
 						}
 
-						doc.text(text.join(" / "));
+						if (! buckets[label][container]){
+							buckets[label][container] = [];
+						}
 
-						if (tags.length){
-							tags = tags.join(", ");
-							doc.text(tags);
+						buckets[label][container].push(visit);
+					}
+					
+				}
+
+				// console.log("BUCKETS", buckets);
+				
+				for (var feelings in buckets){
+
+					// doc.text(feelings, { stroke: true })
+					// doc.moveDown();
+
+					for (container in buckets[feelings]){
+
+						var label = feelings + ", in " + container;
+						
+						doc.text(label, { stroke: true })
+						doc.moveDown();
+
+						var places = buckets[feelings][container];
+						var count_places = places.length;
+
+						for (var i=0; i < count_places; i++){
+
+							var visit = places[i];
+							var place = visit["place"];
+							
+							var text = [
+								visit["name"]
+							];					
+							
+							var tags = [];
+							
+							if (place){
+								
+								var body = place["body"];
+								var data = JSON.parse(body);
+								
+								if (data["addr:full"]){
+									text.push(data["addr:full"])
+								}
+								
+								if (data["addr:phone"]){
+									text.push(data["addr:phone"])
+								}
+								
+								if ((data["wof:tags"]) && (data["wof:tags"].length)){
+									tags = data["wof:tags"];
+								}
+							}
+							
+							doc.text(text.join(" / "));
+							
+							if (tags.length){
+								tags = tags.join(", ");
+								doc.text(tags);
+							}
+							
+							doc.moveDown();
 						}
 						
 						doc.moveDown();
 					}
-
-					doc.moveDown();
 				}
 			}
 			
