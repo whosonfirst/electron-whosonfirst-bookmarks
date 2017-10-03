@@ -84,7 +84,8 @@
 				doc.moveDown();				
 			}
 
-			// console.log("MORE", more);
+			var containers = [];	// please give me a better name...
+			var buckets = {};
 			
 			if (more["visits"]) {
 
@@ -92,7 +93,6 @@
 				// (20170929/thisisaaronland)
 				
 				var visits = more["visits"];
-				var buckets = {};
 
 				for (var label in visits){
 
@@ -100,10 +100,6 @@
 					// should be grouping neighbourhoods by #feelings...
 					// (20171002/thisisaaronland)
 					
-					if (! buckets[label]){
-						buckets[label] = {};
-					}
-
 					var places = visits[label];
 					var count_places = places.length;
 
@@ -140,30 +136,37 @@
 							}
 						}
 
-						if (! buckets[label][container]){
-							buckets[label][container] = [];
+						if (! buckets[container]){
+							buckets[container] = {};
+							containers.push(container);
+						}
+						
+						if (! buckets[container][label]){
+							buckets[container][label] = [];
 						}
 
-						buckets[label][container].push(visit);
+						buckets[container][label].push(visit);
 					}
 					
 				}
 
+				containers.sort()
+
 				// console.log("BUCKETS", buckets);
 				
-				for (var feelings in buckets){
+				for (var idx in containers){
 
-					// doc.text(feelings, { stroke: true })
-					// doc.moveDown();
+					var container = containers[idx];
+					
+					doc.text(container, { stroke: true })
+					doc.moveDown();
 
-					for (container in buckets[feelings]){
+					for (feelings in buckets[container]){
 
-						var label = feelings + ", in " + container;
-						
-						doc.text(label, { stroke: true })
+						doc.text(feelings, { stroke: true })
 						doc.moveDown();
 
-						var places = buckets[feelings][container];
+						var places = buckets[container][feelings];
 						var count_places = places.length;
 
 						for (var i=0; i < count_places; i++){
