@@ -323,6 +323,13 @@ q {
     color: #ccc;
 }
 
+.btn-control {
+    background-color: #fff;
+    border: none;
+    font-size: 1.2em;
+    padding-top: 0px;
+}
+
 .object-list {
     margin: 0px;
     padding: 0px;

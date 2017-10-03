@@ -661,7 +661,7 @@
 			var edit_button = document.createElement("button");
 			edit_button.setAttribute("style", "float:right;");
 			edit_button.setAttribute("title", "edit this trip");
-			edit_button.setAttribute("class", "btn btn-sm");
+			edit_button.setAttribute("class", "btn btn-sm btn-control");
 			edit_button.setAttribute("data-trip-id", trip["id"]);
 			edit_button.appendChild(document.createTextNode("✍🏽"));
 
@@ -672,7 +672,7 @@
 			var print_button = document.createElement("button");
 			print_button.setAttribute("title", "print this trip");
 			print_button.setAttribute("style", "float:right;");
-			print_button.setAttribute("class", "btn btn-sm");
+			print_button.setAttribute("class", "btn btn-sm btn-control");
 			print_button.setAttribute("data-trip-id", trip["id"]);
 			print_button.appendChild(document.createTextNode("🖨️"));
 

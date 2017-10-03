@@ -207,6 +207,13 @@
 							
 							doc.moveDown();
 						}
+
+						// Y U not work???
+						// http://pdfkit.org/docs/vector.html
+						
+						doc.lineTo(100, 0)
+						doc.moveTo(0,0)
+						doc.stroke()
 						
 						doc.moveDown();
 					}
