@@ -22,6 +22,13 @@ cd electron-whosonfirst-bookmarks
 # Install dependencies
 npm install
 
+# This is where it gets weird and fiddly... I am not sure I think you
+# also need to do this to make the SQLite stuff work... node is still
+# a bit of a mystery to me...
+npm install --save-dev electron-builder
+npm install --save sqlite3
+npm run postinstall
+   
 # Run the app
 npm start
 ```
