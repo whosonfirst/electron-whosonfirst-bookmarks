@@ -6,6 +6,8 @@ Bookmarks for Who's On First places.
 
 This is wetter-than-wet paint. If you don't have the time or the inclination for a lot of unknown-unknowns and a measure of bad craziness then it's probably still "too soon". If you're up for some adventure then welcome!
 
+Unfortunately there isn't much in the way of documentation yet, but there is a [long and twisty blog post](https://whosonfirst.org/blog/2018/02/02/privatezen/) about the project.
+
 ## Install
 
 First of all you will need to have [Git](https://git-scm.com/), [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) installed. On a Mac these are all easy to install with the [Homebrew](https://brew.sh/) package manager. On Linux all the dependencies are available via tools like `apt` or `yum`. On Windows I'm afraid I have no idea what the state of the art is these days.
